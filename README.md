@@ -46,18 +46,22 @@ Property Group es una landing page profesional para el sector inmobiliario, desa
 ## Instalación y uso local
 
 1. Clona el repositorio:
+
    ```sh
    git clone https://github.com/Angelrmatoz/property-group-4.git
    cd property-group-4
    ```
+
 2. Instala las dependencias:
    ```sh
-   npm install
-   # o
    pnpm install
+   # o (si prefieres npm)
+   npm install
    ```
 3. Inicia el servidor de desarrollo:
    ```sh
+   pnpm run dev
+   # o (si prefieres npm)
    npm run dev
    ```
 4. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
