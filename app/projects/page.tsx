@@ -5,12 +5,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Building2, MapPin, Bed, Bath, Square, ArrowLeft, Search, Filter, Menu, X } from "lucide-react"
+import { Building2, MapPin, Bed, Bath, Square, ArrowLeft, Search, Filter, Menu, X, Sun, Moon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 
-function MobileMenu() {
+function MobileMenu({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTheme: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleNavClick = (href: string) => {
@@ -23,54 +23,97 @@ function MobileMenu() {
         variant="ghost"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="text-white hover:text-yellow-400 hover:bg-transparent"
+        className={`p-2 ${isDarkMode ? "text-white hover:text-yellow-400" : "text-gray-900 hover:text-yellow-400"} hover:bg-transparent`}
       >
-        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 bg-black/95 backdrop-blur-sm border-b border-yellow-500/20 z-40">
-          <nav className="container mx-auto px-4 py-6 flex flex-col space-y-4">
+        <div
+          className={`absolute top-full left-0 right-0 backdrop-blur-sm border-b z-40 ${
+            isDarkMode ? "bg-black/95 border-yellow-500/20" : "bg-white/95 border-gray-200"
+          }`}
+        >
+          <nav className="px-4 py-4 flex flex-col space-y-3">
             <Link
               href="/#inicio"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => handleNavClick("/#inicio")}
             >
               Inicio
             </Link>
             <Link
               href="/#servicios"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => handleNavClick("/#servicios")}
             >
               Servicios
             </Link>
             <Link
               href="/projects"
-              className="text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors text-yellow-400 ${
+                isDarkMode ? "bg-gray-800" : "bg-gray-100"
+              }`}
               onClick={() => handleNavClick("/projects")}
             >
               Proyectos
             </Link>
             <Link
               href="/#nosotros"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => handleNavClick("/#nosotros")}
             >
               Nosotros
             </Link>
             <Link
               href="/#contacto"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => handleNavClick("/#contacto")}
             >
               Contacto
             </Link>
             <Button
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold mt-4"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                toggleTheme()
+                setIsOpen(false)
+              }}
+              variant="ghost"
+              size="sm"
+              className={`justify-start text-sm transition-all duration-300 ${
+                isDarkMode
+                  ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+              }`}
             >
-              Consulta Gratis
+              <div className="relative w-4 h-4 mr-2">
+                <Sun
+                  className={`absolute inset-0 transition-all duration-500 ${
+                    isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+                  }`}
+                />
+                <Moon
+                  className={`absolute inset-0 transition-all duration-500 ${
+                    isDarkMode ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+                  }`}
+                />
+              </div>
+              {isDarkMode ? "Modo Claro" : "Modo Oscuro"}
             </Button>
           </nav>
         </div>
@@ -206,6 +249,11 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterType, setFilterType] = useState("all")
   const [filterStatus, setFilterStatus] = useState("all")
+  const [isDarkMode, setIsDarkMode] = useState(true)
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode)
+  }
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
@@ -218,86 +266,141 @@ export default function ProjectsPage() {
   })
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div
+      className={`min-h-screen transition-colors duration-300 ${
+        isDarkMode ? "bg-black text-white" : "bg-white text-gray-900"
+      }`}
+    >
       {/* Header */}
-      <header className="fixed top-0 w-full bg-black/90 backdrop-blur-sm z-50 border-b border-yellow-500/20">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-              <span className="text-black font-bold text-xl">PG</span>
+      <header
+        className={`fixed top-0 w-full backdrop-blur-sm z-50 border-b transition-colors duration-300 ${
+          isDarkMode ? "bg-black/90 border-yellow-500/20" : "bg-white/90 border-gray-200"
+        }`}
+      >
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm md:text-xl">PG</span>
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg md:text-xl font-bold text-yellow-400">Property Group</h1>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link href="/#inicio" className="text-sm lg:text-base hover:text-yellow-400 transition-colors">
+                Inicio
+              </Link>
+              <Link href="/#servicios" className="text-sm lg:text-base hover:text-yellow-400 transition-colors">
+                Servicios
+              </Link>
+              <Link href="/projects" className="text-sm lg:text-base text-yellow-400">
+                Proyectos
+              </Link>
+              <Link href="/#nosotros" className="text-sm lg:text-base hover:text-yellow-400 transition-colors">
+                Nosotros
+              </Link>
+              <Link href="/#contacto" className="text-sm lg:text-base hover:text-yellow-400 transition-colors">
+                Contacto
+              </Link>
+            </nav>
+
+            <div className="flex items-center space-x-2">
+              {/* Desktop Theme Toggle */}
+              <Button
+                onClick={toggleTheme}
+                variant="ghost"
+                size="sm"
+                className={`hidden md:flex p-2 transition-all duration-300 ${
+                  isDarkMode
+                    ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                <div className="relative w-5 h-5">
+                  <Sun
+                    className={`absolute inset-0 transition-all duration-500 ${
+                      isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+                    }`}
+                  />
+                  <Moon
+                    className={`absolute inset-0 transition-all duration-500 ${
+                      isDarkMode ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+                    }`}
+                  />
+                </div>
+              </Button>
+
+              {/* Mobile Hamburger Menu */}
+              <MobileMenu isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-yellow-400">Property Group</h1>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <Link href="/#inicio" className="hover:text-yellow-400 transition-colors">
-              Inicio
-            </Link>
-            <Link href="/#servicios" className="hover:text-yellow-400 transition-colors">
-              Servicios
-            </Link>
-            <Link href="/projects" className="text-yellow-400">
-              Proyectos
-            </Link>
-            <Link href="/#nosotros" className="hover:text-yellow-400 transition-colors">
-              Nosotros
-            </Link>
-            <Link href="/#contacto" className="hover:text-yellow-400 transition-colors">
-              Contacto
-            </Link>
-          </nav>
-
-          {/* Desktop CTA Button */}
-          <Button className="hidden md:block bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
-            Consulta Gratis
-          </Button>
-
-          {/* Mobile Hamburger Menu */}
-          <MobileMenu />
+          </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-12 bg-gradient-to-br from-gray-900 to-black">
-        <div className="container mx-auto px-4">
+      <section
+        className={`pt-16 md:pt-20 pb-12 transition-colors duration-300 ${
+          isDarkMode ? "bg-gradient-to-br from-gray-900 to-black" : "bg-gradient-to-br from-gray-100 to-gray-200"
+        }`}
+      >
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center mb-8">
-            <Link href="/" className="flex items-center text-gray-400 hover:text-yellow-400 transition-colors mr-4">
+            <Link
+              href="/"
+              className={`flex items-center transition-colors mr-4 ${
+                isDarkMode ? "text-gray-400 hover:text-yellow-400" : "text-gray-600 hover:text-yellow-400"
+              }`}
+            >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Volver al Inicio
+              <span className="text-sm md:text-base">Volver al Inicio</span>
             </Link>
           </div>
 
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Nuestros <span className="text-yellow-400">Proyectos</span>
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className={`text-lg md:text-xl max-w-4xl mx-auto ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
               Descubre nuestra cartera completa de proyectos inmobiliarios. Desde apartamentos modernos hasta
               desarrollos comerciales, tenemos la propiedad perfecta para ti.
             </p>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-gray-900 rounded-2xl p-6 mb-12">
-            <div className="grid md:grid-cols-4 gap-4">
+          <div className={`rounded-2xl p-6 mb-12 ${isDarkMode ? "bg-gray-900" : "bg-white shadow-lg"}`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search
+                  className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                />
                 <Input
                   placeholder="Buscar proyectos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-black border-gray-700 text-white focus:border-yellow-500"
+                  className={`pl-10 ${
+                    isDarkMode
+                      ? "bg-black border-gray-700 text-white focus:border-yellow-500"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
+                  }`}
                 />
               </div>
 
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="bg-black border-gray-700 text-white focus:border-yellow-500">
+                <SelectTrigger
+                  className={
+                    isDarkMode
+                      ? "bg-black border-gray-700 text-white focus:border-yellow-500"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
+                  }
+                >
                   <SelectValue placeholder="Tipo de Propiedad" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-gray-700">
+                <SelectContent className={isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}>
                   <SelectItem value="all">Todos los Tipos</SelectItem>
                   <SelectItem value="residencial">Residencial</SelectItem>
                   <SelectItem value="comercial">Comercial</SelectItem>
@@ -306,10 +409,16 @@ export default function ProjectsPage() {
               </Select>
 
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="bg-black border-gray-700 text-white focus:border-yellow-500">
+                <SelectTrigger
+                  className={
+                    isDarkMode
+                      ? "bg-black border-gray-700 text-white focus:border-yellow-500"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
+                  }
+                >
                   <SelectValue placeholder="Estado" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-gray-700">
+                <SelectContent className={isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}>
                   <SelectItem value="all">Todos los Estados</SelectItem>
                   <SelectItem value="disponible">Disponible</SelectItem>
                   <SelectItem value="construcción">En Construcción</SelectItem>
@@ -327,13 +436,17 @@ export default function ProjectsPage() {
       </section>
 
       {/* Projects Grid */}
-      <section className="py-12 bg-black">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      <section className={`py-12 ${isDarkMode ? "bg-black" : "bg-white"}`}>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredProjects.map((project) => (
               <Card
                 key={project.id}
-                className="bg-gray-900 border-yellow-500/20 hover:border-yellow-500/50 transition-all duration-300 group overflow-hidden"
+                className={`transition-all duration-300 group overflow-hidden ${
+                  isDarkMode
+                    ? "bg-gray-900 border-yellow-500/20 hover:border-yellow-500/50"
+                    : "bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl"
+                }`}
               >
                 <div className="relative h-64 overflow-hidden">
                   <Image
@@ -352,34 +465,44 @@ export default function ProjectsPage() {
 
                 <CardContent className="p-6">
                   <div className="mb-4">
-                    <h3 className="text-2xl font-bold text-yellow-400 mb-1">{project.name}</h3>
-                    <p className="text-gray-400 text-sm mb-2">{project.type}</p>
-                    <div className="flex items-center text-gray-300 text-sm">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {project.location}
+                    <h3 className={`text-2xl font-bold mb-1 ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
+                      {project.name}
+                    </h3>
+                    <p className={`text-sm mb-2 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>{project.type}</p>
+                    <div className={`flex items-center text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                      <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                      <span className="truncate">{project.location}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
                     {project.bedrooms !== "N/A" && (
                       <div className="text-center">
-                        <Bed className="w-4 h-4 mx-auto mb-1 text-yellow-400" />
-                        <span className="text-gray-300">{project.bedrooms}</span>
+                        <Bed className={`w-4 h-4 mx-auto mb-1 ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`} />
+                        <span className={isDarkMode ? "text-gray-300" : "text-gray-600"}>{project.bedrooms}</span>
                       </div>
                     )}
                     {project.bathrooms !== "N/A" && (
                       <div className="text-center">
-                        <Bath className="w-4 h-4 mx-auto mb-1 text-yellow-400" />
-                        <span className="text-gray-300">{project.bathrooms}</span>
+                        <Bath
+                          className={`w-4 h-4 mx-auto mb-1 ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}
+                        />
+                        <span className={isDarkMode ? "text-gray-300" : "text-gray-600"}>{project.bathrooms}</span>
                       </div>
                     )}
                     <div className="text-center">
-                      <Square className="w-4 h-4 mx-auto mb-1 text-yellow-400" />
-                      <span className="text-gray-300">{project.area}</span>
+                      <Square
+                        className={`w-4 h-4 mx-auto mb-1 ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}
+                      />
+                      <span className={`text-xs ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                        {project.area}
+                      </span>
                     </div>
                   </div>
 
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">{project.description}</p>
+                  <p className={`text-sm mb-4 line-clamp-2 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                    {project.description}
+                  </p>
 
                   <div>
                     <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
@@ -392,10 +515,12 @@ export default function ProjectsPage() {
           </div>
 
           {filteredProjects.length === 0 && (
-            <div className="text-center py-12">
-              <Building2 className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-              <h3 className="text-2xl font-bold text-gray-400 mb-2">No se encontraron proyectos</h3>
-              <p className="text-gray-500">Intenta ajustar tus filtros de búsqueda</p>
+            <div className="text-center py-16">
+              <Building2 className={`w-16 h-16 mx-auto mb-4 ${isDarkMode ? "text-gray-600" : "text-gray-400"}`} />
+              <h3 className={`text-2xl font-bold mb-2 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                No se encontraron proyectos
+              </h3>
+              <p className={isDarkMode ? "text-gray-500" : "text-gray-500"}>Intenta ajustar tus filtros de búsqueda</p>
             </div>
           )}
         </div>
@@ -403,22 +528,27 @@ export default function ProjectsPage() {
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-yellow-500 to-yellow-600">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">¿No Encontraste lo que Buscabas?</h2>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-6">
+            ¿No Encontraste lo que Buscabas?
+          </h2>
           <p className="text-xl text-black/80 mb-8 max-w-2xl mx-auto">
             Nuestro equipo de expertos está listo para ayudarte a encontrar la propiedad perfecta según tus necesidades
             específicas.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/#contacto">
-              <Button size="lg" className="bg-black hover:bg-gray-800 text-yellow-400 font-semibold text-lg px-8 py-4">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto bg-black hover:bg-gray-800 text-yellow-400 font-semibold text-lg px-8 py-4"
+              >
                 Contactar Asesor
               </Button>
             </Link>
             <Button
               size="lg"
               variant="outline"
-              className="border-black text-black hover:bg-black hover:text-yellow-400 text-lg px-8 py-4 bg-transparent"
+              className="w-full sm:w-auto border-black text-black hover:bg-black hover:text-yellow-400 text-lg px-8 py-4 bg-transparent"
             >
               Solicitar Catálogo
             </Button>
@@ -427,8 +557,12 @@ export default function ProjectsPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black border-t border-yellow-500/20 py-12">
-        <div className="container mx-auto px-4">
+      <footer
+        className={`border-t py-12 transition-colors duration-300 ${
+          isDarkMode ? "bg-black border-yellow-500/20" : "bg-gray-100 border-gray-300"
+        }`}
+      >
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <Link href="/" className="flex items-center space-x-3 mb-4 md:mb-0">
               <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
@@ -436,12 +570,18 @@ export default function ProjectsPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-yellow-400">Property Group</h3>
-                <p className="text-gray-400 text-sm">Tu socio inmobiliario de confianza</p>
+                <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                  Tu socio inmobiliario de confianza
+                </p>
               </div>
             </Link>
             <div className="text-center md:text-right">
-              <p className="text-gray-400">© 2024 Property Group. Todos los derechos reservados.</p>
-              <p className="text-gray-500 text-sm mt-1">Diseñado con ❤️ para tu éxito inmobiliario</p>
+              <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
+                © 2024 Property Group. Todos los derechos reservados.
+              </p>
+              <p className={`text-sm mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
+                Diseñado con ❤️ para tu éxito inmobiliario
+              </p>
             </div>
           </div>
         </div>

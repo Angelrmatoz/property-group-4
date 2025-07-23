@@ -10,17 +10,18 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 
-function MobileMenu({ isDarkMode, toggleTheme }) {
+function MobileMenu({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTheme: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleNavClick = (href: string) => {
     setIsOpen(false)
     if (href.startsWith("#")) {
-      // Smooth scroll for anchor links
-      const element = document.querySelector(href)
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" })
-      }
+      setTimeout(() => {
+        const element = document.querySelector(href)
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" })
+        }
+      }, 100)
     }
   }
 
@@ -30,45 +31,69 @@ function MobileMenu({ isDarkMode, toggleTheme }) {
         variant="ghost"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="text-white hover:text-yellow-400 hover:bg-transparent"
+        className={`p-2 ${isDarkMode ? "text-white hover:text-yellow-400" : "text-gray-900 hover:text-yellow-400"} hover:bg-transparent`}
       >
-        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 bg-black/95 backdrop-blur-sm border-b border-yellow-500/20 z-40">
-          <nav className="container mx-auto px-4 py-6 flex flex-col space-y-4">
+        <div
+          className={`absolute top-full left-0 right-0 backdrop-blur-sm border-b z-40 ${
+            isDarkMode ? "bg-black/95 border-yellow-500/20" : "bg-white/95 border-gray-200"
+          }`}
+        >
+          <nav className="px-4 py-4 flex flex-col space-y-3">
             <a
               href="#inicio"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => handleNavClick("#inicio")}
             >
               Inicio
             </a>
             <a
               href="#servicios"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => handleNavClick("#servicios")}
             >
               Servicios
             </a>
             <Link
               href="/projects"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => setIsOpen(false)}
             >
               Proyectos
             </Link>
             <a
               href="#nosotros"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => handleNavClick("#nosotros")}
             >
               Nosotros
             </a>
             <a
               href="#contacto"
-              className="text-white hover:text-yellow-400 transition-colors py-2 border-b border-gray-800"
+              className={`text-sm py-2 px-3 rounded transition-colors ${
+                isDarkMode
+                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
+                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
+              }`}
               onClick={() => handleNavClick("#contacto")}
             >
               Contacto
@@ -79,13 +104,14 @@ function MobileMenu({ isDarkMode, toggleTheme }) {
                 setIsOpen(false)
               }}
               variant="ghost"
-              className={`w-full justify-start transition-all duration-300 ${
+              size="sm"
+              className={`justify-start text-sm transition-all duration-300 ${
                 isDarkMode
                   ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
               }`}
             >
-              <div className="relative w-6 h-6 mr-3">
+              <div className="relative w-4 h-4 mr-2">
                 <Sun
                   className={`absolute inset-0 transition-all duration-500 ${
                     isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
@@ -135,83 +161,87 @@ export default function PropertyGroupLanding() {
           isDarkMode ? "bg-black/90 border-yellow-500/20" : "bg-white/90 border-gray-200"
         }`}
       >
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-              <span className="text-black font-bold text-xl">PG</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-yellow-400">Property Group</h1>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <a
-              href="#inicio"
-              className="hover:text-yellow-400 transition-colors"
-              onClick={(e) => handleSmoothScroll(e, "#inicio")}
-            >
-              Inicio
-            </a>
-            <a
-              href="#servicios"
-              className="hover:text-yellow-400 transition-colors"
-              onClick={(e) => handleSmoothScroll(e, "#servicios")}
-            >
-              Servicios
-            </a>
-            <Link href="/projects" className="hover:text-yellow-400 transition-colors">
-              Proyectos
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm md:text-xl">PG</span>
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg md:text-xl font-bold text-yellow-400">Property Group</h1>
+              </div>
             </Link>
-            <a
-              href="#nosotros"
-              className="hover:text-yellow-400 transition-colors"
-              onClick={(e) => handleSmoothScroll(e, "#nosotros")}
-            >
-              Nosotros
-            </a>
-            <a
-              href="#contacto"
-              className="hover:text-yellow-400 transition-colors"
-              onClick={(e) => handleSmoothScroll(e, "#contacto")}
-            >
-              Contacto
-            </a>
-          </nav>
 
-          {/* Desktop Theme Toggle */}
-          <Button
-            onClick={toggleTheme}
-            variant="ghost"
-            size="sm"
-            className={`relative overflow-hidden transition-all duration-300 ${
-              isDarkMode
-                ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
-                : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-            }`}
-          >
-            <div className="relative w-6 h-6">
-              <Sun
-                className={`absolute inset-0 transition-all duration-500 ${
-                  isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <a
+                href="#inicio"
+                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+                onClick={(e) => handleSmoothScroll(e, "#inicio")}
+              >
+                Inicio
+              </a>
+              <a
+                href="#servicios"
+                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+                onClick={(e) => handleSmoothScroll(e, "#servicios")}
+              >
+                Servicios
+              </a>
+              <Link href="/projects" className="text-sm lg:text-base hover:text-yellow-400 transition-colors">
+                Proyectos
+              </Link>
+              <a
+                href="#nosotros"
+                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+                onClick={(e) => handleSmoothScroll(e, "#nosotros")}
+              >
+                Nosotros
+              </a>
+              <a
+                href="#contacto"
+                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+                onClick={(e) => handleSmoothScroll(e, "#contacto")}
+              >
+                Contacto
+              </a>
+            </nav>
+
+            <div className="flex items-center space-x-2">
+              {/* Desktop Theme Toggle */}
+              <Button
+                onClick={toggleTheme}
+                variant="ghost"
+                size="sm"
+                className={`hidden md:flex p-2 transition-all duration-300 ${
+                  isDarkMode
+                    ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                 }`}
-              />
-              <Moon
-                className={`absolute inset-0 transition-all duration-500 ${
-                  isDarkMode ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
-                }`}
-              />
+              >
+                <div className="relative w-5 h-5">
+                  <Sun
+                    className={`absolute inset-0 transition-all duration-500 ${
+                      isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+                    }`}
+                  />
+                  <Moon
+                    className={`absolute inset-0 transition-all duration-500 ${
+                      isDarkMode ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+                    }`}
+                  />
+                </div>
+              </Button>
+
+              {/* Mobile Hamburger Menu */}
+              <MobileMenu isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
             </div>
-          </Button>
-
-          {/* Mobile Hamburger Menu */}
-          <MobileMenu isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+          </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section id="inicio" className="pt-20 min-h-screen flex items-center relative overflow-hidden">
+      <section id="inicio" className="pt-16 md:pt-20 min-h-screen flex items-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10"></div>
         <div className="absolute inset-0">
           <Image
@@ -219,29 +249,30 @@ export default function PropertyGroupLanding() {
             alt="Edificio moderno de lujo"
             fill
             className="object-cover opacity-40"
+            priority
           />
         </div>
-        <div className="container mx-auto px-4 relative z-20">
-          <div className="max-w-3xl">
-            <div className="mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mb-6">
-                <span className="text-black font-bold text-3xl">PG</span>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="max-w-4xl">
+            <div className="mb-6 md:mb-8">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mb-6">
+                <span className="text-black font-bold text-2xl md:text-3xl">PG</span>
               </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
               <span className="text-yellow-400">Property</span>
               <br />
               <span className="text-white">Group</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed max-w-3xl">
               Expertos en bienes raíces con más de 15 años de experiencia. Convertimos tus sueños inmobiliarios en
               realidad.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/projects">
+            <div className="flex flex-col sm:flex-row gap-4 max-w-md sm:max-w-none">
+              <Link href="/projects" className="flex-1 sm:flex-none">
                 <Button
                   size="lg"
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-lg px-8 py-4 w-full sm:w-auto"
+                  className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-lg px-8 py-4"
                 >
                   Ver Propiedades
                 </Button>
@@ -249,7 +280,7 @@ export default function PropertyGroupLanding() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black text-lg px-8 py-4 bg-transparent"
+                className="w-full sm:w-auto border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black text-lg px-8 py-4 bg-transparent"
                 onClick={(e) => handleSmoothScroll(e, "#contacto")}
               >
                 Contactar Ahora
@@ -260,24 +291,24 @@ export default function PropertyGroupLanding() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-yellow-500 to-yellow-600">
-        <div className="container mx-auto px-4">
+      <section className="py-16 md:py-20 bg-gradient-to-r from-yellow-500 to-yellow-600">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-black">
             <div>
-              <div className="text-4xl md:text-5xl font-bold mb-2">500+</div>
-              <div className="text-lg font-semibold">Propiedades Vendidas</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">500+</div>
+              <div className="text-sm sm:text-base md:text-lg font-semibold">Propiedades Vendidas</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold mb-2">15+</div>
-              <div className="text-lg font-semibold">Años de Experiencia</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">15+</div>
+              <div className="text-sm sm:text-base md:text-lg font-semibold">Años de Experiencia</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold mb-2">98%</div>
-              <div className="text-lg font-semibold">Clientes Satisfechos</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">98%</div>
+              <div className="text-sm sm:text-base md:text-lg font-semibold">Clientes Satisfechos</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold mb-2">24/7</div>
-              <div className="text-lg font-semibold">Atención al Cliente</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">24/7</div>
+              <div className="text-sm sm:text-base md:text-lg font-semibold">Atención al Cliente</div>
             </div>
           </div>
         </div>
@@ -286,11 +317,11 @@ export default function PropertyGroupLanding() {
       {/* Services Section */}
       <section
         id="servicios"
-        className={`py-20 transition-colors duration-300 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
+        className={`py-16 md:py-20 transition-colors duration-300 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
       >
-        <div className="container mx-auto px-4">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
               Nuestros <span className="text-yellow-400">Servicios</span>
             </h2>
             <p className={`text-xl max-w-3xl mx-auto ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
@@ -299,7 +330,7 @@ export default function PropertyGroupLanding() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card
               className={`transition-all duration-300 group ${
                 isDarkMode
@@ -341,7 +372,7 @@ export default function PropertyGroupLanding() {
             </Card>
 
             <Card
-              className={`transition-all duration-300 group ${
+              className={`transition-all duration-300 group md:col-span-2 lg:col-span-1 ${
                 isDarkMode
                   ? "bg-black border-yellow-500/20 hover:border-yellow-500/50"
                   : "bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl"
@@ -364,11 +395,11 @@ export default function PropertyGroupLanding() {
       </section>
 
       {/* About Section */}
-      <section id="nosotros" className={`py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}>
-        <div className="container mx-auto px-4">
+      <section id="nosotros" className={`py-16 md:py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-8">
+            <div className="order-2 lg:order-1">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-8">
                 Sobre <span className="text-yellow-400">Nosotros</span>
               </h2>
               <p className={`text-xl mb-6 leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
@@ -381,34 +412,35 @@ export default function PropertyGroupLanding() {
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
                   <span className={`text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                     Experiencia comprobada en el mercado
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
                   <span className={`text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                     Atención personalizada y profesional
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
                   <span className={`text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                     Red amplia de contactos y propiedades
                   </span>
                 </div>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative order-1 lg:order-2">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-2xl"></div>
-              <Image
-                src="/placeholder.svg?height=600&width=500&text=Equipo+Property+Group"
-                alt="Equipo Property Group"
-                width={500}
-                height={600}
-                className="rounded-2xl object-cover w-full"
-              />
+              <div className="relative h-64 sm:h-80 md:h-96 lg:h-[600px] rounded-2xl overflow-hidden">
+                <Image
+                  src="/placeholder.svg?height=600&width=500&text=Equipo+Property+Group"
+                  alt="Equipo Property Group"
+                  fill
+                  className="object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -417,11 +449,11 @@ export default function PropertyGroupLanding() {
       {/* Contact Section */}
       <section
         id="contacto"
-        className={`py-20 transition-colors duration-300 ${isDarkMode ? "bg-gradient-to-br from-gray-900 to-black" : "bg-gradient-to-br from-gray-100 to-gray-200"}`}
+        className={`py-16 md:py-20 transition-colors duration-300 ${isDarkMode ? "bg-gradient-to-br from-gray-900 to-black" : "bg-gradient-to-br from-gray-100 to-gray-200"}`}
       >
-        <div className="container mx-auto px-4">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
               <span className="text-yellow-400">Contacta</span> con Nosotros
             </h2>
             <p className={`text-xl max-w-3xl mx-auto ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
@@ -434,7 +466,7 @@ export default function PropertyGroupLanding() {
               <h3 className="text-2xl font-bold text-yellow-400 mb-8">Información de Contacto</h3>
               <div className="space-y-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Phone className="w-6 h-6 text-black" />
                   </div>
                   <div>
@@ -445,18 +477,18 @@ export default function PropertyGroupLanding() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Mail className="w-6 h-6 text-black" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>Email</p>
-                    <p className={`text-xl font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    <p className={`text-xl font-semibold break-words ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                       info@propertygroup.com
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-6 h-6 text-black" />
                   </div>
                   <div>
@@ -475,7 +507,7 @@ export default function PropertyGroupLanding() {
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold text-yellow-400 mb-6">Envíanos un Mensaje</h3>
                 <form className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label
                         className={`block text-sm font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-700"}`}
@@ -550,7 +582,7 @@ export default function PropertyGroupLanding() {
           isDarkMode ? "bg-black border-yellow-500/20" : "bg-gray-100 border-gray-300"
         }`}
       >
-        <div className="container mx-auto px-4">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <Link href="/" className="flex items-center space-x-3 mb-4 md:mb-0">
               <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
