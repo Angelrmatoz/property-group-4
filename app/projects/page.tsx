@@ -38,7 +38,11 @@ function MobileMenu({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleNavClick = (href: string) => {
+  // Permite cualquier tipo de evento de mouse para evitar errores de tipo
+  const handleNavClick = (
+    _event: React.MouseEvent<HTMLElement>,
+    _href: string
+  ) => {
     setIsOpen(false);
   };
 
@@ -73,7 +77,7 @@ function MobileMenu({
                   ? "text-white hover:text-yellow-400 hover:bg-gray-800"
                   : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
               }`}
-              onClick={() => handleNavClick("/#inicio")}
+              onClick={(e) => handleNavClick(e, "/#inicio")}
             >
               Inicio
             </Link>
@@ -84,7 +88,7 @@ function MobileMenu({
                   ? "text-white hover:text-yellow-400 hover:bg-gray-800"
                   : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
               }`}
-              onClick={() => handleNavClick("/#servicios")}
+              onClick={(e) => handleNavClick(e, "/#servicios")}
             >
               Servicios
             </Link>
@@ -93,7 +97,7 @@ function MobileMenu({
               className={`text-sm py-2 px-3 rounded transition-colors text-yellow-400 ${
                 isDarkMode ? "bg-gray-800" : "bg-gray-100"
               }`}
-              onClick={() => handleNavClick("/projects")}
+              onClick={(e) => handleNavClick(e, "/projects")}
             >
               Proyectos
             </Link>
@@ -104,7 +108,7 @@ function MobileMenu({
                   ? "text-white hover:text-yellow-400 hover:bg-gray-800"
                   : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
               }`}
-              onClick={() => handleNavClick("/#nosotros")}
+              onClick={(e) => handleNavClick(e, "/#nosotros")}
             >
               Nosotros
             </Link>
@@ -115,7 +119,7 @@ function MobileMenu({
                   ? "text-white hover:text-yellow-400 hover:bg-gray-800"
                   : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
               }`}
-              onClick={() => handleNavClick("/#contacto")}
+              onClick={(e) => handleNavClick(e, "/#contacto")}
             >
               Contacto
             </Link>

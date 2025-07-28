@@ -4,42 +4,42 @@
 
 @font-face {
   font-family: "FashionFetishRegular";
-  src: url("/assets/fonts/Fashion Fetish Regular.ttf") format("truetype");
+  src: url("/fonts/Fashion Fetish Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "FashionFetishLight";
-  src: url("/assets/fonts/Fashion Fetish Light.ttf") format("truetype");
+  src: url("/fonts/Fashion Fetish Light.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "FashionFetishSmallCaps";
-  src: url("/assets/fonts/Fashion Fetish Small Caps.ttf") format("truetype");
+  src: url("/fonts/Fashion Fetish Small Caps.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "FashionFetishBold";
-  src: url("/assets/fonts/Fashion Fetish Bold.ttf") format("truetype");
+  src: url("/fonts/Fashion Fetish Bold.ttf") format("truetype");
   font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
   font-family: "FashionFetishItalic";
-  src: url("/assets/fonts/Fashion Fetish Italic.ttf") format("truetype");
+  src: url("/fonts/Fashion Fetish Italic.ttf") format("truetype");
   font-weight: normal;
   font-style: italic;
 }
 
 @font-face {
   font-family: "FashionFetishBoldItalic";
-  src: url("/assets/fonts/Fashion Fetish Bold Italic.ttf") format("truetype");
+  src: url("/fonts/Fashion Fetish Bold Italic.ttf") format("truetype");
   font-weight: bold;
   font-style: italic;
 }

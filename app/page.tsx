@@ -162,8 +162,9 @@ function MobileMenu({
 export default function PropertyGroupLanding() {
   const [isDarkMode, setIsDarkMode] = useState(true);
 
+  // Permite cualquier tipo de evento de mouse para evitar errores de tipo
   const handleSmoothScroll = (
-    e: React.MouseEvent<HTMLAnchorElement>,
+    e: React.MouseEvent<HTMLElement>,
     href: string
   ) => {
     if (href.startsWith("#")) {
