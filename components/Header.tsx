@@ -51,11 +51,11 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br flex items-center justify-center">
               <span>
-                <img src="/images/icons/PG-icon-dorado.png" alt="" />
+                <img src="/images/icons/PG-icon-dorado.png" alt="Logo PG" />
               </span>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg md:text-xl font-bold text-saffron">
+              <h1 className="text-lg md:text-xl font-bold text-satin-sheen-gold">
                 Property Group
               </h1>
             </div>

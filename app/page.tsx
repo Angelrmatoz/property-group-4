@@ -68,12 +68,12 @@ export default function PropertyGroupLanding() {
             <div className="mb-6 md:mb-8">
               <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br rounded-2xl flex items-center justify-center mb-6">
                 <span>
-                  <img src="/images/icons/PG-icon-dorado.png" alt="" />
+                  <img src="/images/icons/PG-icon-dorado.png" alt="Logo PG" />
                 </span>
               </div>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              <span className="text-saffron">Property</span>
+              <span className="text-satin-sheen-gold">Property</span>
               <br />
               <span className="text-white">Group</span>
             </h1>
@@ -104,7 +104,7 @@ export default function PropertyGroupLanding() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 md:py-20 bg-gradient-to-r from-yellow-500 to-yellow-600">
+      <section className="py-16 md:py-20 bg-gradient-to-r bg-saffron">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-black">
             <div>
@@ -174,12 +174,12 @@ export default function PropertyGroupLanding() {
               }`}
             >
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-yellow-500 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 bg-saffron rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Building2 className="w-8 h-8 text-black" />
                 </div>
                 <h3
                   className={`text-2xl font-bold mb-4 ${
-                    isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                    isDarkMode ? "text-saffron" : "text-satin-sheen-gold"
                   }`}
                 >
                   Venta de Propiedades
@@ -203,12 +203,12 @@ export default function PropertyGroupLanding() {
               }`}
             >
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-yellow-500 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 bg-saffron rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <TrendingUp className="w-8 h-8 text-black" />
                 </div>
                 <h3
                   className={`text-2xl font-bold mb-4 ${
-                    isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                    isDarkMode ? "text-saffron" : "text-satin-sheen-gold"
                   }`}
                 >
                   Inversión Inmobiliaria
@@ -232,12 +232,12 @@ export default function PropertyGroupLanding() {
               }`}
             >
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-yellow-500 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 bg-saffron rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Users className="w-8 h-8 text-black" />
                 </div>
                 <h3
                   className={`text-2xl font-bold mb-4 ${
-                    isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                    isDarkMode ? "text-saffron" : "text-satin-sheen-gold"
                   }`}
                 >
                   Asesoría Personalizada
@@ -265,7 +265,7 @@ export default function PropertyGroupLanding() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="order-2 lg:order-1">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-8">
-                Sobre <span className="text-yellow-400">Nosotros</span>
+                Sobre <span className="text-saffron">Nosotros</span>
               </h2>
               <p
                 className={`text-xl mb-6 leading-relaxed ${
@@ -289,7 +289,7 @@ export default function PropertyGroupLanding() {
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                  <div className="w-3 h-3 bg-saffron rounded-full flex-shrink-0"></div>
                   <span
                     className={`text-lg ${
                       isDarkMode ? "text-white" : "text-gray-900"
@@ -299,7 +299,7 @@ export default function PropertyGroupLanding() {
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                  <div className="w-3 h-3 bg-saffron rounded-full flex-shrink-0"></div>
                   <span
                     className={`text-lg ${
                       isDarkMode ? "text-white" : "text-gray-900"
@@ -309,7 +309,7 @@ export default function PropertyGroupLanding() {
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                  <div className="w-3 h-3 bg-saffron rounded-full flex-shrink-0"></div>
                   <span
                     className={`text-lg ${
                       isDarkMode ? "text-white" : "text-gray-900"
@@ -347,7 +347,7 @@ export default function PropertyGroupLanding() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-yellow-400">Contacta</span> con Nosotros
+              <span className="text-saffron">Contacta</span> con Nosotros
             </h2>
             <p
               className={`text-xl max-w-3xl mx-auto ${
@@ -361,12 +361,12 @@ export default function PropertyGroupLanding() {
 
           <div className="grid lg:grid-cols-2 gap-16">
             <div>
-              <h3 className="text-2xl font-bold text-yellow-400 mb-8">
+              <h3 className="text-2xl font-bold text-saffron mb-8">
                 Información de Contacto
               </h3>
               <div className="space-y-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
                     <Phone className="w-6 h-6 text-black" />
                   </div>
                   <div>
@@ -385,7 +385,7 @@ export default function PropertyGroupLanding() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
                     <Mail className="w-6 h-6 text-black" />
                   </div>
                   <div className="min-w-0">
@@ -404,7 +404,7 @@ export default function PropertyGroupLanding() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-6 h-6 text-black" />
                   </div>
                   <div>
@@ -433,7 +433,7 @@ export default function PropertyGroupLanding() {
               }`}
             >
               <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-yellow-400 mb-6">
+                <h3 className="text-2xl font-bold text-saffron mb-6">
                   Envíanos un Mensaje
                 </h3>
                 <form className="space-y-6">
@@ -508,7 +508,7 @@ export default function PropertyGroupLanding() {
                       placeholder="Cuéntanos cómo podemos ayudarte..."
                     />
                   </div>
-                  <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-lg py-3">
+                  <Button className="w-full bg-saffron hover:bg-satin-sheen-gold text-black font-semibold text-lg py-3">
                     Enviar Mensaje
                   </Button>
                 </form>
@@ -529,11 +529,13 @@ export default function PropertyGroupLanding() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <Link href="/" className="flex items-center space-x-3 mb-4 md:mb-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-xl">PG</span>
+              <div className="w-12 h-12 bg-gradient-to-br rounded-lg flex items-center justify-center">
+                <span>
+                  <img src="/images/icons/PG-icon-dorado.png" alt="Logo PG" />
+                </span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-yellow-400">
+                <h3 className="text-xl font-bold text-satin-sheen-gold">
                   Property Group
                 </h3>
                 <p
@@ -547,7 +549,8 @@ export default function PropertyGroupLanding() {
             </Link>
             <div className="text-center md:text-right">
               <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
-                © 2024 Property Group. Todos los derechos reservados.
+                © {new Date().getFullYear()} Property Group. Todos los derechos
+                reservados.
               </p>
               <p
                 className={`text-sm mt-1 ${

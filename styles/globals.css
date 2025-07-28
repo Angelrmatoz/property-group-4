@@ -1,3 +1,4 @@
+@import "@csstools/normalize.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -131,6 +132,18 @@
   span,
   div {
     font-family: "FashionFetishRegular", sans-serif;
+  }
+
+  /* apply a natural box layout model to all elements, but allowing components to change */
+  html,
+  body {
+    box-sizing: border-box;
+    overscroll-behavior: none;
+  }
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
   }
 }
 
