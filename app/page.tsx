@@ -1,29 +1,46 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Building2, Phone, Mail, MapPin, Users, TrendingUp, Menu, X, Sun, Moon } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { useState } from "react"
+import type React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Building2,
+  Phone,
+  Mail,
+  MapPin,
+  Users,
+  TrendingUp,
+  Menu,
+  X,
+  Sun,
+  Moon,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
-function MobileMenu({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTheme: () => void }) {
-  const [isOpen, setIsOpen] = useState(false)
+function MobileMenu({
+  isDarkMode,
+  toggleTheme,
+}: {
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleNavClick = (href: string) => {
-    setIsOpen(false)
+    setIsOpen(false);
     if (href.startsWith("#")) {
       setTimeout(() => {
-        const element = document.querySelector(href)
+        const element = document.querySelector(href);
         if (element) {
-          element.scrollIntoView({ behavior: "smooth" })
+          element.scrollIntoView({ behavior: "smooth" });
         }
-      }, 100)
+      }, 100);
     }
-  }
+  };
 
   return (
     <div className="md:hidden">
@@ -31,7 +48,11 @@ function MobileMenu({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTh
         variant="ghost"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 ${isDarkMode ? "text-white hover:text-yellow-400" : "text-gray-900 hover:text-yellow-400"} hover:bg-transparent`}
+        className={`p-2 ${
+          isDarkMode
+            ? "text-white hover:text-yellow-400"
+            : "text-gray-900 hover:text-yellow-400"
+        } hover:bg-transparent`}
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
@@ -39,7 +60,9 @@ function MobileMenu({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTh
       {isOpen && (
         <div
           className={`absolute top-full left-0 right-0 backdrop-blur-sm border-b z-40 ${
-            isDarkMode ? "bg-black/95 border-yellow-500/20" : "bg-white/95 border-gray-200"
+            isDarkMode
+              ? "bg-black/95 border-yellow-500/20"
+              : "bg-white/95 border-gray-200"
           }`}
         >
           <nav className="px-4 py-4 flex flex-col space-y-3">
@@ -100,8 +123,8 @@ function MobileMenu({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTh
             </a>
             <Button
               onClick={() => {
-                toggleTheme()
-                setIsOpen(false)
+                toggleTheme();
+                setIsOpen(false);
               }}
               variant="ghost"
               size="sm"
@@ -114,12 +137,16 @@ function MobileMenu({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTh
               <div className="relative w-4 h-4 mr-2">
                 <Sun
                   className={`absolute inset-0 transition-all duration-500 ${
-                    isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+                    isDarkMode
+                      ? "rotate-90 scale-0 opacity-0"
+                      : "rotate-0 scale-100 opacity-100"
                   }`}
                 />
                 <Moon
                   className={`absolute inset-0 transition-all duration-500 ${
-                    isDarkMode ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+                    isDarkMode
+                      ? "rotate-0 scale-100 opacity-100"
+                      : "-rotate-90 scale-0 opacity-0"
                   }`}
                 />
               </div>
@@ -129,25 +156,28 @@ function MobileMenu({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTh
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default function PropertyGroupLanding() {
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleSmoothScroll = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
     if (href.startsWith("#")) {
-      e.preventDefault()
-      const element = document.querySelector(href)
+      e.preventDefault();
+      const element = document.querySelector(href);
       if (element) {
-        element.scrollIntoView({ behavior: "smooth" })
+        element.scrollIntoView({ behavior: "smooth" });
       }
     }
-  }
+  };
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode)
-  }
+    setIsDarkMode(!isDarkMode);
+  };
 
   return (
     <div
@@ -158,17 +188,26 @@ export default function PropertyGroupLanding() {
       {/* Header */}
       <header
         className={`fixed top-0 w-full backdrop-blur-sm z-50 border-b transition-colors duration-300 ${
-          isDarkMode ? "bg-black/90 border-yellow-500/20" : "bg-white/90 border-gray-200"
+          isDarkMode
+            ? "bg-black/90 border-yellow-500/20"
+            : "bg-white/90 border-gray-200"
         }`}
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
+            <Link
+              href="/"
+              className="flex items-center space-x-2 flex-shrink-0"
+            >
               <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-sm md:text-xl">PG</span>
+                <span className="text-black font-bold text-sm md:text-xl">
+                  PG
+                </span>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg md:text-xl font-bold text-yellow-400">Property Group</h1>
+                <h1 className="text-lg md:text-xl font-bold text-yellow-400">
+                  Property Group
+                </h1>
               </div>
             </Link>
 
@@ -188,7 +227,10 @@ export default function PropertyGroupLanding() {
               >
                 Servicios
               </a>
-              <Link href="/projects" className="text-sm lg:text-base hover:text-yellow-400 transition-colors">
+              <Link
+                href="/projects"
+                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+              >
                 Proyectos
               </Link>
               <a
@@ -222,12 +264,16 @@ export default function PropertyGroupLanding() {
                 <div className="relative w-5 h-5">
                   <Sun
                     className={`absolute inset-0 transition-all duration-500 ${
-                      isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+                      isDarkMode
+                        ? "rotate-90 scale-0 opacity-0"
+                        : "rotate-0 scale-100 opacity-100"
                     }`}
                   />
                   <Moon
                     className={`absolute inset-0 transition-all duration-500 ${
-                      isDarkMode ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+                      isDarkMode
+                        ? "rotate-0 scale-100 opacity-100"
+                        : "-rotate-90 scale-0 opacity-0"
                     }`}
                   />
                 </div>
@@ -241,7 +287,10 @@ export default function PropertyGroupLanding() {
       </header>
 
       {/* Hero Section */}
-      <section id="inicio" className="pt-16 md:pt-20 min-h-screen flex items-center relative overflow-hidden">
+      <section
+        id="inicio"
+        className="pt-16 md:pt-20 min-h-screen flex items-center relative overflow-hidden"
+      >
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10"></div>
         <div className="absolute inset-0">
           <Image
@@ -256,7 +305,9 @@ export default function PropertyGroupLanding() {
           <div className="max-w-4xl">
             <div className="mb-6 md:mb-8">
               <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mb-6">
-                <span className="text-black font-bold text-2xl md:text-3xl">PG</span>
+                <span className="text-black font-bold text-2xl md:text-3xl">
+                  PG
+                </span>
               </div>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
@@ -265,8 +316,8 @@ export default function PropertyGroupLanding() {
               <span className="text-white">Group</span>
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed max-w-3xl">
-              Expertos en bienes raíces con más de 15 años de experiencia. Convertimos tus sueños inmobiliarios en
-              realidad.
+              Expertos en bienes raíces con más de 15 años de experiencia.
+              Convertimos tus sueños inmobiliarios en realidad.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-md sm:max-w-none">
               <Link href="/projects" className="flex-1 sm:flex-none">
@@ -295,20 +346,36 @@ export default function PropertyGroupLanding() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-black">
             <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">500+</div>
-              <div className="text-sm sm:text-base md:text-lg font-semibold">Propiedades Vendidas</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
+                500+
+              </div>
+              <div className="text-sm sm:text-base md:text-lg font-semibold">
+                Propiedades Vendidas
+              </div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">15+</div>
-              <div className="text-sm sm:text-base md:text-lg font-semibold">Años de Experiencia</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
+                15+
+              </div>
+              <div className="text-sm sm:text-base md:text-lg font-semibold">
+                Años de Experiencia
+              </div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">98%</div>
-              <div className="text-sm sm:text-base md:text-lg font-semibold">Clientes Satisfechos</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
+                98%
+              </div>
+              <div className="text-sm sm:text-base md:text-lg font-semibold">
+                Clientes Satisfechos
+              </div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">24/7</div>
-              <div className="text-sm sm:text-base md:text-lg font-semibold">Atención al Cliente</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
+                24/7
+              </div>
+              <div className="text-sm sm:text-base md:text-lg font-semibold">
+                Atención al Cliente
+              </div>
             </div>
           </div>
         </div>
@@ -317,16 +384,22 @@ export default function PropertyGroupLanding() {
       {/* Services Section */}
       <section
         id="servicios"
-        className={`py-16 md:py-20 transition-colors duration-300 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
+        className={`py-16 md:py-20 transition-colors duration-300 ${
+          isDarkMode ? "bg-gray-900" : "bg-gray-50"
+        }`}
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
               Nuestros <span className="text-yellow-400">Servicios</span>
             </h2>
-            <p className={`text-xl max-w-3xl mx-auto ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
-              Ofrecemos soluciones integrales en el sector inmobiliario, adaptadas a las necesidades específicas de cada
-              cliente.
+            <p
+              className={`text-xl max-w-3xl mx-auto ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Ofrecemos soluciones integrales en el sector inmobiliario,
+              adaptadas a las necesidades específicas de cada cliente.
             </p>
           </div>
 
@@ -342,11 +415,20 @@ export default function PropertyGroupLanding() {
                 <div className="w-16 h-16 bg-yellow-500 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Building2 className="w-8 h-8 text-black" />
                 </div>
-                <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
+                <h3
+                  className={`text-2xl font-bold mb-4 ${
+                    isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                  }`}
+                >
                   Venta de Propiedades
                 </h3>
-                <p className={`leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                  Asesoría completa en la venta de casas, apartamentos, locales comerciales y terrenos.
+                <p
+                  className={`leading-relaxed ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Asesoría completa en la venta de casas, apartamentos, locales
+                  comerciales y terrenos.
                 </p>
               </CardContent>
             </Card>
@@ -362,11 +444,20 @@ export default function PropertyGroupLanding() {
                 <div className="w-16 h-16 bg-yellow-500 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <TrendingUp className="w-8 h-8 text-black" />
                 </div>
-                <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
+                <h3
+                  className={`text-2xl font-bold mb-4 ${
+                    isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                  }`}
+                >
                   Inversión Inmobiliaria
                 </h3>
-                <p className={`leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                  Análisis de mercado y oportunidades de inversión para maximizar tu rentabilidad.
+                <p
+                  className={`leading-relaxed ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Análisis de mercado y oportunidades de inversión para
+                  maximizar tu rentabilidad.
                 </p>
               </CardContent>
             </Card>
@@ -382,11 +473,20 @@ export default function PropertyGroupLanding() {
                 <div className="w-16 h-16 bg-yellow-500 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Users className="w-8 h-8 text-black" />
                 </div>
-                <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
+                <h3
+                  className={`text-2xl font-bold mb-4 ${
+                    isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                  }`}
+                >
                   Asesoría Personalizada
                 </h3>
-                <p className={`leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                  Acompañamiento integral desde la búsqueda hasta la firma de escrituras.
+                <p
+                  className={`leading-relaxed ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Acompañamiento integral desde la búsqueda hasta la firma de
+                  escrituras.
                 </p>
               </CardContent>
             </Card>
@@ -395,37 +495,64 @@ export default function PropertyGroupLanding() {
       </section>
 
       {/* About Section */}
-      <section id="nosotros" className={`py-16 md:py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}>
+      <section
+        id="nosotros"
+        className={`py-16 md:py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}
+      >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="order-2 lg:order-1">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-8">
                 Sobre <span className="text-yellow-400">Nosotros</span>
               </h2>
-              <p className={`text-xl mb-6 leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
-                Property Group nació de la pasión por ayudar a las familias a encontrar el hogar de sus sueños. Con más
-                de 15 años en el mercado inmobiliario, nos hemos consolidado como una empresa de confianza.
+              <p
+                className={`text-xl mb-6 leading-relaxed ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Property Group nació de la pasión por ayudar a las familias a
+                encontrar el hogar de sus sueños. Con más de 15 años en el
+                mercado inmobiliario, nos hemos consolidado como una empresa de
+                confianza.
               </p>
-              <p className={`text-lg mb-8 leading-relaxed ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                Nuestro enfoque personalizado y conocimiento profundo del mercado local nos permite ofrecer las mejores
-                oportunidades a nuestros clientes, ya sea que busquen comprar, vender o invertir.
+              <p
+                className={`text-lg mb-8 leading-relaxed ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Nuestro enfoque personalizado y conocimiento profundo del
+                mercado local nos permite ofrecer las mejores oportunidades a
+                nuestros clientes, ya sea que busquen comprar, vender o
+                invertir.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                  <span className={`text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <span
+                    className={`text-lg ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Experiencia comprobada en el mercado
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                  <span className={`text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <span
+                    className={`text-lg ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Atención personalizada y profesional
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                  <span className={`text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <span
+                    className={`text-lg ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Red amplia de contactos y propiedades
                   </span>
                 </div>
@@ -449,29 +576,48 @@ export default function PropertyGroupLanding() {
       {/* Contact Section */}
       <section
         id="contacto"
-        className={`py-16 md:py-20 transition-colors duration-300 ${isDarkMode ? "bg-gradient-to-br from-gray-900 to-black" : "bg-gradient-to-br from-gray-100 to-gray-200"}`}
+        className={`py-16 md:py-20 transition-colors duration-300 ${
+          isDarkMode
+            ? "bg-gradient-to-br from-gray-900 to-black"
+            : "bg-gradient-to-br from-gray-100 to-gray-200"
+        }`}
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
               <span className="text-yellow-400">Contacta</span> con Nosotros
             </h2>
-            <p className={`text-xl max-w-3xl mx-auto ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
-              ¿Listo para dar el siguiente paso? Estamos aquí para ayudarte en tu próxima decisión inmobiliaria.
+            <p
+              className={`text-xl max-w-3xl mx-auto ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              ¿Listo para dar el siguiente paso? Estamos aquí para ayudarte en
+              tu próxima decisión inmobiliaria.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-16">
             <div>
-              <h3 className="text-2xl font-bold text-yellow-400 mb-8">Información de Contacto</h3>
+              <h3 className="text-2xl font-bold text-yellow-400 mb-8">
+                Información de Contacto
+              </h3>
               <div className="space-y-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Phone className="w-6 h-6 text-black" />
                   </div>
                   <div>
-                    <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>Teléfono</p>
-                    <p className={`text-xl font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    <p
+                      className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+                    >
+                      Teléfono
+                    </p>
+                    <p
+                      className={`text-xl font-semibold ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       +1 (555) 123-4567
                     </p>
                   </div>
@@ -481,8 +627,16 @@ export default function PropertyGroupLanding() {
                     <Mail className="w-6 h-6 text-black" />
                   </div>
                   <div className="min-w-0">
-                    <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>Email</p>
-                    <p className={`text-xl font-semibold break-words ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    <p
+                      className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+                    >
+                      Email
+                    </p>
+                    <p
+                      className={`text-xl font-semibold break-words ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       info@propertygroup.com
                     </p>
                   </div>
@@ -492,8 +646,16 @@ export default function PropertyGroupLanding() {
                     <MapPin className="w-6 h-6 text-black" />
                   </div>
                   <div>
-                    <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>Dirección</p>
-                    <p className={`text-xl font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    <p
+                      className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+                    >
+                      Dirección
+                    </p>
+                    <p
+                      className={`text-xl font-semibold ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       Av. Principal 123, Ciudad
                     </p>
                   </div>
@@ -502,15 +664,23 @@ export default function PropertyGroupLanding() {
             </div>
 
             <Card
-              className={`transition-all duration-300 ${isDarkMode ? "bg-black border-yellow-500/20" : "bg-white border-gray-200 shadow-lg"}`}
+              className={`transition-all duration-300 ${
+                isDarkMode
+                  ? "bg-black border-yellow-500/20"
+                  : "bg-white border-gray-200 shadow-lg"
+              }`}
             >
               <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-yellow-400 mb-6">Envíanos un Mensaje</h3>
+                <h3 className="text-2xl font-bold text-yellow-400 mb-6">
+                  Envíanos un Mensaje
+                </h3>
                 <form className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label
-                        className={`block text-sm font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-700"}`}
+                        className={`block text-sm font-medium mb-2 ${
+                          isDarkMode ? "text-white" : "text-gray-700"
+                        }`}
                       >
                         Nombre
                       </label>
@@ -525,7 +695,9 @@ export default function PropertyGroupLanding() {
                     </div>
                     <div>
                       <label
-                        className={`block text-sm font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-700"}`}
+                        className={`block text-sm font-medium mb-2 ${
+                          isDarkMode ? "text-white" : "text-gray-700"
+                        }`}
                       >
                         Teléfono
                       </label>
@@ -540,7 +712,11 @@ export default function PropertyGroupLanding() {
                     </div>
                   </div>
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-700"}`}>
+                    <label
+                      className={`block text-sm font-medium mb-2 ${
+                        isDarkMode ? "text-white" : "text-gray-700"
+                      }`}
+                    >
                       Email
                     </label>
                     <Input
@@ -554,7 +730,11 @@ export default function PropertyGroupLanding() {
                     />
                   </div>
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-700"}`}>
+                    <label
+                      className={`block text-sm font-medium mb-2 ${
+                        isDarkMode ? "text-white" : "text-gray-700"
+                      }`}
+                    >
                       Mensaje
                     </label>
                     <Textarea
@@ -579,7 +759,9 @@ export default function PropertyGroupLanding() {
       {/* Footer */}
       <footer
         className={`border-t py-12 transition-colors duration-300 ${
-          isDarkMode ? "bg-black border-yellow-500/20" : "bg-gray-100 border-gray-300"
+          isDarkMode
+            ? "bg-black border-yellow-500/20"
+            : "bg-gray-100 border-gray-300"
         }`}
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -589,8 +771,14 @@ export default function PropertyGroupLanding() {
                 <span className="text-black font-bold text-xl">PG</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-yellow-400">Property Group</h3>
-                <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                <h3 className="text-xl font-bold text-yellow-400">
+                  Property Group
+                </h3>
+                <p
+                  className={`text-sm ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   Tu socio inmobiliario de confianza
                 </p>
               </div>
@@ -599,7 +787,11 @@ export default function PropertyGroupLanding() {
               <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
                 © 2024 Property Group. Todos los derechos reservados.
               </p>
-              <p className={`text-sm mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
+              <p
+                className={`text-sm mt-1 ${
+                  isDarkMode ? "text-gray-500" : "text-gray-500"
+                }`}
+              >
                 Diseñado con ❤️ para tu éxito inmobiliario
               </p>
             </div>
@@ -607,5 +799,5 @@ export default function PropertyGroupLanding() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
