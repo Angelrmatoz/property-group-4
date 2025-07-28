@@ -381,7 +381,7 @@ export default function PropertyGroupLanding() {
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      +1 (555) 123-4567
+                      +1 (829) 638-0380
                     </p>
                   </div>
                 </div>
@@ -419,7 +419,7 @@ export default function PropertyGroupLanding() {
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      Av. Principal 123, Ciudad
+                      Punta Cana, República Dominicana
                     </p>
                   </div>
                 </div>
