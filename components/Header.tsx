@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface HeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
 }
 
-export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
+const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleNavClick = (href: string) => {
@@ -38,6 +39,11 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
     }
   };
 
+  const pathname = usePathname();
+
+  // Helper para saber si estamos en la home
+  const isHome = pathname === "/";
+
   return (
     <header
       className={`fixed top-0 w-full backdrop-blur-sm z-50 border-b transition-colors duration-300 ${
@@ -63,40 +69,77 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a
-              href="#inicio"
-              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
-              onClick={(e) => handleSmoothScroll(e, "#inicio")}
-            >
-              Inicio
-            </a>
-            <a
-              href="#servicios"
-              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
-              onClick={(e) => handleSmoothScroll(e, "#servicios")}
-            >
-              Servicios
-            </a>
-            <Link
-              href="/projects"
-              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
-            >
-              Proyectos
-            </Link>
-            <a
-              href="#nosotros"
-              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
-              onClick={(e) => handleSmoothScroll(e, "#nosotros")}
-            >
-              Nosotros
-            </a>
-            <a
-              href="#contacto"
-              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
-              onClick={(e) => handleSmoothScroll(e, "#contacto")}
-            >
-              Contacto
-            </a>
+            {isHome ? (
+              <>
+                <a
+                  href="#inicio"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                  onClick={(e) => handleSmoothScroll(e, "#inicio")}
+                >
+                  Inicio
+                </a>
+                <a
+                  href="#servicios"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                  onClick={(e) => handleSmoothScroll(e, "#servicios")}
+                >
+                  Servicios
+                </a>
+                <Link
+                  href="/projects"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                >
+                  Proyectos
+                </Link>
+                <a
+                  href="#nosotros"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                  onClick={(e) => handleSmoothScroll(e, "#nosotros")}
+                >
+                  Nosotros
+                </a>
+                <a
+                  href="#contacto"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                  onClick={(e) => handleSmoothScroll(e, "#contacto")}
+                >
+                  Contacto
+                </a>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/#inicio"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                >
+                  Inicio
+                </Link>
+                <Link
+                  href="/#servicios"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                >
+                  Servicios
+                </Link>
+                <Link
+                  href="/projects"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                >
+                  Proyectos
+                </Link>
+                <Link
+                  href="/#nosotros"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                >
+                  Nosotros
+                </Link>
+                <Link
+                  href="/#contacto"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                >
+                  Contacto
+                </Link>
+              </>
+            )}
           </nav>
 
           <div className="flex items-center space-x-2">
@@ -243,4 +286,6 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
       </div>
     </header>
   );
-}
+};
+
+export default Header;
