@@ -12,157 +12,19 @@ import {
   MapPin,
   Users,
   TrendingUp,
-  Menu,
-  X,
-  Sun,
-  Moon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-
-function MobileMenu({
-  isDarkMode,
-  toggleTheme,
-}: {
-  isDarkMode: boolean;
-  toggleTheme: () => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleNavClick = (href: string) => {
-    setIsOpen(false);
-    if (href.startsWith("#")) {
-      setTimeout(() => {
-        const element = document.querySelector(href);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
-    }
-  };
-
-  return (
-    <div className="md:hidden">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 ${
-          isDarkMode
-            ? "text-white hover:text-yellow-400"
-            : "text-gray-900 hover:text-yellow-400"
-        } hover:bg-transparent`}
-      >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </Button>
-
-      {isOpen && (
-        <div
-          className={`absolute top-full left-0 right-0 backdrop-blur-sm border-b z-40 ${
-            isDarkMode
-              ? "bg-black/95 border-yellow-500/20"
-              : "bg-white/95 border-gray-200"
-          }`}
-        >
-          <nav className="px-4 py-4 flex flex-col space-y-3">
-            <a
-              href="#inicio"
-              className={`text-sm py-2 px-3 rounded transition-colors ${
-                isDarkMode
-                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
-                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
-              }`}
-              onClick={() => handleNavClick("#inicio")}
-            >
-              Inicio
-            </a>
-            <a
-              href="#servicios"
-              className={`text-sm py-2 px-3 rounded transition-colors ${
-                isDarkMode
-                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
-                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
-              }`}
-              onClick={() => handleNavClick("#servicios")}
-            >
-              Servicios
-            </a>
-            <Link
-              href="/projects"
-              className={`text-sm py-2 px-3 rounded transition-colors ${
-                isDarkMode
-                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
-                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
-              }`}
-              onClick={() => setIsOpen(false)}
-            >
-              Proyectos
-            </Link>
-            <a
-              href="#nosotros"
-              className={`text-sm py-2 px-3 rounded transition-colors ${
-                isDarkMode
-                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
-                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
-              }`}
-              onClick={() => handleNavClick("#nosotros")}
-            >
-              Nosotros
-            </a>
-            <a
-              href="#contacto"
-              className={`text-sm py-2 px-3 rounded transition-colors ${
-                isDarkMode
-                  ? "text-white hover:text-yellow-400 hover:bg-gray-800"
-                  : "text-gray-900 hover:text-yellow-400 hover:bg-gray-100"
-              }`}
-              onClick={() => handleNavClick("#contacto")}
-            >
-              Contacto
-            </a>
-            <Button
-              onClick={() => {
-                toggleTheme();
-                setIsOpen(false);
-              }}
-              variant="ghost"
-              size="sm"
-              className={`justify-start text-sm transition-all duration-300 ${
-                isDarkMode
-                  ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
-                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-              }`}
-            >
-              <div className="relative w-4 h-4 mr-2">
-                <Sun
-                  className={`absolute inset-0 transition-all duration-500 ${
-                    isDarkMode
-                      ? "rotate-90 scale-0 opacity-0"
-                      : "rotate-0 scale-100 opacity-100"
-                  }`}
-                />
-                <Moon
-                  className={`absolute inset-0 transition-all duration-500 ${
-                    isDarkMode
-                      ? "rotate-0 scale-100 opacity-100"
-                      : "-rotate-90 scale-0 opacity-0"
-                  }`}
-                />
-              </div>
-              {isDarkMode ? "Modo Claro" : "Modo Oscuro"}
-            </Button>
-          </nav>
-        </div>
-      )}
-    </div>
-  );
-}
+import Header from "@/components/Header";
 
 export default function PropertyGroupLanding() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Permite cualquier tipo de evento de mouse para evitar errores de tipo
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
   const handleSmoothScroll = (
     e: React.MouseEvent<HTMLElement>,
     href: string
@@ -176,10 +38,6 @@ export default function PropertyGroupLanding() {
     }
   };
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
   return (
     <div
       className={`min-h-screen transition-colors duration-300 ${
@@ -187,105 +45,8 @@ export default function PropertyGroupLanding() {
       }`}
     >
       {/* Header */}
-      <header
-        className={`fixed top-0 w-full backdrop-blur-sm z-50 border-b transition-colors duration-300 ${
-          isDarkMode
-            ? "bg-black/90 border-yellow-500/20"
-            : "bg-white/90 border-gray-200"
-        }`}
-      >
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <Link
-              href="/"
-              className="flex items-center space-x-2 flex-shrink-0"
-            >
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-sm md:text-xl">
-                  PG
-                </span>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg md:text-xl font-bold text-yellow-400">
-                  Property Group
-                </h1>
-              </div>
-            </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <a
-                href="#inicio"
-                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
-                onClick={(e) => handleSmoothScroll(e, "#inicio")}
-              >
-                Inicio
-              </a>
-              <a
-                href="#servicios"
-                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
-                onClick={(e) => handleSmoothScroll(e, "#servicios")}
-              >
-                Servicios
-              </a>
-              <Link
-                href="/projects"
-                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
-              >
-                Proyectos
-              </Link>
-              <a
-                href="#nosotros"
-                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
-                onClick={(e) => handleSmoothScroll(e, "#nosotros")}
-              >
-                Nosotros
-              </a>
-              <a
-                href="#contacto"
-                className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
-                onClick={(e) => handleSmoothScroll(e, "#contacto")}
-              >
-                Contacto
-              </a>
-            </nav>
-
-            <div className="flex items-center space-x-2">
-              {/* Desktop Theme Toggle */}
-              <Button
-                onClick={toggleTheme}
-                variant="ghost"
-                size="sm"
-                className={`hidden md:flex p-2 transition-all duration-300 ${
-                  isDarkMode
-                    ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
-                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                }`}
-              >
-                <div className="relative w-5 h-5">
-                  <Sun
-                    className={`absolute inset-0 transition-all duration-500 ${
-                      isDarkMode
-                        ? "rotate-90 scale-0 opacity-0"
-                        : "rotate-0 scale-100 opacity-100"
-                    }`}
-                  />
-                  <Moon
-                    className={`absolute inset-0 transition-all duration-500 ${
-                      isDarkMode
-                        ? "rotate-0 scale-100 opacity-100"
-                        : "-rotate-90 scale-0 opacity-0"
-                    }`}
-                  />
-                </div>
-              </Button>
-
-              {/* Mobile Hamburger Menu */}
-              <MobileMenu isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
 
       {/* Hero Section */}
       <section
