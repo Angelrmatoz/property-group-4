@@ -55,7 +55,7 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
               </span>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg md:text-xl font-bold text-yellow-400">
+              <h1 className="text-lg md:text-xl font-bold text-saffron">
                 Property Group
               </h1>
             </div>
@@ -65,34 +65,34 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
           <nav className="hidden md:flex items-center space-x-8">
             <a
               href="#inicio"
-              className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
               onClick={(e) => handleSmoothScroll(e, "#inicio")}
             >
               Inicio
             </a>
             <a
               href="#servicios"
-              className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
               onClick={(e) => handleSmoothScroll(e, "#servicios")}
             >
               Servicios
             </a>
             <Link
               href="/projects"
-              className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
             >
               Proyectos
             </Link>
             <a
               href="#nosotros"
-              className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
               onClick={(e) => handleSmoothScroll(e, "#nosotros")}
             >
               Nosotros
             </a>
             <a
               href="#contacto"
-              className="text-sm lg:text-base hover:text-yellow-400 transition-colors"
+              className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
               onClick={(e) => handleSmoothScroll(e, "#contacto")}
             >
               Contacto
@@ -171,35 +171,35 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
           <nav className="py-4 space-y-3 border-t border-yellow-500/20">
             <a
               href="#inicio"
-              className="block px-4 py-2 text-base hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors"
+              className="block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
               onClick={() => handleNavClick("#inicio")}
             >
               Inicio
             </a>
             <a
               href="#servicios"
-              className="block px-4 py-2 text-base hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors"
+              className="block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
               onClick={() => handleNavClick("#servicios")}
             >
               Servicios
             </a>
             <Link
               href="/projects"
-              className="block px-4 py-2 text-base hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors"
+              className="block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
               onClick={() => handleNavClick("/projects")}
             >
               Proyectos
             </Link>
             <a
               href="#nosotros"
-              className="block px-4 py-2 text-base hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors"
+              className="block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
               onClick={() => handleNavClick("#nosotros")}
             >
               Nosotros
             </a>
             <a
               href="#contacto"
-              className="block px-4 py-2 text-base hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors"
+              className="block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
               onClick={() => handleNavClick("#contacto")}
             >
               Contacto

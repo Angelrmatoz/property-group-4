@@ -66,14 +66,14 @@ export default function PropertyGroupLanding() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
           <div className="max-w-4xl">
             <div className="mb-6 md:mb-8">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mb-6">
-                <span className="text-black font-bold text-2xl md:text-3xl">
-                  PG
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br rounded-2xl flex items-center justify-center mb-6">
+                <span>
+                  <img src="/images/icons/PG-icon-dorado.png" alt="" />
                 </span>
               </div>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              <span className="text-yellow-400">Property</span>
+              <span className="text-saffron">Property</span>
               <br />
               <span className="text-white">Group</span>
             </h1>
