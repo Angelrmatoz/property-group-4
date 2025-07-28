@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Testimonials from "@/components/Testimonials";
 
 export default function PropertyGroupLanding() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -256,6 +257,9 @@ export default function PropertyGroupLanding() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <Testimonials isDarkMode={isDarkMode} />
 
       {/* About Section */}
       <section
