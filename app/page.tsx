@@ -57,7 +57,7 @@ export default function PropertyGroupLanding() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${
+      className={`min-h-screen transition-colors duration-300 overflow-x-hidden ${
         isDarkMode ? "bg-black text-white" : "bg-white text-gray-900"
       }`}
     >
@@ -526,8 +526,8 @@ export default function PropertyGroupLanding() {
                     <Textarea
                       className={
                         isDarkMode
-                          ? "bg-gray-900 border-gray-700 text-white focus:border-yellow-500 min-h-[120px]"
-                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 min-h-[120px]"
+                          ? "resize-none bg-gray-900 border-gray-700 text-white focus:border-yellow-500 min-h-[120px]"
+                          : "resize-none bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 min-h-[120px]"
                       }
                       placeholder="Cuéntanos cómo podemos ayudarte..."
                     />

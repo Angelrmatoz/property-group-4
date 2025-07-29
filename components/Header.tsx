@@ -233,13 +233,20 @@ const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
             >
               Servicios
             </a>
-            <Link
+            <a
+              href="#Testimonios"
+              className="block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
+              onClick={() => handleNavClick("#Testimonios")}
+            >
+              Testimonios
+            </a>
+            {/* <Link
               href="/projects"
               className="block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
               onClick={() => handleNavClick("/projects")}
             >
               Proyectos
-            </Link>
+            </Link> */}
             <a
               href="#nosotros"
               className="block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"

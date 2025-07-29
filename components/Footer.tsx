@@ -10,7 +10,7 @@ const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
       }`}
     >
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between">
+        <div className="flex flex-col lg:flex-row items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 mb-4 md:mb-0">
             <div className="w-12 h-12 bg-gradient-to-br rounded-lg flex items-center justify-center">
               <span>
@@ -30,12 +30,12 @@ const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
               </p>
             </div>
           </Link>
-          <div className="text-center">
+          <div className="text-center md:mt-4 lg:mt-0">
             <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
               © {new Date().getFullYear()} Property Group. Todos los derechos
               reservados.
             </p>
-            <div className="flex items-center space-x-3 mt-3 justify-center md:justify-end">
+            <div className="flex items-center space-x-3 mt-3 justify-center lg:justify-end">
               <a
                 href="https://wa.me/18296380380"
                 target="_blank"
