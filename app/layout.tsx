@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import Head from "next/head";
 
 export const metadata: Metadata = {
   title: "Property Group",
@@ -14,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
+      <head>
         <link rel="icon" href="./images/icons/PG-icon-dorado.png" />
         {/* Meta Pixel Code */}
         <script
@@ -41,7 +40,7 @@ fbq('track', 'PageView');`,
           />
         </noscript>
         {/* End Meta Pixel Code */}
-      </Head>
+      </head>
       <body>{children}</body>
     </html>
   );
