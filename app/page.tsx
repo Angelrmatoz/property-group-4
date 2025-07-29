@@ -101,7 +101,7 @@ export default function PropertyGroupLanding() {
               Convertimos tus sueños inmobiliarios en realidad.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-md sm:max-w-none">
-              <Link href="/projects" className="flex-1 sm:flex-none">
+              <Link href="#/projects" className="flex-1 sm:flex-none">
                 <Button
                   size="lg"
                   className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-lg px-8 py-4"
