@@ -14,7 +14,8 @@ const Testimonials = ({ isDarkMode }: TestimonialsProps) => {
       content:
         "Property Group me ayudó a encontrar el hogar perfecto para mi familia. Su profesionalismo y dedicación fueron excepcionales durante todo el proceso.",
       rating: 5,
-      image: "/placeholder-user.jpg",
+      image:
+        "/images/Person/Testimonials/testimonial2.jpg",
     },
     {
       id: 2,
@@ -23,7 +24,8 @@ const Testimonials = ({ isDarkMode }: TestimonialsProps) => {
       content:
         "He trabajado con Property Group en múltiples proyectos. Su conocimiento del mercado y asesoría han sido fundamentales para mis inversiones exitosas.",
       rating: 5,
-      image: "/placeholder-user.jpg",
+      image:
+        "/images/Person/Testimonials/testimonial1.jpg",
     },
     {
       id: 3,
@@ -32,7 +34,8 @@ const Testimonials = ({ isDarkMode }: TestimonialsProps) => {
       content:
         "Vendí mi casa a través de Property Group y el proceso fue muy fluido. Lograron venderla por encima del precio esperado en tiempo récord.",
       rating: 5,
-      image: "/placeholder-user.jpg",
+      image:
+        "/images/Person/Testimonials/testimonial3.jpg",
     },
   ];
 

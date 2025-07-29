@@ -26,7 +26,7 @@ const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
                   isDarkMode ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                Tu socio inmobiliario de confianza
+                Tu socia inmobiliaria de confianza
               </p>
             </div>
           </Link>

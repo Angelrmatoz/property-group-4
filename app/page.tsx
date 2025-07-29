@@ -346,12 +346,12 @@ export default function PropertyGroupLanding() {
             </div>
             <div className="relative order-1 lg:order-2">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-2xl"></div>
-              <div className="relative h-64 sm:h-80 md:h-96 lg:h-[600px] rounded-2xl overflow-hidden">
+              <div className="relative h-50 sm:h-80 md:h-96 lg:h-[600px] rounded-2xl overflow-hidden">
                 <Image
-                  src="/placeholder.svg?height=600&width=500&text=Equipo+Property+Group"
+                  src="/images/Person/CEO/img6.jpg"
                   alt="Equipo Property Group"
                   fill
-                  className="object-cover"
+                  className="object-cover object-top"
                 />
               </div>
             </div>
