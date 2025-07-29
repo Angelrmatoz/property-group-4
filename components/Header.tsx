@@ -85,18 +85,25 @@ const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
                 >
                   Servicios
                 </a>
-                <Link
+                {/* <Link
                   href="/projects"
                   className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
                 >
                   Proyectos
-                </Link>
+                </Link> */}
                 <a
                   href="#nosotros"
                   className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
                   onClick={(e) => handleSmoothScroll(e, "#nosotros")}
                 >
                   Nosotros
+                </a>
+                <a
+                  href="#Testimonios"
+                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
+                  onClick={(e) => handleSmoothScroll(e, "#Testimonios")}
+                >
+                  Testimonios
                 </a>
                 <a
                   href="#contacto"

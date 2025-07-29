@@ -130,7 +130,7 @@ const Testimonials = ({ isDarkMode }: TestimonialsProps) => {
             ¿Listo para ser nuestro próximo cliente satisfecho?
           </h3>
           <p
-            className={`text-lg mb-8 ${
+            className={`text-lg mb-3 ${
               isDarkMode ? "text-gray-300" : "text-gray-700"
             }`}
           >

@@ -15,13 +15,28 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Testimonials from "@/components/Testimonials";
+import { useCarousel } from "@/hooks/useCarousel";
 
 export default function PropertyGroupLanding() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { nextImage, currentImage } = useCarousel();
+  const [heroImage, setHeroImage] = useState(currentImage());
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setHeroImage(nextImage());
+        setFade(true);
+      }, 300); // duración del fade out
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [nextImage]);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -58,10 +73,12 @@ export default function PropertyGroupLanding() {
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10"></div>
         <div className="absolute inset-0">
           <Image
-            src="/placeholder.svg?height=800&width=1200&text=Edificio+moderno+de+lujo"
+            src={heroImage}
             alt="Edificio moderno de lujo"
             fill
-            className="object-cover opacity-40"
+            className={`object-cover bg-no-repeat transition-opacity duration-300 w-full h-full ${
+              fade ? "opacity-40" : "opacity-0"
+            }`}
             priority
           />
         </div>
@@ -259,7 +276,9 @@ export default function PropertyGroupLanding() {
       </section>
 
       {/* Testimonials Section */}
-      <Testimonials isDarkMode={isDarkMode} />
+      <section id="Testimonios">
+        <Testimonials isDarkMode={isDarkMode} />
+      </section>
 
       {/* About Section */}
       <section
