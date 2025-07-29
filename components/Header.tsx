@@ -67,8 +67,8 @@ const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation solo en lg+ */}
+          <nav className="hidden lg:flex items-center space-x-8">
             {isHome ? (
               <>
                 <a
@@ -150,12 +150,12 @@ const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
           </nav>
 
           <div className="flex items-center space-x-2">
-            {/* Desktop Theme Toggle */}
+            {/* Desktop Theme Toggle solo en lg+ */}
             <Button
               onClick={toggleTheme}
               variant="ghost"
               size="sm"
-              className={`hidden md:flex p-2 transition-all duration-300 ${
+              className={`hidden lg:flex p-2 transition-all duration-300 ${
                 isDarkMode
                   ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
@@ -179,12 +179,12 @@ const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
               </div>
             </Button>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button visible hasta lg-1 */}
             <Button
               onClick={() => setIsOpen(!isOpen)}
               variant="ghost"
               size="sm"
-              className={`md:hidden p-2 transition-all duration-300 ${
+              className={`flex lg:hidden p-2 transition-all duration-300 ${
                 isDarkMode
                   ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
@@ -214,7 +214,7 @@ const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
 
         {/* Mobile Navigation */}
         <div
-          className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${
+          className={`lg:hidden overflow-hidden transition-all duration-300 ease-out ${
             isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
           }`}
         >

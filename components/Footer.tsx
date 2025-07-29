@@ -30,12 +30,12 @@ const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
               </p>
             </div>
           </Link>
-          <div className="text-center md:text-right">
+          <div className="text-center">
             <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
               © {new Date().getFullYear()} Property Group. Todos los derechos
               reservados.
             </p>
-            <div className="flex items-center justify-end space-x-3 mt-3">
+            <div className="flex items-center space-x-3 mt-3 justify-center md:justify-end">
               <a
                 href="https://wa.me/18296380380"
                 target="_blank"

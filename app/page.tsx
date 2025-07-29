@@ -346,12 +346,12 @@ export default function PropertyGroupLanding() {
             </div>
             <div className="relative order-1 lg:order-2">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-2xl"></div>
-              <div className="relative h-50 sm:h-80 md:h-96 lg:h-[600px] rounded-2xl overflow-hidden">
+              <div className="relative h-60 sm:h-80 md:h-96 lg:h-[600px] rounded-2xl overflow-hidden">
                 <Image
                   src="/images/Person/CEO/img6.jpg"
                   alt="Equipo Property Group"
                   fill
-                  className="object-cover object-top"
+                  className="object-cover object-[center_top] md:object-[center_15%] lg:object-[center_30%]"
                 />
               </div>
             </div>
@@ -423,7 +423,7 @@ export default function PropertyGroupLanding() {
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      info@propertygroup.com
+                      propertygroup@gmail.com
                     </p>
                   </div>
                 </div>
