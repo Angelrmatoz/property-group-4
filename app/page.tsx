@@ -423,7 +423,7 @@ export default function PropertyGroupLanding() {
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      propertygroup@gmail.com
+                      Propertygrouprd@gmail.com
                     </p>
                   </div>
                 </div>
@@ -460,7 +460,11 @@ export default function PropertyGroupLanding() {
                 <h3 className="text-2xl font-bold text-saffron mb-6">
                   Envíanos un Mensaje
                 </h3>
-                <form className="space-y-6">
+                <form
+                  className="space-y-6"
+                  action={"https://formspree.io/f/mqalbgej"}
+                  method="POST"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label
@@ -471,6 +475,7 @@ export default function PropertyGroupLanding() {
                         Nombre
                       </label>
                       <Input
+                        name="nombre"
                         className={
                           isDarkMode
                             ? "bg-gray-900 border-gray-700 text-white focus:border-yellow-500"
@@ -488,6 +493,7 @@ export default function PropertyGroupLanding() {
                         Teléfono
                       </label>
                       <Input
+                        name="telefono"
                         className={
                           isDarkMode
                             ? "bg-gray-900 border-gray-700 text-white focus:border-yellow-500"
@@ -506,6 +512,7 @@ export default function PropertyGroupLanding() {
                       Email
                     </label>
                     <Input
+                      name="email"
                       type="email"
                       className={
                         isDarkMode
@@ -524,6 +531,7 @@ export default function PropertyGroupLanding() {
                       Mensaje
                     </label>
                     <Textarea
+                      name="mensaje"
                       className={
                         isDarkMode
                           ? "resize-none bg-gray-900 border-gray-700 text-white focus:border-yellow-500 min-h-[120px]"
