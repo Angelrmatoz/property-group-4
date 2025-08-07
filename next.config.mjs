@@ -6,10 +6,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  images: {
-    formats: ['image/webp', 'image/avif'],
-    dangerouslyAllowSVG: true,
-  },
 }
 
 export default nextConfig;
