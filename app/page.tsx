@@ -391,7 +391,7 @@ export default function PropertyGroupLanding() {
               <div className="space-y-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-6 h-6 text-black" />
+                    <Phone className="w-6 h-6 text-black " />
                   </div>
                   <div>
                     <p
