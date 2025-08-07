@@ -8,7 +8,7 @@ const images = [
   "/images/Properties/EB-NU4299.webp",
   "/images/Properties/EB-OF2302.webp",
   "/images/Properties/EB-OR1803.webp",
-  "/images/Properties/eyJidWNrZXQiOiAiYWx0ZXJlc3RhdGUiLCAia2V5IjogInN0YXRpYy9wcm9wZXJ0aWVzL1JYMzRGTVNUM0gvQlFaRUtZVFRPMS9ZYm5SQnNEM1NnLzIyLTIzLTE5LmpwZyIsICJlZGl0cyI6.jpeg",
+  "/images/Properties/EB-PROPERTY-8.jpeg",
 ];
 
 export const useCarousel = () => {
