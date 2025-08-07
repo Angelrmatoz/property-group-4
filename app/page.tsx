@@ -383,7 +383,7 @@ export default function PropertyGroupLanding() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid lg:grid-cols-2 gap-16 justify-center">
             <div>
               <h3 className="text-2xl font-bold text-saffron mb-8">
                 Información de Contacto
@@ -450,7 +450,7 @@ export default function PropertyGroupLanding() {
             </div>
 
             <Card
-              className={`transition-all duration-300 ${
+              className={`mx-auto w-full max-w-md transition-all duration-300 ${
                 isDarkMode
                   ? "bg-black border-yellow-500/20"
                   : "bg-white border-gray-200 shadow-lg"
