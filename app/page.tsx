@@ -29,11 +29,14 @@ export default function PropertyGroupLanding() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setHeroImage(nextImage());
-        setFade(true);
+      setFade(false); // Inicia el fade-out
+      // Espera a que termine el fade-out antes de cambiar la imagen
+      const timeout = setTimeout(() => {
+        setHeroImage(nextImage()); // Cambia la imagen justo cuando termina el fade-out
+        setFade(true); // Inicia el fade-in
       }, 300); // duración del fade out
+      // Limpia el timeout si el componente se desmonta antes de que termine
+      return () => clearTimeout(timeout);
     }, 4000);
     return () => clearInterval(interval);
   }, [nextImage]);
