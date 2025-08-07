@@ -1,14 +1,14 @@
 import { useState, useCallback } from "react";
 
 const images = [
-  "/images/Properties/EB-DD5020.webp",
-  "/images/Properties/EB-NU4299 (1).webp",
-  "/images/Properties/EB-NU4299 (2).webp",
-  "/images/Properties/EB-NU4299 (3).webp",
-  "/images/Properties/EB-NU4299.webp",
-  "/images/Properties/EB-OF2302.webp",
-  "/images/Properties/EB-OR1803.webp",
-  "/images/Properties/EB-PROPERTY-8.jpeg",
+  "/images/Properties/luxury-apartment-downtown.webp",
+  "/images/Properties/modern-house-interior.webp",
+  "/images/Properties/modern-house-kitchen.webp",
+  "/images/Properties/modern-house-bedroom.webp",
+  "/images/Properties/modern-house-exterior.webp",
+  "/images/Properties/office-building-facade.webp",
+  "/images/Properties/residential-complex.webp",
+  "/images/Properties/commercial-property.jpeg",
 ];
 
 export const useCarousel = () => {
