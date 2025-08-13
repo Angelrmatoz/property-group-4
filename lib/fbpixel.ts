@@ -19,7 +19,15 @@ export const event = (name: string, options = {}) => {
 export function injectFbPixel() {
   if (typeof window === "undefined") return;
   if ((window as any).fbq) return; // Prevent double-injection
-  (function (f: any, b: any, e: any, v: any, n: any, t: any, s: any) {
+  const fbPixelLoader: any = function (
+    f: any,
+    b: any,
+    e: any,
+    v: any,
+    n: any,
+    t: any,
+    s: any
+  ) {
     if (f.fbq) return;
     n = f.fbq = function () {
       n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
@@ -34,7 +42,8 @@ export function injectFbPixel() {
     t.src = v;
     s = b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t, s);
-  })(
+  };
+  fbPixelLoader(
     window,
     document,
     "script",
