@@ -16,6 +16,17 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="./images/icons/PG-icon-dorado.png" />
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=1063226029330522&ev=PageView&noscript=1"
+            alt="Meta Pixel"
+          />
+        </noscript>
+      </head>
+      <body>
         {/* Meta Pixel Code */}
         <Script id="meta-pixel" strategy="afterInteractive">
           {`!function(f,b,e,v,n,t,s)
@@ -29,18 +40,9 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 fbq('init', '1063226029330522');
 fbq('track', 'PageView');`}
         </Script>
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: "none" }}
-            src="https://www.facebook.com/tr?id=1063226029330522&ev=PageView&noscript=1"
-            alt="Meta Pixel"
-          />
-        </noscript>
         {/* End Meta Pixel Code */}
-      </head>
-      <body>{children}</body>
+        {children}
+      </body>
     </html>
   );
 }
