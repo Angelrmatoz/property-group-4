@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { event } from "../lib/fbpixel";
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -23,6 +24,8 @@ const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
           element.scrollIntoView({ behavior: "smooth" });
         }
       }, 100);
+      // Evento Meta Pixel
+      event("ViewContent", { section: href.replace("#", "") });
     }
   };
 
@@ -36,6 +39,8 @@ const Header = ({ isDarkMode, toggleTheme }: HeaderProps) => {
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
       }
+      // Evento Meta Pixel
+      event("ViewContent", { section: href.replace("#", "") });
     }
   };
 

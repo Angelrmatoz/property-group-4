@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { event } from "../lib/fbpixel";
 
 const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
   return (
@@ -36,10 +37,12 @@ const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
               reservados.
             </p>
             <div className="flex items-center space-x-3 mt-3 justify-center lg:justify-end">
+              {/* WhatsApp */}
               <a
                 href="https://wa.me/18296380380"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => event("Contact", { method: "WhatsApp" })}
               >
                 <svg
                   data-testid="geist-icon"
@@ -57,7 +60,13 @@ const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
                 </svg>
               </a>
 
-              <a href="https://www.instagram.com/propertygrouprd/">
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/propertygrouprd/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => event("Contact", { method: "Instagram" })}
+              >
                 <svg
                   viewBox="0 0 32 32"
                   fill="none"

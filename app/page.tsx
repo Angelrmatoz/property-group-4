@@ -20,6 +20,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Testimonials from "@/components/Testimonials";
 import { useCarousel } from "@/hooks/useCarousel";
+import { event } from "../lib/fbpixel";
 
 export default function PropertyGroupLanding() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -116,7 +117,10 @@ export default function PropertyGroupLanding() {
                 size="lg"
                 variant="outline"
                 className="w-full sm:w-auto border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black text-lg px-8 py-4 bg-transparent"
-                onClick={(e) => handleSmoothScroll(e, "#contacto")}
+                onClick={(e) => {
+                  handleSmoothScroll(e, "#contacto");
+                  event("Contact", { location: "Hero" });
+                }}
               >
                 Contactar Ahora
               </Button>
@@ -467,6 +471,7 @@ export default function PropertyGroupLanding() {
                   className="space-y-6"
                   action={"https://formspree.io/f/mqalbgej"}
                   method="POST"
+                  onSubmit={() => event("Lead", { location: "ContactForm" })}
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
