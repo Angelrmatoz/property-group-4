@@ -29,13 +29,14 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 fbq('init', '1063226029330522');
 fbq('track', 'PageView');`,
           }}
-        ></script>
+        />
         <noscript>
           <img
             height="1"
             width="1"
             style={{ display: "none" }}
             src="https://www.facebook.com/tr?id=1063226029330522&ev=PageView&noscript=1"
+            alt="Meta Pixel"
           />
         </noscript>
         {/* End Meta Pixel Code */}
