@@ -26,7 +26,7 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1090379115079834');
+fbq('init', '1063226029330522');
 fbq('track', 'PageView');`,
           }}
         />
@@ -35,7 +35,7 @@ fbq('track', 'PageView');`,
             height="1"
             width="1"
             style={{ display: "none" }}
-            src="https://www.facebook.com/tr?id=1090379115079834&ev=PageView&noscript=1"
+            src="https://www.facebook.com/tr?id=1063226029330522&ev=PageView&noscript=1"
             alt="Meta Pixel"
           />
         </noscript>
