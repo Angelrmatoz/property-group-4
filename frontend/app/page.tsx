@@ -358,6 +358,7 @@ export default function PropertyGroupLanding() {
                   src="/images/Person/CEO/img6.jpg"
                   alt="Equipo Property Group"
                   fill
+                  sizes="(min-width: 1024px) 800px, 100vw"
                   className="object-cover object-[center_top] md:object-[center_15%] lg:object-[center_30%]"
                 />
               </div>
