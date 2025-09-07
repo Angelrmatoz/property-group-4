@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { event } from "../lib/fbpixel";
+import { event } from "@/lib/fbpixel";
 
 const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
   return (

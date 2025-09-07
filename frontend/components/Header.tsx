@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { event } from "../lib/fbpixel";
+import { event } from "@/lib/fbpixel";
 
 interface HeaderProps {
   isDarkMode: boolean;

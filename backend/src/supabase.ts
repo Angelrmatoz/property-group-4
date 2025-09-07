@@ -3,7 +3,7 @@ import {
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY,
-} from "./utils/config";
+} from "@/utils/config";
 
 // Runtime sanity check: `config.ts` already throws on missing values, but
 // TypeScript still types them as possibly undefined. Ensure they're present

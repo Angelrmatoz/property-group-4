@@ -20,7 +20,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Testimonials from "@/components/Testimonials";
 import { useCarousel } from "@/hooks/useCarousel";
-import { event } from "../lib/fbpixel";
+import { event } from "@/lib/fbpixel";
 
 export default function PropertyGroupLanding() {
   const [isDarkMode, setIsDarkMode] = useState(false);

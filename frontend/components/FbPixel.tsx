@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { injectFbPixel, pageview } from "../lib/fbpixel";
+import { injectFbPixel, pageview } from "@/lib/fbpixel";
 
 export default function FbPixel() {
   const pathname = usePathname();

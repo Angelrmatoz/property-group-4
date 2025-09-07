@@ -24,7 +24,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import projects from "../data/projects";
+import projects from "@/app/data/projects";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 

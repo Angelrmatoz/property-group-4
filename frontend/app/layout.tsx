@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import FbPixel from "../components/FbPixel";
+import FbPixel from "@/components/FbPixel";
 
 export const metadata: Metadata = {
   title: "Property Group",
