@@ -19,6 +19,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "module-alias": "^2.2.3",
     "morgan": "^1.10.1"
   },
   "devDependencies": {
@@ -27,6 +28,7 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.3.1",
     "nodemon": "^3.1.10",
+    "supabase": "^2.40.7",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.2"

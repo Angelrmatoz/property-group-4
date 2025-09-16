@@ -1,0 +1,20 @@
+name: AI Policy Presence Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-ai-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify AI policy exists
+        run: |
+          if [ ! -f .github/ai-instructions/ai-policy.yaml ]; then
+            echo "AI policy file .github/ai-instructions/ai-policy.yaml is missing";
+            exit 1;
+          fi
+          echo "AI policy present";
