@@ -44,4 +44,5 @@ mongoose.connection.on("disconnected", () => {
   console.log("Mongoose desconectado");
 });
 
+
 export default mongoose;
