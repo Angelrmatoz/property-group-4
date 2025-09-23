@@ -1,21 +1,21 @@
 import express from "express";
-import * as config from "@/utils/config";
-import morgan from "morgan";
 import cors from "cors";
+import morgan from "morgan";
+import { PORT } from "@/utils/config";
+
+import "@/mongo";
 
 const app = express();
+app.disable("x-powered-by");
 
-app.use(express.json());
-app.use(morgan("tiny"));
 app.use(cors());
+app.use(morgan("tiny"));
+app.use(express.json());
 
-app.get("/health", (req, res) => {
-  res.status(200).send("OK");
-});
-
-if (require.main === module) {
-  const PORT = config.PORT || 4000;
+if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
 }
+
+export default app;

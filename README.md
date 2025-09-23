@@ -41,12 +41,12 @@ Landing page profesional y responsiva para Property Group, empresa de bienes ra√
   # o npm install
   ```
 
-3. Inicia el servidor de desarrollo:
+1. Inicia el servidor de desarrollo:
    ```bash
    pnpm dev
    # o npm run dev
    ```
-4. Abre en tu navegador: [http://localhost:3000](http://localhost:3000)
+2. Abre en tu navegador: [http://localhost:3000](http://localhost:3000)
 
 ## Estructura del proyecto
 
