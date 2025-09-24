@@ -15,7 +15,7 @@ app.use(morgan("tiny"));
 app.use(express.json());
 
 
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/properties", propertiesRouter);
 
 // Middleware de manejo de errores (último)
