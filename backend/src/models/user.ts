@@ -4,32 +4,33 @@ import bcrypt from "bcrypt";
 // Definición del esquema de User
 
 const loginSchema = new mongoose.Schema({
-    nombre: { type: String, required: true },
-    apellido: { type: String, required: true },
-    email: { type: String, required: true, unique: true, index: true },
-    passwordHash: { type: String, required: true },
+  nombre: { type: String, required: true },
+  apellido: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  passwordHash: { type: String, required: true },
 });
 
-// Índice explícito para email (asegura unicidad a nivel BD)
-loginSchema.index({ email: 1 }, { unique: true });
-
 // Campo virtual para la contraseña en texto plano (no se guarda directamente)
-loginSchema.virtual('password')
-  .set(function(this: any, password: string) {
+loginSchema
+  .virtual("password")
+  .set(function (this: any, password: string) {
     this._password = password;
   })
-  .get(function(this: any) {
+  .get(function (this: any) {
     return this._password;
   });
 
 // Middleware para hashear la contraseña antes de guardar
-loginSchema.pre('save', async function (next) {
+loginSchema.pre("save", async function (next) {
   // Si se ha establecido la contraseña (campo virtual) o el documento es nuevo
   try {
-    const doc: any = this;
-    if (doc._password) {
+    // Use `this` directly to access document fields (avoid aliasing `this` to a local variable)
+    if ((this as any)._password) {
       const saltRounds = 10;
-      doc.passwordHash = await bcrypt.hash(doc._password, saltRounds);
+      (this as any).passwordHash = await bcrypt.hash(
+        (this as any)._password,
+        saltRounds
+      );
     }
     next();
   } catch (err) {
@@ -38,10 +39,16 @@ loginSchema.pre('save', async function (next) {
 });
 
 // Método para comparar contraseñas
-loginSchema.methods.comparePassword = async function (candidatePassword: string) {
+loginSchema.methods.comparePassword = async function (
+  candidatePassword: string
+) {
   return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
-const User = mongoose.model("User", loginSchema);
+// Avoid re-registering the model if this file is loaded multiple times
+const User =
+  mongoose.models && (mongoose.models as any).User
+    ? (mongoose.models as any).User
+    : mongoose.model("User", loginSchema);
 
 export default User;

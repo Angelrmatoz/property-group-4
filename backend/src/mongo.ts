@@ -1,6 +1,17 @@
 import mongoose from "mongoose";
 
-if (process.env.NODE_ENV !== "test") {
+// Reduce deprecation warnings and control index creation behavior.
+// By default, disable automatic index building in production to avoid
+// long startup times and index-related warnings (e.g. duplicates on unique fields).
+const isTest = process.env.NODE_ENV === "test";
+const isProd = process.env.NODE_ENV === "production";
+const autoIndex = !isProd; // enable autoIndex in development/test, disable in production
+
+// Mongoose settings applied before connecting
+mongoose.set("strictQuery", false);
+mongoose.set("autoIndex", autoIndex);
+
+if (!isTest) {
   const mongoUrl = process.env.MONGODB_URI;
 
   if (!mongoUrl) {
@@ -10,24 +21,18 @@ if (process.env.NODE_ENV !== "test") {
   }
 
   // Environment-specific behavior
-  if (process.env.NODE_ENV === "production") {
-    // Production: minimal logging
+  if (isProd) {
+    // Production: minimal logging and autoIndex disabled
     mongoose
       .connect(mongoUrl)
       .then(() => console.log("Conectado a MongoDB"))
       .catch((err) => console.error("Error al conectar a MongoDB:", err));
-  } else if (process.env.NODE_ENV === "development") {
-    // Development: enable mongoose debug to see queries in console
+  } else {
+    // Development / staging: enable mongoose debug to see queries in console
     mongoose.set("debug", true);
     mongoose
       .connect(mongoUrl)
       .then(() => console.log("Conectado a MongoDB (development)"))
-      .catch((err) => console.error("Error al conectar a MongoDB:", err));
-  } else {
-    // Fallback (staging, local, etc.) – behave like development but without debug
-    mongoose
-      .connect(mongoUrl)
-      .then(() => console.log("Conectado a MongoDB"))
       .catch((err) => console.error("Error al conectar a MongoDB:", err));
   }
 }
@@ -43,6 +48,5 @@ mongoose.connection.on("error", (err) => {
 mongoose.connection.on("disconnected", () => {
   console.log("Mongoose desconectado");
 });
-
 
 export default mongoose;
