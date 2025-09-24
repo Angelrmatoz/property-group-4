@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// noinspection JSNonASCIINames
 const propertySchema = new mongoose.Schema({
     titulo: { type: String, required: true },
     descripcion: { type: String, required: true },
@@ -17,6 +18,6 @@ const propertySchema = new mongoose.Schema({
     fechaCreacion: { type: Date, default: Date.now }
 });
 
-const Property = mongoose.model("Property", propertySchema);
+const Property = mongoose.model('Property', propertySchema);
 
 export default Property;
