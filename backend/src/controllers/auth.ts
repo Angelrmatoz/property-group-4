@@ -32,7 +32,7 @@ authRouter.get('/me', authenticate, async (req: Request, res: Response, next: an
 
         return res.status(200).json({ user: userDto });
     } catch (err) {
-        return next(new HttpError(500, 'Internal server error'));
+        return next(new HttpError(500, 'Internal server error'), err);
     }
 });
 
