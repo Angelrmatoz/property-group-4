@@ -20,18 +20,23 @@ if (!isTest) {
     );
   }
 
+  // Ensure we pass an explicit database name to mongoose to avoid using the default 'test' database
+  const connectOptions = {
+    dbName: process.env.MONGODB_DB_NAME || "property-group",
+  };
+
   // Environment-specific behavior
   if (isProd) {
     // Production: minimal logging and autoIndex disabled
     mongoose
-      .connect(mongoUrl)
+      .connect(mongoUrl, connectOptions)
       .then(() => console.log("Conectado a MongoDB"))
       .catch((err) => console.error("Error al conectar a MongoDB:", err));
   } else {
     // Development / staging: enable mongoose debug to see queries in console
     mongoose.set("debug", true);
     mongoose
-      .connect(mongoUrl)
+      .connect(mongoUrl, connectOptions)
       .then(() => console.log("Conectado a MongoDB (development)"))
       .catch((err) => console.error("Error al conectar a MongoDB:", err));
   }

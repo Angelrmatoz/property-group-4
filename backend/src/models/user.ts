@@ -20,11 +20,11 @@ loginSchema
     return this._password;
   });
 
-// Middleware para hashear la contraseña antes de guardar
-loginSchema.pre("save", async function (next) {
-  // Si se ha establecido la contraseña (campo virtual) o el documento es nuevo
+// Middleware para hashear la contraseña antes de validar (validation runs before save)
+// Cambiamos a 'validate' para asegurar que passwordHash exista cuando Mongoose haga
+// la validación de campos required.
+loginSchema.pre("validate", async function (next) {
   try {
-    // Use `this` directly to access document fields (avoid aliasing `this` to a local variable)
     if ((this as any)._password) {
       const saltRounds = 10;
       (this as any).passwordHash = await bcrypt.hash(
@@ -42,6 +42,8 @@ loginSchema.pre("save", async function (next) {
 loginSchema.methods.comparePassword = async function (
   candidatePassword: string
 ) {
+  // Si no hay passwordHash, devolver false en vez de lanzar
+  if (!this.passwordHash) return false;
   return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 

@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import User from "@/models/user";
 import * as Config from "@/utils/config";
 import { HttpError, RegisterDTO, LoginDTO, UserDTO } from "@/dto";
@@ -28,14 +29,20 @@ loginRouter.post(
         return next(new HttpError(409, "User already exists"));
       }
 
+      // Hashear la contraseña aquí y pasar passwordHash al crear el usuario
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(body.password, saltRounds);
+
+      if (!passwordHash) {
+        return next(new HttpError(500, "Password hashing failed"));
+      }
+
       const user = new User({
         nombre: body.nombre,
         apellido: body.apellido,
         email: body.email,
+        passwordHash,
       });
-
-      // Usamos el virtual 'password' para que el pre('save') haga el hash
-      (user as any).password = body.password;
 
       await user.save();
 
@@ -47,8 +54,12 @@ loginRouter.post(
       };
 
       return res.status(201).json({ user: userDto });
-    } catch (err) {
-      console.error("Error in /register handler:", err);
+    } catch (err: any) {
+      if (err && err.name === "ValidationError") {
+        console.error("ValidationError in /register:", err.errors);
+      } else {
+        console.error("Error in /register handler:", err && err.message ? err.message : err);
+      }
       return next(new HttpError(500, "Internal server error"));
     }
   }
@@ -71,12 +82,16 @@ loginRouter.post(
       const isMatch = await (user as any).comparePassword(body.password);
       if (!isMatch) return next(new HttpError(401, "Invalid credentials"));
 
-      if (!Config.JWT_SECRET) {
+      // Obtener el secret de forma segura al momento de firmar
+      let secret: string;
+      try {
+        secret = Config.getJwtSecret();
+      } catch (e) {
         return next(new HttpError(500, "Server configuration error"));
       }
 
       const payload = { id: user._id.toString(), email: user.email };
-      const token = jwt.sign(payload, Config.JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign(payload, secret, { expiresIn: "1h" });
 
       const userDto: UserDTO = {
         id: user._id.toString(),
@@ -87,7 +102,7 @@ loginRouter.post(
 
       return res.status(200).json({ token, user: userDto });
     } catch (err) {
-      console.error("Error in /login handler:", err);
+      console.error("Error in /login handler:", err && (err as any).message ? (err as any).message : err);
       return next(new HttpError(500, "Internal server error"));
     }
   }

@@ -28,13 +28,17 @@ export const authenticate = (
   const token = parts[1];
 
   try {
-    if (!Config.JWT_SECRET) {
-      console.error('JWT_SECRET no definido');
+    // Obtener el secret en el momento de uso
+    let secret: string;
+    try {
+      secret = Config.getJwtSecret();
+    } catch (e) {
+      console.error('JWT secret not configured');
       return next(createError('Server configuration error', 500));
     }
 
-    // Asignamos directamente el payload verificado al request para evitar variable local redundante
-    (req as any).user = jwt.verify(token, Config.JWT_SECRET) as JwtPayload;
+    // Verificamos y anexamos el payload al request
+    (req as any).user = jwt.verify(token, secret) as JwtPayload;
 
     return next();
   } catch (err: any) {
