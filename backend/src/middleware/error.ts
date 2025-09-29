@@ -5,7 +5,7 @@ const errorHandler = (
   err: HttpError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   const status = err.status ?? 500;
   const response: any = { error: err.message || 'Internal Server Error' };

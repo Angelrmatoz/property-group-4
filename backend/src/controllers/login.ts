@@ -86,7 +86,7 @@ loginRouter.post(
       let secret: string;
       try {
         secret = Config.getJwtSecret();
-      } catch (e) {
+      } catch  {
         return next(new HttpError(500, "Server configuration error"));
       }
 
