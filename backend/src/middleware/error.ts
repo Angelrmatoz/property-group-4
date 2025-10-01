@@ -3,7 +3,7 @@ import { HttpError } from '@/dto';
 
 const errorHandler = (
   err: HttpError,
-  req: Request,
+  _req: Request,
   res: Response,
   _next: NextFunction
 ): void => {

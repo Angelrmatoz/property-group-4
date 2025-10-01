@@ -1,25 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express';
-import path from 'path';
-import fs from 'fs';
 import multer from 'multer';
 import Property from '@/models/property';
+import { uploadBufferToCloudinary } from '@/utils/cloudinary';
 
 const propertiesRouter = express.Router();
 
-// Crear carpeta uploads si no existe
-const uploadsDir = path.resolve(__dirname, '..', '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// configuración de multer
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, file, cb) => {
-    const safeName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
-    cb(null, safeName);
-  },
-});
+// configuración de multer -> usar memoria para enviar buffer a Cloudinary
+const storage = multer.memoryStorage();
 
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowed = ['image/jpeg', 'image/png'];
@@ -40,7 +27,7 @@ function firstDefined<T = any>(obj: any, keys: string[]): T | undefined {
   return undefined;
 }
 
-function toNumber(val: any): number | undefined {
+function _toNumber(val: any): number | undefined {
   if (val === undefined || val === null || val === '') return undefined;
   const n = Number(val);
   return Number.isFinite(n) ? n : undefined;
@@ -130,11 +117,17 @@ propertiesRouter.post('/create', upload.single('imagen'), async (req: Request, r
   try {
     const body = req.body as any;
 
-    // si hay archivo, construir la ruta pública
+    // si hay archivo, subir a Cloudinary y obtener la URL
     let imagenPath: string | undefined = undefined;
     if ((req as any).file) {
-      const file = (req as any).file;
-      imagenPath = `/uploads/${file.filename}`;
+      const file = (req as any).file as Express.Multer.File & { buffer?: Buffer };
+      if (!file.buffer) return res.status(400).json({ error: 'No file buffer available' });
+      try {
+        const result = await uploadBufferToCloudinary(file.buffer, 'properties');
+        imagenPath = result?.secure_url || result?.url || undefined;
+      } catch (e) {
+        return next(e as any);
+      }
     }
 
     // Normalizar campos que pueden venir con o sin tildes
