@@ -1,16 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
-import { HttpError } from '@/dto';
+import { Request, Response, NextFunction } from "express";
+import { HttpError } from "@/dto";
 
 const errorHandler = (
   err: HttpError,
   _req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ): void => {
   const status = err.status ?? 500;
-  const response: any = { error: err.message || 'Internal Server Error' };
+  const response: any = { error: err.message || "Internal Server Error" };
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     response.stack = err.stack;
   }
 

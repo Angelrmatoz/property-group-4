@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import path from 'path';
+import path from "path";
 import { PORT } from "@/utils/config";
 
 import "@/mongo";
@@ -16,7 +16,7 @@ app.use(morgan("tiny"));
 app.use(express.json());
 
 // Servir archivos subidos en /uploads
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 app.use("/api/auth", authRouter);
 app.use("/api/properties", propertiesRouter);

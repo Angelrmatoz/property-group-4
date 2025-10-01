@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload as _JwtPayload } from 'jsonwebtoken';
-import * as Config from '@/utils/config';
-import { HttpError } from '@/dto';
+import { Request, Response, NextFunction } from "express";
+import jwt, { JwtPayload as _JwtPayload } from "jsonwebtoken";
+import * as Config from "@/utils/config";
+import { HttpError } from "@/dto";
 
 type JwtPayload = _JwtPayload & { id?: string; [key: string]: any };
 
@@ -12,17 +12,17 @@ const createError = (message: string, status = 500): HttpError => {
 export const authenticate = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
 
-  if (!authHeader || typeof authHeader !== 'string') {
-    return next(createError('Authorization header missing', 401));
+  if (!authHeader || typeof authHeader !== "string") {
+    return next(createError("Authorization header missing", 401));
   }
 
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0] !== 'Bearer') {
-    return next(createError('Authorization header is not a Bearer token', 401));
+  const parts = authHeader.split(" ");
+  if (parts.length !== 2 || parts[0] !== "Bearer") {
+    return next(createError("Authorization header is not a Bearer token", 401));
   }
 
   const token = parts[1];
@@ -32,9 +32,9 @@ export const authenticate = (
     let secret: string;
     try {
       secret = Config.getJwtSecret();
-    } catch (e) {
-      console.error('JWT secret not configured');
-      return next(createError('Server configuration error', 500));
+    } catch {
+      console.error("JWT secret not configured");
+      return next(createError("Server configuration error", 500));
     }
 
     // Verificamos y anexamos el payload al request
@@ -42,10 +42,10 @@ export const authenticate = (
 
     return next();
   } catch (err: any) {
-    if (err && err.name === 'TokenExpiredError') {
-      return next(createError('Token expired', 401));
+    if (err && err.name === "TokenExpiredError") {
+      return next(createError("Token expired", 401));
     }
-    return next(createError('Token invalid', 401));
+    return next(createError("Token invalid", 401));
   }
 };
 

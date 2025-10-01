@@ -29,7 +29,7 @@ loginSchema.pre("validate", async function (next) {
       const saltRounds = 10;
       (this as any).passwordHash = await bcrypt.hash(
         (this as any)._password,
-        saltRounds
+        saltRounds,
       );
     }
     next();
@@ -40,7 +40,7 @@ loginSchema.pre("validate", async function (next) {
 
 // Método para comparar contraseñas
 loginSchema.methods.comparePassword = async function (
-  candidatePassword: string
+  candidatePassword: string,
 ) {
   // Si no hay passwordHash, devolver false en vez de lanzar
   if (!this.passwordHash) return false;

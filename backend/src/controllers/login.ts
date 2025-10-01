@@ -58,11 +58,14 @@ loginRouter.post(
       if (err && err.name === "ValidationError") {
         console.error("ValidationError in /register:", err.errors);
       } else {
-        console.error("Error in /register handler:", err && err.message ? err.message : err);
+        console.error(
+          "Error in /register handler:",
+          err && err.message ? err.message : err,
+        );
       }
       return next(new HttpError(500, "Internal server error"));
     }
-  }
+  },
 );
 
 // Login
@@ -86,7 +89,7 @@ loginRouter.post(
       let secret: string;
       try {
         secret = Config.getJwtSecret();
-      } catch  {
+      } catch {
         return next(new HttpError(500, "Server configuration error"));
       }
 
@@ -102,10 +105,13 @@ loginRouter.post(
 
       return res.status(200).json({ token, user: userDto });
     } catch (err) {
-      console.error("Error in /login handler:", err && (err as any).message ? (err as any).message : err);
+      console.error(
+        "Error in /login handler:",
+        err && (err as any).message ? (err as any).message : err,
+      );
       return next(new HttpError(500, "Internal server error"));
     }
-  }
+  },
 );
 
 export default loginRouter;

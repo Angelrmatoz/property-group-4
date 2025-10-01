@@ -16,7 +16,7 @@ if (!isTest) {
 
   if (!mongoUrl) {
     throw new Error(
-      "La variable MONGODB_URI no está definida en el archivo .env"
+      "La variable MONGODB_URI no está definida en el archivo .env",
     );
   }
 
