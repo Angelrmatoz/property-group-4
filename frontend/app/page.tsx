@@ -306,43 +306,47 @@ export default function PropertyGroupLanding() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16 justify-center">
-            <div>
-              <h3 className="text-2xl font-bold text-saffron mb-8">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
+            <div className="order-1 lg:order-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-saffron mb-6 sm:mb-8">
                 Información de Contacto
               </h3>
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-6 h-6 text-black " />
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0 mt-1 sm:mt-0">
+                    <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                   </div>
-                  <div>
-                    <p className="text-gray-600 dark:text-gray-400">Teléfono</p>
-                    <p className="text-xl font-semibold text-gray-900 dark:text-white">
+                  <div className="min-w-0">
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                      Teléfono
+                    </p>
+                    <p className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                       +1 (829) 638-0380
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-black" />
+                <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0 mt-1 sm:mt-0">
+                    <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-gray-600 dark:text-gray-400">Email</p>
-                    <p className="text-xl font-semibold break-words text-gray-900 dark:text-white">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                      Email
+                    </p>
+                    <p className="text-lg sm:text-xl font-semibold break-words text-gray-900 dark:text-white">
                       Propertygrouprd@gmail.com
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-black" />
+                <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0 mt-1 sm:mt-0">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                   </div>
-                  <div>
-                    <p className="text-gray-600 dark:text-gray-400">
+                  <div className="min-w-0">
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       Dirección
                     </p>
-                    <p className="text-xl font-semibold text-gray-900 dark:text-white">
+                    <p className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                       Punta Cana, República Dominicana
                     </p>
                   </div>
@@ -350,18 +354,18 @@ export default function PropertyGroupLanding() {
               </div>
             </div>
 
-            <Card className="mx-auto w-full max-w-md transition-all duration-300 bg-white border-gray-200 shadow-lg dark:bg-black dark:border-yellow-500/20">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-saffron mb-6">
+            <Card className="order-2 lg:order-2 w-full transition-all duration-300 bg-white border-gray-200 shadow-lg dark:bg-black dark:border-yellow-500/20">
+              <CardContent className="p-6 sm:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-saffron mb-4 sm:mb-6">
                   Envíanos un Mensaje
                 </h3>
                 <form
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                   action={"https://formspree.io/f/mqalbgej"}
                   method="POST"
                   onSubmit={() => event("Lead", { location: "ContactForm" })}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-white">
                         Nombre
@@ -400,11 +404,11 @@ export default function PropertyGroupLanding() {
                     </label>
                     <Textarea
                       name="mensaje"
-                      className="resize-none bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 min-h-[120px] dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+                      className="resize-none bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 min-h-[100px] sm:min-h-[120px] dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                       placeholder="Cuéntanos cómo podemos ayudarte..."
                     />
                   </div>
-                  <Button className="w-full bg-saffron hover:bg-satin-sheen-gold text-black font-semibold text-lg py-3">
+                  <Button className="w-full bg-saffron hover:bg-satin-sheen-gold text-black font-semibold text-base sm:text-lg py-3">
                     Enviar Mensaje
                   </Button>
                 </form>
