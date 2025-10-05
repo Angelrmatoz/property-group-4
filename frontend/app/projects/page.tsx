@@ -32,11 +32,6 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
@@ -53,32 +48,18 @@ export default function ProjectsPage() {
   });
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-300 ${
-        isDarkMode ? "bg-black text-white" : "bg-white text-gray-900"
-      }`}
-    >
+    <div className="min-h-screen transition-colors duration-300 bg-background text-foreground dark:bg-black dark:text-foreground">
       {/* Header */}
 
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+      <Header />
 
       {/* Hero Section */}
-      <section
-        className={`pt-16 md:pt-20 pb-12 transition-colors duration-300 ${
-          isDarkMode
-            ? "bg-gradient-to-br from-gray-900 to-black"
-            : "bg-gradient-to-br from-gray-100 to-gray-200"
-        }`}
-      >
+      <section className="pt-16 md:pt-20 pb-12 transition-colors duration-300 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center mb-8 mt-4">
             <Link
               href="/"
-              className={`flex items-center transition-colors mr-4 ${
-                isDarkMode
-                  ? "text-gray-400 hover:text-yellow-400"
-                  : "text-gray-600 hover:text-yellow-400"
-              }`}
+              className="flex items-center transition-colors mr-4 text-gray-600 hover:text-yellow-400 dark:text-gray-400"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               <span className="text-sm md:text-base">Volver al Inicio</span>
@@ -89,11 +70,7 @@ export default function ProjectsPage() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Nuestros <span className="text-yellow-400">Proyectos</span>
             </h1>
-            <p
-              className={`text-lg md:text-xl max-w-4xl mx-auto ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
+            <p className="text-lg md:text-xl max-w-4xl mx-auto text-gray-700 dark:text-gray-300">
               Descubre nuestra cartera completa de proyectos inmobiliarios.
               Desde apartamentos modernos hasta desarrollos comerciales, tenemos
               la propiedad perfecta para ti.
@@ -101,47 +78,23 @@ export default function ProjectsPage() {
           </div>
 
           {/* Search and Filters */}
-          <div
-            className={`rounded-2xl p-6 mb-12 ${
-              isDarkMode ? "bg-gray-900" : "bg-white shadow-lg"
-            }`}
-          >
+          <div className="rounded-2xl p-6 mb-12 bg-white shadow-lg dark:bg-gray-900">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="relative">
-                <Search
-                  className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
-                    isDarkMode ? "text-gray-400" : "text-gray-500"
-                  }`}
-                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
                 <Input
                   placeholder="Buscar proyectos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`pl-10 ${
-                    isDarkMode
-                      ? "bg-black border-gray-700 text-white focus:border-yellow-500"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
-                  }`}
+                  className={`pl-10 bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 dark:bg-black dark:border-gray-700 dark:text-white`}
                 />
               </div>
 
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger
-                  className={
-                    isDarkMode
-                      ? "bg-black border-gray-700 text-white focus:border-yellow-500"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
-                  }
-                >
+                <SelectTrigger className="bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 dark:bg-black dark:border-gray-700 dark:text-white">
                   <SelectValue placeholder="Tipo de Propiedad" />
                 </SelectTrigger>
-                <SelectContent
-                  className={
-                    isDarkMode
-                      ? "bg-gray-900 border-gray-700"
-                      : "bg-white border-gray-200"
-                  }
-                >
+                <SelectContent className="bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700">
                   <SelectItem value="all">Todos los Tipos</SelectItem>
                   <SelectItem value="residencial">Residencial</SelectItem>
                   <SelectItem value="comercial">Comercial</SelectItem>
@@ -150,22 +103,10 @@ export default function ProjectsPage() {
               </Select>
 
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger
-                  className={
-                    isDarkMode
-                      ? "bg-black border-gray-700 text-white focus:border-yellow-500"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
-                  }
-                >
+                <SelectTrigger className="bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 dark:bg-black dark:border-gray-700 dark:text-white">
                   <SelectValue placeholder="Estado" />
                 </SelectTrigger>
-                <SelectContent
-                  className={
-                    isDarkMode
-                      ? "bg-gray-900 border-gray-700"
-                      : "bg-white border-gray-200"
-                  }
-                >
+                <SelectContent className="bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700">
                   <SelectItem value="all">Todos los Estados</SelectItem>
                   <SelectItem value="disponible">Disponible</SelectItem>
                   <SelectItem value="construcción">En Construcción</SelectItem>
@@ -183,17 +124,13 @@ export default function ProjectsPage() {
       </section>
 
       {/* Projects Grid */}
-      <section className={`py-12 ${isDarkMode ? "bg-black" : "bg-white"}`}>
+      <section className="py-12 bg-white dark:bg-black">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredProjects.map((project) => (
               <Card
                 key={project.id}
-                className={`transition-all duration-300 group overflow-hidden ${
-                  isDarkMode
-                    ? "bg-gray-900 border-yellow-500/20 hover:border-yellow-500/50"
-                    : "bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl"
-                }`}
+                className="transition-all duration-300 group overflow-hidden bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl dark:bg-gray-900 dark:border-yellow-500/20 dark:hover:border-yellow-500/50"
               >
                 <div className="relative h-64 overflow-hidden">
                   <Image
@@ -218,25 +155,13 @@ export default function ProjectsPage() {
 
                 <CardContent className="p-6">
                   <div className="mb-4">
-                    <h3
-                      className={`text-2xl font-bold mb-1 ${
-                        isDarkMode ? "text-yellow-400" : "text-yellow-600"
-                      }`}
-                    >
+                    <h3 className="text-2xl font-bold mb-1 text-yellow-600 dark:text-yellow-400">
                       {project.name}
                     </h3>
-                    <p
-                      className={`text-sm mb-2 ${
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
+                    <p className="text-sm mb-2 text-gray-500 dark:text-gray-400">
                       {project.type}
                     </p>
-                    <div
-                      className={`flex items-center text-sm ${
-                        isDarkMode ? "text-gray-300" : "text-gray-600"
-                      }`}
-                    >
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                       <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
                       <span className="truncate">{project.location}</span>
                     </div>
@@ -245,57 +170,29 @@ export default function ProjectsPage() {
                   <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
                     {project.bedrooms !== "N/A" && (
                       <div className="text-center">
-                        <Bed
-                          className={`w-4 h-4 mx-auto mb-1 ${
-                            isDarkMode ? "text-yellow-400" : "text-yellow-600"
-                          }`}
-                        />
-                        <span
-                          className={
-                            isDarkMode ? "text-gray-300" : "text-gray-600"
-                          }
-                        >
+                        <Bed className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
+                        <span className="text-gray-600 dark:text-gray-300">
                           {project.bedrooms}
                         </span>
                       </div>
                     )}
                     {project.bathrooms !== "N/A" && (
                       <div className="text-center">
-                        <Bath
-                          className={`w-4 h-4 mx-auto mb-1 ${
-                            isDarkMode ? "text-yellow-400" : "text-yellow-600"
-                          }`}
-                        />
-                        <span
-                          className={
-                            isDarkMode ? "text-gray-300" : "text-gray-600"
-                          }
-                        >
+                        <Bath className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
+                        <span className="text-gray-600 dark:text-gray-300">
                           {project.bathrooms}
                         </span>
                       </div>
                     )}
                     <div className="text-center">
-                      <Square
-                        className={`w-4 h-4 mx-auto mb-1 ${
-                          isDarkMode ? "text-yellow-400" : "text-yellow-600"
-                        }`}
-                      />
-                      <span
-                        className={`text-xs ${
-                          isDarkMode ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
+                      <Square className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-300">
                         {project.area}
                       </span>
                     </div>
                   </div>
 
-                  <p
-                    className={`text-sm mb-4 line-clamp-2 ${
-                      isDarkMode ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
+                  <p className="text-sm mb-4 line-clamp-2 text-gray-600 dark:text-gray-400">
                     {project.description}
                   </p>
 
@@ -311,19 +208,11 @@ export default function ProjectsPage() {
 
           {filteredProjects.length === 0 && (
             <div className="text-center py-16">
-              <Building2
-                className={`w-16 h-16 mx-auto mb-4 ${
-                  isDarkMode ? "text-gray-600" : "text-gray-400"
-                }`}
-              />
-              <h3
-                className={`text-2xl font-bold mb-2 ${
-                  isDarkMode ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
+              <Building2 className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+              <h3 className="text-2xl font-bold mb-2 text-gray-600 dark:text-gray-400">
                 No se encontraron proyectos
               </h3>
-              <p className={isDarkMode ? "text-gray-500" : "text-gray-500"}>
+              <p className="text-gray-500">
                 Intenta ajustar tus filtros de búsqueda
               </p>
             </div>
@@ -362,7 +251,7 @@ export default function ProjectsPage() {
       </section>
 
       {/* Footer */}
-      <Footer isDarkMode={isDarkMode} />
+      <Footer />
     </div>
   );
 }

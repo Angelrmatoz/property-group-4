@@ -86,6 +86,16 @@ function getNumericFromBodyFlexible(
   return undefined;
 }
 
+// Parse a flexible boolean from form values: supports true/false, 1/0, si/no, on/off
+function parseBoolean(val: any): boolean | undefined {
+  if (val === undefined || val === null || val === "") return undefined;
+  if (typeof val === "boolean") return val;
+  const s = String(val).trim().toLowerCase();
+  if (["1", "true", "si", "sí", "on", "yes"].includes(s)) return true;
+  if (["0", "false", "no", "off"].includes(s)) return false;
+  return undefined;
+}
+
 // GET / - lista de propiedades con filtros simples
 propertiesRouter.get(
   "/",
@@ -212,6 +222,10 @@ propertiesRouter.post(
 
       const userId = (req as any).user && (req as any).user.id;
 
+      // parseamos un campo 'amueblado' opcional (puede venir como checkbox o texto)
+      const rawAmueblado = firstDefined(body, ["amueblado", "mueblado"]);
+      const amueblado = parseBoolean(rawAmueblado);
+
       const created = new Property({
         titulo: firstDefined(body, ["titulo"]),
         descripcion: firstDefined(body, ["descripcion"]),
@@ -226,6 +240,7 @@ propertiesRouter.post(
         parqueos,
         construccion,
         imagen: imagenPath,
+        amueblado,
         createdBy: userId,
       });
 

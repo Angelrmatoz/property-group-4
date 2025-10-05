@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
+import { rateLimit } from "express-rate-limit";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "@/models/user";
@@ -7,9 +8,19 @@ import { HttpError, RegisterDTO, LoginDTO, UserDTO } from "@/dto";
 
 const loginRouter = express.Router();
 
+// Limitar intentos de autenticación para evitar bruteforce
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10, // máximo 10 requests por IP en el periodo
+  message: { error: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Registro de usuario
 loginRouter.post(
   "/register",
+  authLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
     const body = req.body as RegisterDTO;
 
@@ -71,6 +82,7 @@ loginRouter.post(
 // Login
 loginRouter.post(
   "/login",
+  authLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
     const body = req.body as LoginDTO;
 

@@ -1,15 +1,9 @@
 import Link from "next/link";
 import { event } from "@/lib/fbpixel";
 
-const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
+const Footer = () => {
   return (
-    <footer
-      className={`border-t py-12 transition-colors duration-300 ${
-        isDarkMode
-          ? "bg-black border-yellow-500/20"
-          : "bg-gray-100 border-gray-300"
-      }`}
-    >
+    <footer className="border-t py-12 transition-colors duration-300 bg-gray-100 border-gray-300 dark:bg-black dark:border-yellow-500/20">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 mb-4 md:mb-0">
@@ -22,17 +16,13 @@ const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => {
               <h3 className="text-xl font-bold text-satin-sheen-gold">
                 Property Group
               </h3>
-              <p
-                className={`text-sm ${
-                  isDarkMode ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Tu socia inmobiliaria de confianza
               </p>
             </div>
           </Link>
           <div className="text-center md:mt-4 lg:mt-0">
-            <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
+            <p className="text-gray-600 dark:text-gray-400">
               © {new Date().getFullYear()} Property Group. Todos los derechos
               reservados.
             </p>

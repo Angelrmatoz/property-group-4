@@ -1,17 +1,17 @@
-export interface Project { 
-   id: number;
-    name: string;
-    type: string;
-    location: string;
-    price: string;
-    bedrooms: string;
-    bathrooms: string;
-    area: string;
-    status: string;
-    statusColor: string;
-    image: string;
-    description: string;
-    features: string[];
+export interface Project {
+  id: number;
+  name: string;
+  type: string;
+  location: string;
+  price: string;
+  bedrooms: string;
+  bathrooms: string;
+  area: string;
+  status: string;
+  statusColor: string;
+  image: string;
+  description: string;
+  features: string[];
 }
 
 const projects: Project[] = [

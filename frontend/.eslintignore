@@ -1,6 +1,0 @@
-node_modules
-.next
-public
-build
-*.log
-pnpm-lock.yaml

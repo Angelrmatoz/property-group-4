@@ -10,6 +10,7 @@ import propertiesRouter from "@/controllers/properties";
 import errorHandler from "@/middleware/error";
 
 const app = express();
+app.disable("x-powered-by");
 
 app.use(cors());
 app.use(morgan("tiny"));
