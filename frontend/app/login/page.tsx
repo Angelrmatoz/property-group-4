@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const DEMO_EMAIL = "admin@example.test";
@@ -11,6 +12,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +79,7 @@ const Login: React.FC = () => {
       </aside>
 
       {/* Right: login form */}
-      <section className="md:w-1/2 w-full flex items-center justify-center p-8">
+      <section className="relative md:w-1/2 w-full flex items-center justify-center p-8">
         <div className="w-full max-w-md bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm rounded-lg shadow-lg p-8">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
             Iniciar sesión
@@ -150,6 +152,149 @@ const Login: React.FC = () => {
             </button>
           </div>
         </div>
+        {/* Floating Menu button (fixed, bottom-right) to avoid overlapping the login card */}
+        <button
+          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          onClick={() => setMenuOpen((s) => !s)}
+          className="fixed right-6 bottom-6 md:top-6 md:bottom-auto z-50 p-3 rounded-full bg-black/60 dark:bg-white/10 hover:bg-black/70 dark:hover:bg-white/20 shadow-lg"
+        >
+          {/* simple hamburger / close icon */}
+          {menuOpen ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          )}
+        </button>
+
+        {/* Fullscreen translucent menu overlay */}
+        {menuOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            role="dialog"
+            aria-modal="true"
+            onClick={() => setMenuOpen(false)}
+          >
+            <nav
+              className="w-full max-w-md mx-4 bg-white/80 dark:bg-neutral-900/80 rounded-lg p-6 shadow-lg text-center max-h-[90vh] overflow-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-black/10 dark:bg-white/10"
+                aria-label="Cerrar"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              <ul className="space-y-4">
+                <li>
+                  <Link
+                    href="/#inicio"
+                    className="text-xl font-semibold text-amber-700 dark:text-amber-300"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Inicio
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#servicios"
+                    className="text-lg text-gray-700 dark:text-gray-200"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Servicios
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/projects"
+                    className="text-lg text-gray-700 dark:text-gray-200"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Proyectos
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#nosotros"
+                    className="text-lg text-gray-700 dark:text-gray-200"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Nosotros
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#Testimonios"
+                    className="text-lg text-gray-700 dark:text-gray-200"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Testimonios
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#contacto"
+                    className="text-lg text-gray-700 dark:text-gray-200"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Contacto
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      demoLogin();
+                    }}
+                    className="mt-4 px-4 py-2 rounded bg-amber-600 text-white"
+                  >
+                    Iniciar sesión como demo
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        )}
       </section>
     </main>
   );

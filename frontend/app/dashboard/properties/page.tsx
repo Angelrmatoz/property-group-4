@@ -22,11 +22,12 @@ export default async function PropertiesPage() {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-6">
+      {/* Responsive header: stack on small screens to avoid clipping with mobile sidebar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-2">
         <h2 className="text-2xl font-semibold">Mis propiedades</h2>
         <Link
           href="/dashboard/properties/create"
-          className="inline-flex items-center px-3 py-2 bg-amber-600 text-white rounded"
+          className="inline-flex items-center px-3 py-2 bg-amber-600 text-white rounded self-start sm:self-auto"
         >
           Crear
         </Link>

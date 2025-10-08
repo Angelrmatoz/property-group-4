@@ -1,13 +1,33 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const [openUsers, setOpenUsers] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const STORAGE_KEY = "dashboard:sidebarCollapsed";
+
+  // Initialize to false so server/client markup match during SSR.
+  // Use useLayoutEffect to read persisted preference before the first paint
+  // to avoid a visible jump. We also track `hydrated` so we can enable
+  // transitions only after the first paint.
   const [collapsed, setCollapsed] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useLayoutEffect(() => {
+    try {
+      const v = localStorage.getItem(STORAGE_KEY);
+      if (v !== null) setCollapsed(v === "1");
+    } catch {
+      // ignore
+    } finally {
+      // mark that we've applied the persisted value (runs before paint)
+      setHydrated(true);
+    }
+    // empty deps: run once on mount
+  }, []);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,6 +52,22 @@ export default function Sidebar() {
     };
   }, []);
 
+  // Sync collapsed state across tabs
+  useEffect(() => {
+    const onStorage = (ev: StorageEvent) => {
+      if (ev.key === STORAGE_KEY) {
+        try {
+          setCollapsed(ev.newValue === "1");
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   function logout() {
     // remove demo token cookie used for local testing
     document.cookie = "token=; Max-Age=0; path=/; Secure";
@@ -40,15 +76,23 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`${
-        collapsed ? "w-16" : "w-64"
-      } px-2 py-6 border-r transition-all duration-200 ease-in-out overflow-hidden`}
+      className={`${collapsed ? "w-16" : "w-64"} px-2 py-6 border-r ${
+        hydrated ? "transition-all duration-200 ease-in-out" : "transition-none"
+      } overflow-hidden`}
     >
       <div className="flex items-center justify-between mb-4 px-2">
         {!collapsed && <h3 className="text-lg font-semibold">Panel</h3>}
         <button
           aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => {
+            const next = !collapsed;
+            setCollapsed(next);
+            try {
+              localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+            } catch {
+              /* ignore storage errors */
+            }
+          }}
           className="p-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800"
         >
           {/* simple icon: hamburger / chevron */}
