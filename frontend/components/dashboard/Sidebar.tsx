@@ -89,16 +89,18 @@ export default function Sidebar() {
             collapsed ? "justify-center" : ""
           } transition-colors`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M10 2a1 1 0 00-.894.553l-7 14A1 1 0 003 18h14a1 1 0 00.894-1.447l-7-14A1 1 0 0010 2z" />
-          </svg>
+          <span className="h-6 w-6 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 block"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M10 2a1 1 0 00-.894.553l-7 14A1 1 0 003 18h14a1 1 0 00.894-1.447l-7-14A1 1 0 0010 2z" />
+            </svg>
+          </span>
           <span
-            className={`transition-opacity duration-200 ${
+            className={`transition-opacity duration-200 flex items-center leading-none ${
               collapsed ? "opacity-0 max-w-0 overflow-hidden" : "opacity-100"
             }`}
           >
@@ -112,16 +114,18 @@ export default function Sidebar() {
             collapsed ? "justify-center" : ""
           } transition-colors`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M4 3h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" />
-          </svg>
+          <span className="h-6 w-6 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 block"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M4 3h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" />
+            </svg>
+          </span>
           <span
-            className={`transition-opacity duration-200 ${
+            className={`transition-opacity duration-200 flex items-center leading-none ${
               collapsed ? "opacity-0 max-w-0 overflow-hidden" : "opacity-100"
             }`}
           >
@@ -137,16 +141,18 @@ export default function Sidebar() {
             }`}
           >
             <div className="flex items-center gap-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M10 2a4 4 0 100 8 4 4 0 000-8zM2 18a8 8 0 1116 0H2z" />
-              </svg>
+              <span className="h-6 w-6 flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 block"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M10 2a4 4 0 100 8 4 4 0 000-8zM2 18a8 8 0 1116 0H2z" />
+                </svg>
+              </span>
               <span
-                className={`transition-opacity duration-200 ${
+                className={`transition-opacity duration-200 flex items-center leading-none ${
                   collapsed
                     ? "opacity-0 max-w-0 overflow-hidden"
                     : "opacity-100"
@@ -194,28 +200,34 @@ export default function Sidebar() {
             collapsed ? "justify-center" : ""
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 ${!collapsed ? "mr-2" : ""}`}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M17 16l4-4m0 0l-4-4m4 4H7"
-            />
-            <path
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M7 8v8"
-            />
-          </svg>
           <span
-            className={`transition-opacity duration-200 ${
+            className={`${
+              !collapsed ? "mr-2" : ""
+            } h-6 w-6 flex items-center justify-center`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 block"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17 16l4-4m0 0l-4-4m4 4H7"
+              />
+              <path
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7 8v8"
+              />
+            </svg>
+          </span>
+          <span
+            className={`transition-opacity duration-200 flex items-center leading-none ${
               collapsed ? "opacity-0 max-w-0 overflow-hidden" : "opacity-100"
             }`}
           >

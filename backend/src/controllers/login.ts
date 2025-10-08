@@ -71,12 +71,12 @@ loginRouter.post(
       } else {
         console.error(
           "Error in /register handler:",
-          err && err.message ? err.message : err,
+          err && err.message ? err.message : err
         );
       }
       return next(new HttpError(500, "Internal server error"));
     }
-  },
+  }
 );
 
 // Login
@@ -115,15 +115,27 @@ loginRouter.post(
         email: user.email,
       };
 
+      // Set cookie with token (httpOnly) so clients don't need to store it in localStorage
+      const isSecure =
+        process.env.NODE_ENV === "production" ||
+        process.env.TRUST_PROXY === "1";
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000, // 1 hour
+        path: "/",
+      });
+
       return res.status(200).json({ token, user: userDto });
     } catch (err) {
       console.error(
         "Error in /login handler:",
-        err && (err as any).message ? (err as any).message : err,
+        err && (err as any).message ? (err as any).message : err
       );
       return next(new HttpError(500, "Internal server error"));
     }
-  },
+  }
 );
 
 export default loginRouter;

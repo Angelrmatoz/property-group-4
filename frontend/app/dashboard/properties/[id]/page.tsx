@@ -8,10 +8,11 @@ type Property = {
 };
 
 async function getProperty(id: string): Promise<Property | null> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/properties/${id}`,
-    { cache: "no-store" }
-  );
+  const base =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    `http://localhost:${process.env.PORT || 3000}`;
+  const url = new URL(`/api/properties/${id}`, base).toString();
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return null;
   return res.json();
 }

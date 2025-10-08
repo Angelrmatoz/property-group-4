@@ -15,7 +15,11 @@ export default function EditPropertyPage({
 
   useEffect(() => {
     async function load() {
-      const res = await fetch(`/api/properties/${params.id}`);
+      const base = process.env.NEXT_PUBLIC_BASE_URL || "";
+      const url = base
+        ? new URL(`/api/properties/${params.id}`, base).toString()
+        : `/api/properties/${params.id}`;
+      const res = await fetch(url);
       if (!res.ok) return;
       const data = await res.json();
       setTitle(data.title || "");
@@ -27,7 +31,11 @@ export default function EditPropertyPage({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch(`/api/properties/${params.id}`, {
+    const base = process.env.NEXT_PUBLIC_BASE_URL || "";
+    const url = base
+      ? new URL(`/api/properties/${params.id}`, base).toString()
+      : `/api/properties/${params.id}`;
+    const res = await fetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, price: Number(price) }),

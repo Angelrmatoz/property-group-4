@@ -12,20 +12,25 @@ const createError = (message: string, status = 500): HttpError => {
 export const authenticate = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): void => {
+  // Accept token in Authorization header (Bearer) or in cookie named 'token'
+  let token: string | undefined;
   const authHeader = req.headers.authorization || req.headers.Authorization;
-
-  if (!authHeader || typeof authHeader !== "string") {
-    return next(createError("Authorization header missing", 401));
+  if (authHeader && typeof authHeader === "string") {
+    const parts = authHeader.split(" ");
+    if (parts.length === 2 && parts[0] === "Bearer") {
+      token = parts[1];
+    }
   }
 
-  const parts = authHeader.split(" ");
-  if (parts.length !== 2 || parts[0] !== "Bearer") {
-    return next(createError("Authorization header is not a Bearer token", 401));
+  if (!token && req.cookies && req.cookies.token) {
+    token = req.cookies.token;
   }
 
-  const token = parts[1];
+  if (!token) {
+    return next(createError("Authorization token missing", 401));
+  }
 
   try {
     // Obtener el secret en el momento de uso

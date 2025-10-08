@@ -12,7 +12,11 @@ export default function CreatePropertyPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch("/api/properties", {
+    const base = process.env.NEXT_PUBLIC_BASE_URL || "";
+    const url = base
+      ? new URL(`/api/properties`, base).toString()
+      : `/api/properties`;
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, price: Number(price) }),
