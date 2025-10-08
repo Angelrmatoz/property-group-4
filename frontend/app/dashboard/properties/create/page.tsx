@@ -17,14 +17,13 @@ export default function CreatePropertyPage() {
   const [mediosBanos, setMediosBanos] = useState("");
   const [parqueos, setParqueos] = useState("");
   const [construccion, setConstruccion] = useState("");
-  const [imagen, setImagen] = useState("");
+  const [images, setImages] = useState<File[]>([]);
   const [amueblado, setAmueblado] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    
 
     const payload = {
       titulo,
@@ -38,12 +37,18 @@ export default function CreatePropertyPage() {
       mediosBanos: Number(mediosBanos),
       parqueos: Number(parqueos),
       construccion: Number(construccion),
-      imagen,
       amueblado,
     };
 
     try {
-      await createProperty(payload);
+      if (images && images.length > 0) {
+        // use FormData upload
+        // import createPropertyFormData dynamically to avoid circular issues
+        const mod = await import("@/services/properties");
+        await mod.createPropertyFormData(payload as any, images);
+      } else {
+        await createProperty(payload);
+      }
       setLoading(false);
       router.push("/dashboard/properties");
     } catch (err) {
@@ -181,13 +186,53 @@ export default function CreatePropertyPage() {
         </div>
 
         <div>
-          <label className="block text-sm mb-1">Imagen (URL)</label>
-          <input
-            value={imagen}
-            onChange={(e) => setImagen(e.target.value)}
-            className="w-full rounded border px-3 py-2"
-            placeholder="https://..."
-          />
+          <div className="space-y-2">
+            <div>
+              <label className="block text-sm mb-1">
+                Subir imágenes (máx 10)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  // Append but cap at 10
+                  const combined = [...images, ...files].slice(0, 10);
+                  setImages(combined);
+                }}
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500">
+                Puedes subir hasta 10 imágenes. Las imágenes adicionales serán
+                ignoradas.
+              </p>
+
+              {images.length > 0 && (
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  {images.map((file, idx) => (
+                    <div key={idx} className="relative">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setImages(images.filter((_, i) => i !== idx))
+                        }
+                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1"
+                        aria-label={`Remove image ${file.name}`}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div>

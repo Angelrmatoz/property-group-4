@@ -12,7 +12,7 @@ const storage = multer.memoryStorage();
 const fileFilter = (
   _req: any,
   file: Express.Multer.File,
-  cb: multer.FileFilterCallback,
+  cb: multer.FileFilterCallback
 ) => {
   const allowed = ["image/jpeg", "image/png"];
   if (allowed.includes(file.mimetype)) cb(null, true);
@@ -22,7 +22,7 @@ const fileFilter = (
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  limits: { fileSize: 5 * 1024 * 1024, files: 10 }, // 5 MB, max 10 files
 });
 
 function firstDefined<T = any>(obj: any, keys: string[]): T | undefined {
@@ -55,7 +55,7 @@ function normalizeKey(k: string): string {
 
 function getNumericFromBodyFlexible(
   obj: any,
-  targetNames: string[],
+  targetNames: string[]
 ): number | undefined {
   if (!obj) return undefined;
   // construir mapa de keys normalizadas a valor
@@ -124,7 +124,7 @@ propertiesRouter.get(
     } catch (err) {
       next(err as any);
     }
-  },
+  }
 );
 
 // GET /:id - obtener una propiedad por id
@@ -143,34 +143,37 @@ propertiesRouter.get(
     } catch (err) {
       next(err as any);
     }
-  },
+  }
 );
 
-// POST /create - crear una nueva propiedad (acepta multipart/form-data con campo 'imagen')
+// POST / - crear una nueva propiedad (acepta multipart/form-data con campo 'images' hasta 10 archivos)
 propertiesRouter.post(
-  "/create",
+  "/",
   authenticate,
-  upload.single("imagen"),
+  // accept up to 10 images with the field name 'images'
+  upload.array("images", 10),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const body = req.body as any;
 
-      // si hay archivo, subir a Cloudinary y obtener la URL
-      let imagenPath: string | undefined = undefined;
-      if ((req as any).file) {
-        const file = (req as any).file as Express.Multer.File & {
-          buffer?: Buffer;
-        };
-        if (!file.buffer)
-          return res.status(400).json({ error: "No file buffer available" });
-        try {
-          const result = await uploadBufferToCloudinary(
-            file.buffer,
-            "properties",
-          );
-          imagenPath = result?.secure_url || result?.url || undefined;
-        } catch (e) {
-          return next(e as any);
+      // si hay archivos, subir cada uno a Cloudinary y recolectar URLs
+      const imagenesPaths: string[] = [];
+      const files = (req as any).files as
+        | (Express.Multer.File & { buffer?: Buffer })[]
+        | undefined;
+      if (files && files.length) {
+        for (const file of files.slice(0, 10)) {
+          if (!file.buffer) continue;
+          try {
+            const result = await uploadBufferToCloudinary(
+              file.buffer,
+              "properties"
+            );
+            const url = result?.secure_url || result?.url;
+            if (url) imagenesPaths.push(url);
+          } catch (e) {
+            return next(e as any);
+          }
         }
       }
 
@@ -239,7 +242,7 @@ propertiesRouter.post(
         mediosBanos,
         parqueos,
         construccion,
-        imagen: imagenPath,
+        imagenes: imagenesPaths,
         amueblado,
         createdBy: userId,
       });
@@ -249,7 +252,7 @@ propertiesRouter.post(
     } catch (err) {
       next(err as any);
     }
-  },
+  }
 );
 
 // PUT /:id - actualizar una propiedad
@@ -271,7 +274,7 @@ propertiesRouter.put(
     } catch (err) {
       next(err as any);
     }
-  },
+  }
 );
 
 // DELETE /:id - eliminar una propiedad
@@ -290,7 +293,7 @@ propertiesRouter.delete(
     } catch (err) {
       next(err as any);
     }
-  },
+  }
 );
 
 export default propertiesRouter;

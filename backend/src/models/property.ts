@@ -13,7 +13,7 @@ const propertySchema = new mongoose.Schema({
   mediosBanos: { type: Number, required: true },
   parqueos: { type: Number, required: true },
   construccion: { type: Number, required: true },
-  imagen: { type: String },
+  imagenes: [{ type: String }],
   amueblado: { type: Boolean, default: false },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

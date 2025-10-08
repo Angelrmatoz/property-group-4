@@ -240,15 +240,11 @@ export default function Sidebar() {
 
         <button
           onClick={logout}
-          className={`mt-4 text-sm text-amber-600 text-left px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 flex items-center ${
+          className={`text-sm text-amber-600 text-left px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 flex items-center gap-3 ${
             collapsed ? "justify-center" : ""
           }`}
         >
-          <span
-            className={`${
-              !collapsed ? "mr-2" : ""
-            } h-6 w-6 flex items-center justify-center`}
-          >
+          <span className="h-6 w-6 flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 block"

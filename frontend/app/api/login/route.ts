@@ -20,7 +20,8 @@ export async function POST(req: Request) {
   const backend = process.env.BACKEND_URL;
   if (backend) {
     try {
-      const res = await fetch(`${backend}/api/login`, {
+      // backend auth routes are mounted under /api/auth
+      const res = await fetch(`${backend}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
