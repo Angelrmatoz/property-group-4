@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 // Definición del esquema de User
 
 const loginSchema = new mongoose.Schema({
+  admin: { type: Boolean, required: true, default: false },
   nombre: { type: String, required: true },
   apellido: { type: String, required: true },
   email: { type: String, required: true, unique: true },

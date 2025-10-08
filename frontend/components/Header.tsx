@@ -79,12 +79,12 @@ const Header = () => {
                 >
                   Servicios
                 </a>
-                <a
+                <Link
                   href="/projects"
                   className="text-foreground text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
                 >
                   Proyectos
-                </a>
+                </Link>
                 <a
                   href="#nosotros"
                   className="text-foreground text-sm lg:text-base hover:text-satin-sheen-gold transition-colors"
@@ -191,11 +191,11 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         <div
-          className={`lg:hidden overflow-hidden transition-all duration-300 ease-out ${
-            isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          className={`lg:hidden transition-all duration-300 ease-out ${
+            isOpen ? "max-h-[60vh] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <nav className="py-4 space-y-3 border-t border-yellow-500/20">
+          <nav className="py-4 space-y-3 border-t border-yellow-500/20 overflow-auto max-h-[60vh]">
             <a
               href="#inicio"
               className="text-foreground block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
@@ -239,11 +239,13 @@ const Header = () => {
               Contacto
             </a>
             <a
-              href="#contacto"
-              className="text-foreground block px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
-              onClick={() => handleNavClick("#contacto")}
+              href="/login"
+              className="text-foreground flex items-center gap-2 px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
+              onClick={() => handleNavClick("/login")}
+              aria-label="Login"
             >
-              Contacto
+              <LogIn size={18} className="text-foreground" />
+              <span>Login</span>
             </a>
             <div className="px-4 py-2">
               {/* Theme toggle removed: theme follows system preference */}
