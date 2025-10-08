@@ -8,6 +8,7 @@ import { PORT } from "@/utils/config";
 import "@/mongo";
 import authRouter from "@/controllers/auth";
 import propertiesRouter from "@/controllers/properties";
+import usersRouter from "@/controllers/users";
 import errorHandler from "@/middleware/error";
 
 const app = express();
@@ -26,7 +27,7 @@ app.use(
     origin: FRONTEND_ORIGIN || true,
     credentials: true,
     exposedHeaders: ["Set-Cookie"],
-  }),
+  })
 );
 app.use(morgan("tiny"));
 app.use(express.json());
@@ -38,6 +39,7 @@ app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 app.use("/api/auth", authRouter);
 app.use("/api/properties", propertiesRouter);
+app.use("/api/users", usersRouter);
 
 // Middleware de manejo de errores (último)
 app.use(errorHandler);

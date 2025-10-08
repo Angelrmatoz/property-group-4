@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 
 export default function CreateUserPage() {
   const router = useRouter();
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ export default function CreateUserPage() {
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, apellido, email, password }),
+      body: JSON.stringify({ firstName, lastName, email, password }),
     });
     setLoading(false);
     if (res.ok) {
@@ -30,22 +30,22 @@ export default function CreateUserPage() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Crear usuario</h2>
+      <h2 className="text-xl font-semibold mb-4">Create user</h2>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
         <div>
-          <label className="block text-sm mb-1">Nombre</label>
+          <label className="block text-sm mb-1">First name</label>
           <input
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             className="w-full rounded border px-3 py-2"
             required
           />
         </div>
         <div>
-          <label className="block text-sm mb-1">Apellido</label>
+          <label className="block text-sm mb-1">Last name</label>
           <input
-            value={apellido}
-            onChange={(e) => setApellido(e.target.value)}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             className="w-full rounded border px-3 py-2"
             required
           />

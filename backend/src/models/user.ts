@@ -4,9 +4,9 @@ import bcrypt from "bcrypt";
 // Definición del esquema de User
 
 const loginSchema = new mongoose.Schema({
-  admin: { type: Boolean, required: true, default: false },
-  nombre: { type: String, required: true },
-  apellido: { type: String, required: true },
+  admin: { type: Boolean, default: false },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
 });
@@ -30,7 +30,7 @@ loginSchema.pre("validate", async function (next) {
       const saltRounds = 10;
       (this as any).passwordHash = await bcrypt.hash(
         (this as any)._password,
-        saltRounds,
+        saltRounds
       );
     }
     next();
@@ -41,7 +41,7 @@ loginSchema.pre("validate", async function (next) {
 
 // Método para comparar contraseñas
 loginSchema.methods.comparePassword = async function (
-  candidatePassword: string,
+  candidatePassword: string
 ) {
   // Si no hay passwordHash, devolver false en vez de lanzar
   if (!this.passwordHash) return false;

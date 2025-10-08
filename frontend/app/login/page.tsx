@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import auth from "@/services/auth";
 
 const DEMO_EMAIL = "admin@example.test";
 const DEMO_PASSWORD = "password123";
@@ -16,23 +17,19 @@ const Login: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Hard-coded dev check: set a cookie and redirect when credentials match
-    if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
-      // Set a non-httpOnly cookie for local testing; server-side layout will read it
-      document.cookie = `token=dev-token-123; path=/; max-age=${
-        60 * 60 * 24
-      } Secure`; // 1 day
-      router.push("/dashboard");
-      return;
-    }
-
-    // placeholder: real auth should call API and set httpOnly cookie from server
-    alert(
-      "Credenciales incorrectas. Para probar, usa:\nEmail: " +
-        DEMO_EMAIL +
-        "\nPassword: " +
-        DEMO_PASSWORD
-    );
+    // Call the app route which proxies to the backend (or uses demo auth server-side)
+    (async () => {
+      try {
+        const result = await auth.login(email, password);
+        if (result.ok) {
+          router.push("/dashboard");
+          return;
+        }
+        alert(result.message || "Credenciales incorrectas");
+      } catch {
+        alert("Error de red al intentar iniciar sesión");
+      }
+    })();
   };
 
   function demoLogin() {
@@ -40,11 +37,14 @@ const Login: React.FC = () => {
     setEmail(DEMO_EMAIL);
     setPassword(DEMO_PASSWORD);
     // Slight delay to allow state to update before submitting
-    setTimeout(() => {
-      document.cookie = `token=dev-token-123; path=/; max-age=${
-        60 * 60 * 24
-      } Secure`;
-      router.push("/dashboard");
+    setTimeout(async () => {
+      try {
+        const result = await auth.login(DEMO_EMAIL, DEMO_PASSWORD);
+        if (result.ok) router.push("/dashboard");
+        else alert(result.message || "Demo login failed");
+      } catch {
+        alert("Network error on demo login");
+      }
     }, 150);
   }
 
@@ -58,6 +58,7 @@ const Login: React.FC = () => {
             src="/images/logos/PG-fondo-blanco.jpg"
             alt="PG background light"
             fill
+            sizes="(min-width: 768px) 50vw, 100vw"
             className="object-cover"
             priority
           />
@@ -69,6 +70,7 @@ const Login: React.FC = () => {
             src="/images/logos/PG-fondo-negro.png"
             alt="PG background dark"
             fill
+            sizes="(min-width: 768px) 50vw, 100vw"
             className="object-cover"
             priority
           />

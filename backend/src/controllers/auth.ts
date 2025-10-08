@@ -28,16 +28,17 @@ authRouter.get(
 
       const userDto: UserDTO = {
         id: user._id.toString(),
-        nombre: (user as any).nombre,
-        apellido: (user as any).apellido,
+        firstName: (user as any).firstName,
+        lastName: (user as any).lastName,
         email: (user as any).email,
+        admin: (user as any).admin,
       };
 
       return res.status(200).json({ user: userDto });
     } catch (err) {
       return next(new HttpError(500, "Internal server error"), err);
     }
-  },
+  }
 );
 
 export default authRouter;

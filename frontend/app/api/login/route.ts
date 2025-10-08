@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const DEMO_EMAIL = "admin@example.test";
-const DEMO_PASSWORD = "password123";
-
 export async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
@@ -73,18 +70,16 @@ export async function POST(req: Request) {
     }
   }
 
-  // Demo local auth: accept the demo credentials and set an httpOnly admin cookie
-  if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
-    const res = NextResponse.json({ ok: true });
-    res.cookies.set({
-      name: "token",
-      value: "dev-admin-token",
-      path: "/",
-      httpOnly: true,
-      maxAge: 60 * 60 * 24,
-    });
-    return res;
+  // No backend configured: reject authentication. The app relies on a
+  // real backend to perform auth. Configure BACKEND_URL to enable login.
+  if (!backend) {
+    return NextResponse.json(
+      { error: "No backend configured for authentication" },
+      { status: 503 }
+    );
   }
 
+  // If we reach this point, the backend proxy handled the request above.
+  // Fallback: invalid credentials (shouldn't be reachable when backend proxies).
   return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
 }

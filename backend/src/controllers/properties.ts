@@ -3,6 +3,7 @@ import multer from "multer";
 import Property from "@/models/property";
 import authenticate from "@/middleware/auth";
 import { uploadBufferToCloudinary } from "@/utils/cloudinary";
+import { PropertyDTO } from "@/dto/property";
 
 const propertiesRouter = express.Router();
 
@@ -101,16 +102,16 @@ propertiesRouter.get(
   "/",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { tipo, provincia, minPrecio, maxPrecio, limit, page } =
+      const { type, province, minPrice, maxPrice, limit, page } =
         req.query as any;
 
       const filter: any = {};
-      if (tipo) filter.tipo = tipo;
-      if (provincia) filter.provincia = provincia;
-      if (minPrecio || maxPrecio) {
-        filter.precio = {} as any;
-        if (minPrecio) filter.precio.$gte = Number(minPrecio);
-        if (maxPrecio) filter.precio.$lte = Number(maxPrecio);
+      if (type) filter.type = type;
+      if (province) filter.province = province;
+      if (minPrice || maxPrice) {
+        filter.price = {} as any;
+        if (minPrice) filter.price.$gte = Number(minPrice);
+        if (maxPrice) filter.price.$lte = Number(maxPrice);
       }
 
       const lim = Math.max(1, Number(limit) || 20);
@@ -120,7 +121,9 @@ propertiesRouter.get(
         .skip(pg * lim)
         .limit(lim)
         .exec();
-      res.json(items);
+      // map to DTOs
+      const out = items.map((it: any) => toDTO(it));
+      res.json(out);
     } catch (err) {
       next(err as any);
     }
@@ -139,7 +142,7 @@ propertiesRouter.get(
         e.status = 404;
         return next(e);
       }
-      res.json(item);
+      res.json(toDTO(item));
     } catch (err) {
       next(err as any);
     }
@@ -156,11 +159,12 @@ propertiesRouter.post(
     try {
       const body = req.body as any;
 
-      // si hay archivos, subir cada uno a Cloudinary y recolectar URLs
-      const imagenesPaths: string[] = [];
+      // if there are files, upload each to Cloudinary and collect URLs
+      const imagesPaths: string[] = [];
       const files = (req as any).files as
         | (Express.Multer.File & { buffer?: Buffer })[]
         | undefined;
+
       if (files && files.length) {
         for (const file of files.slice(0, 10)) {
           if (!file.buffer) continue;
@@ -170,7 +174,7 @@ propertiesRouter.post(
               "properties"
             );
             const url = result?.secure_url || result?.url;
-            if (url) imagenesPaths.push(url);
+            if (url) imagesPaths.push(url);
           } catch (e) {
             return next(e as any);
           }
@@ -178,29 +182,38 @@ propertiesRouter.post(
       }
 
       // Normalizar campos que pueden venir con o sin tildes
-      const habitaciones = getNumericFromBodyFlexible(body, ["habitaciones"]);
-      const banos = getNumericFromBodyFlexible(body, [
+      const bedrooms = getNumericFromBodyFlexible(body, [
+        "bedrooms",
+        "habitaciones",
+      ]);
+      const bathrooms = getNumericFromBodyFlexible(body, [
+        "bathrooms",
         "banos",
-        "baos",
         "baños",
       ]);
-      const mediosBanos = getNumericFromBodyFlexible(body, [
+      const halfBathrooms = getNumericFromBodyFlexible(body, [
+        "halfBathrooms",
         "mediosBanos",
-        "mediosBaOs",
         "mediosBaños",
       ]);
-      const parqueos = getNumericFromBodyFlexible(body, ["parqueos"]);
-      const construccion = getNumericFromBodyFlexible(body, ["construccion"]);
-      const precio = getNumericFromBodyFlexible(body, ["precio"]);
+      const parkingSpaces = getNumericFromBodyFlexible(body, [
+        "parkingSpaces",
+        "parqueos",
+      ]);
+      const builtArea = getNumericFromBodyFlexible(body, [
+        "builtArea",
+        "construccion",
+      ]);
+      const price = getNumericFromBodyFlexible(body, ["price", "precio"]);
 
       // Validaciones básicas
       const requiredStringFields = [
-        "titulo",
-        "descripcion",
-        "provincia",
-        "municipio",
-        "sector",
-        "tipo",
+        "title",
+        "description",
+        "province",
+        "city",
+        "neighborhood",
+        "type",
       ];
       for (const f of requiredStringFields) {
         if (!firstDefined(body, [f])) {
@@ -211,12 +224,12 @@ propertiesRouter.post(
       }
 
       const missingNums: string[] = [];
-      if (precio === undefined) missingNums.push("precio");
-      if (habitaciones === undefined) missingNums.push("habitaciones");
-      if (banos === undefined) missingNums.push("baños");
-      if (mediosBanos === undefined) missingNums.push("mediosBaños");
-      if (parqueos === undefined) missingNums.push("parqueos");
-      if (construccion === undefined) missingNums.push("construccion");
+      if (price === undefined) missingNums.push("price");
+      if (bedrooms === undefined) missingNums.push("bedrooms");
+      if (bathrooms === undefined) missingNums.push("bathrooms");
+      if (halfBathrooms === undefined) missingNums.push("halfBathrooms");
+      if (parkingSpaces === undefined) missingNums.push("parkingSpaces");
+      if (builtArea === undefined) missingNums.push("builtArea");
       if (missingNums.length) {
         return res.status(400).json({
           error: `Numeric fields missing or invalid: ${missingNums.join(", ")}`,
@@ -226,34 +239,64 @@ propertiesRouter.post(
       const userId = (req as any).user && (req as any).user.id;
 
       // parseamos un campo 'amueblado' opcional (puede venir como checkbox o texto)
-      const rawAmueblado = firstDefined(body, ["amueblado", "mueblado"]);
-      const amueblado = parseBoolean(rawAmueblado);
+      const rawFurnished = firstDefined(body, [
+        "furnished",
+        "amueblado",
+        "mueblado",
+      ]);
+      const furnished = parseBoolean(rawFurnished);
 
       const created = new Property({
-        titulo: firstDefined(body, ["titulo"]),
-        descripcion: firstDefined(body, ["descripcion"]),
-        precio,
-        provincia: firstDefined(body, ["provincia"]),
-        municipio: firstDefined(body, ["municipio"]),
-        sector: firstDefined(body, ["sector"]),
-        tipo: firstDefined(body, ["tipo"]),
-        habitaciones,
-        banos,
-        mediosBanos,
-        parqueos,
-        construccion,
-        imagenes: imagenesPaths,
-        amueblado,
+        title: firstDefined(body, ["title", "titulo"]),
+        description: firstDefined(body, ["description", "descripcion"]),
+        price,
+        province: firstDefined(body, ["province", "provincia"]),
+        city: firstDefined(body, ["city", "municipio"]),
+        neighborhood: firstDefined(body, ["neighborhood", "sector"]),
+        type: firstDefined(body, ["type", "tipo"]),
+        bedrooms,
+        bathrooms,
+        halfBathrooms,
+        parkingSpaces,
+        builtArea,
+        images: imagesPaths,
+        furnished,
         createdBy: userId,
       });
 
       await created.save();
-      res.status(201).json(created);
+      res.status(201).json(toDTO(created));
     } catch (err) {
       next(err as any);
     }
   }
 );
+
+// mapper from mongoose doc to PropertyDTO
+function toDTO(doc: any): PropertyDTO {
+  if (!doc) return doc;
+  return {
+    id: doc._id?.toString(),
+    title: doc.title,
+    description: doc.description,
+    price: doc.price,
+    province: doc.province,
+    city: doc.city,
+    neighborhood: doc.neighborhood,
+    type: doc.type,
+    bedrooms: doc.bedrooms,
+    bathrooms: doc.bathrooms,
+    halfBathrooms: doc.halfBathrooms,
+    parkingSpaces: doc.parkingSpaces,
+    builtArea: doc.builtArea,
+    images: doc.images || [],
+    furnished: doc.furnished,
+    createdBy: doc.createdBy?.toString(),
+    createdAt: doc.createdAt
+      ? new Date(doc.createdAt).toISOString()
+      : new Date().toISOString(),
+  } as PropertyDTO;
+}
 
 // PUT /:id - actualizar una propiedad
 propertiesRouter.put(

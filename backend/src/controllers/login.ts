@@ -29,8 +29,8 @@ loginRouter.post(
       !body ||
       !body.email ||
       !body.password ||
-      !body.nombre ||
-      !body.apellido
+      !body.firstName ||
+      !body.lastName
     ) {
       return next(new HttpError(400, "Missing required fields"));
     }
@@ -50,8 +50,8 @@ loginRouter.post(
       }
 
       const user = new User({
-        nombre: body.nombre,
-        apellido: body.apellido,
+        firstName: body.firstName,
+        lastName: body.lastName,
         email: body.email,
         passwordHash,
       });
@@ -60,9 +60,10 @@ loginRouter.post(
 
       const userDto: UserDTO = {
         id: user._id.toString(),
-        nombre: user.nombre,
-        apellido: user.apellido,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+        admin: user.admin,
       };
 
       return res.status(201).json({ user: userDto });
@@ -93,8 +94,8 @@ loginRouter.post(
       !body ||
       !body.email ||
       !body.password ||
-      !body.nombre ||
-      !body.apellido
+      !body.firstName ||
+      !body.lastName
     ) {
       return next(new HttpError(400, "Missing required fields"));
     }
@@ -122,8 +123,8 @@ loginRouter.post(
       }
 
       const user = new User({
-        nombre: body.nombre,
-        apellido: body.apellido,
+        firstName: body.firstName,
+        lastName: body.lastName,
         email: body.email,
         passwordHash,
         admin: !!body.admin,
@@ -133,9 +134,10 @@ loginRouter.post(
 
       const userDto: UserDTO = {
         id: user._id.toString(),
-        nombre: user.nombre,
-        apellido: user.apellido,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+        admin: user.admin,
       };
 
       return res.status(201).json({ user: userDto });
@@ -180,9 +182,10 @@ loginRouter.post(
 
       const userDto: UserDTO = {
         id: user._id.toString(),
-        nombre: user.nombre,
-        apellido: user.apellido,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+        admin: user.admin,
       };
 
       // Set cookie with token (httpOnly) so clients don't need to store it in localStorage
