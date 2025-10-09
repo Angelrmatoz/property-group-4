@@ -18,6 +18,7 @@ export async function login(
   const res = await fetch("/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ email, password }),
   });
 
@@ -32,7 +33,11 @@ export async function login(
 }
 
 export async function me(): Promise<LoginResult> {
-  const res = await fetch("/api/login", { method: "GET", cache: "no-store" });
+  const res = await fetch("/api/login", {
+    method: "GET",
+    cache: "no-store",
+    credentials: "include",
+  });
   if (!res.ok) return { ok: false };
   const data = await res.json().catch(() => ({}));
   return { ok: true, ...data } as LoginResult;
@@ -47,6 +52,7 @@ export async function register(payload: {
   const res = await fetch("/api/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));

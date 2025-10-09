@@ -40,8 +40,10 @@ export async function createPropertyFormData(
   }
 
   const { data } = await api.post("/api/properties", fd, {
-    // Let the browser set Content-Type (including boundary)
-    headers: { "Content-Type": "multipart/form-data" },
+    // Let the browser set Content-Type (including boundary). Do NOT set
+    // Content-Type manually or axios will omit the boundary which breaks
+    // multipart requests.
+    // headers: { "Content-Type": "multipart/form-data" },
   });
 
   return data;
@@ -71,18 +73,43 @@ export async function updatePropertyFormData(
   }
 
   const { data } = await api.put(`/api/properties/${id}`, fd, {
-    headers: { "Content-Type": "multipart/form-data" },
+    // Let the browser set the Content-Type header so the multipart boundary
+    // is included. See note above in createPropertyFormData.
+    // headers: { "Content-Type": "multipart/form-data" },
   });
 
   return data;
 }
 
 export async function getProperties() {
+  // When executing on the server (Next server components / SSR) axios may
+  // not have a proper baseURL configured. Use native fetch with an absolute
+  // URL in that case. In the browser, keep using the axios instance.
+  if (typeof window === "undefined") {
+    const base =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      `http://localhost:${process.env.PORT || 3000}`;
+    const url = new URL(`/api/properties`, base).toString();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch properties");
+    return res.json();
+  }
+
   const { data } = await api.get("/api/properties");
   return data;
 }
 
 export async function getPropertyById(id: string) {
+  if (typeof window === "undefined") {
+    const base =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      `http://localhost:${process.env.PORT || 3000}`;
+    const url = new URL(`/api/properties/${id}`, base).toString();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch property ${id}`);
+    return res.json();
+  }
+
   const { data } = await api.get(`/api/properties/${id}`);
   return data;
 }

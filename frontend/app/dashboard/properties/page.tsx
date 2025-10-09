@@ -1,7 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import projects from "../../data/projects";
 import DeletePropertyButton from "@/components/dashboard/DeletePropertyButton";
+import { getProperties as getPropertiesService } from "@/services/properties";
+
+// Esta página depende de datos que cambian con frecuencia; declarar como
+// force-dynamic hace explícito que Next debe renderizarla en cada petición
+// y evita advertencias durante la fase de build sobre fetch con no-store.
+export const dynamic = "force-dynamic";
 
 type Property = {
   _id: string;
@@ -10,29 +15,23 @@ type Property = {
 };
 
 async function getProperties(): Promise<Property[]> {
-  // Try API first, but fall back to the local hard-coded projects when empty or on error.
-  const base =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    `http://localhost:${process.env.PORT || 3000}`;
-  const url = new URL(`/api/properties`, base).toString();
-
+  // Intentamos la API a través del servicio Axios compartido; si falla o
+  // devuelve vacío usamos el fallback local `projects`.
   try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (res.ok) {
-      const json = await res.json();
-      if (Array.isArray(json) && json.length > 0) return json;
-    }
+    const data = await getPropertiesService();
+    if (Array.isArray(data) && data.length > 0) return data;
   } catch (err) {
     // swallow - we'll use fallback below
-    console.warn("Could not fetch properties, using local sample data", err);
+    // Mantener la advertencia en console puede ayudar en dev.
+    // eslint-disable-next-line no-console
+    console.warn(
+      "Could not fetch properties via service, using local sample data",
+      err
+    );
   }
 
-  // Map the local projects shape to the Property type used by the dashboard
-  return projects.map((p) => ({
-    _id: p.id,
-    title: p.name,
-    price: p.price,
-  }));
+  // If the API call failed or returned nothing, return an empty list.
+  return [];
 }
 
 export default async function PropertiesPage() {
@@ -57,29 +56,32 @@ export default async function PropertiesPage() {
             No hay propiedades aún.
           </p>
         )}
-        {properties.map((p) => (
-          <article key={p._id} className="p-4 border rounded">
-            <h3 className="font-medium">{p.title}</h3>
-            <p className="text-sm text-muted-foreground">
-              Precio: {p.price ?? "—"}
-            </p>
-            <div className="mt-2 flex gap-2 items-center">
-              <Link
-                href={`/dashboard/properties/${p._id}`}
-                className="text-amber-600"
-              >
-                Ver
-              </Link>
-              <Link
-                href={`/dashboard/properties/${p._id}/edit`}
-                className="text-amber-600"
-              >
-                Editar
-              </Link>
-              <DeletePropertyButton id={p._id} />
-            </div>
-          </article>
-        ))}
+        {properties.map((p, idx) => {
+          const id = p._id ?? (p as any).id ?? idx;
+          return (
+            <article key={id} className="p-4 border rounded">
+              <h3 className="font-medium">{p.title}</h3>
+              <p className="text-sm text-muted-foreground">
+                Precio: {p.price ?? "—"}
+              </p>
+              <div className="mt-2 flex gap-2 items-center">
+                <Link
+                  href={`/dashboard/properties/${id}`}
+                  className="text-amber-600"
+                >
+                  Ver
+                </Link>
+                <Link
+                  href={`/dashboard/properties/${id}/edit`}
+                  className="text-amber-600"
+                >
+                  Editar
+                </Link>
+                <DeletePropertyButton id={String(id)} />
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );

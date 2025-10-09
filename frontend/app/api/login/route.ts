@@ -17,11 +17,54 @@ export async function POST(req: Request) {
   const backend = process.env.BACKEND_URL;
   if (backend) {
     try {
+      // First fetch CSRF token from backend so we can include it in the login request.
+      // We must include credentials so the backend can set/read the csurf secret cookie.
+      const csrfRes = await fetch(`${backend}/api/csrf-token`, {
+        method: "GET",
+        credentials: "include",
+      });
+      let csrfToken: string | undefined = undefined;
+      // Capture any Set-Cookie headers the backend sent so we can forward the
+      // csurf secret cookie in the subsequent login request.
+      const csrfSetCookies: string[] = [];
+      if (csrfRes) {
+        try {
+          const j = await csrfRes.json().catch(() => ({}));
+          csrfToken = (j as any).csrfToken;
+        } catch {
+          // ignore
+        }
+        try {
+          // Node/edge fetch may present set-cookie as multiple headers; collect them
+          csrfRes.headers.forEach((value, key) => {
+            if (key.toLowerCase() === "set-cookie") csrfSetCookies.push(value);
+          });
+        } catch {
+          // ignore
+        }
+      }
       // backend auth routes are mounted under /api/auth
+      const loginHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (csrfToken) loginHeaders["X-CSRF-Token"] = csrfToken;
+      if (csrfSetCookies.length) {
+        // Forward cookies returned by csrf endpoint in the Cookie header for the
+        // subsequent login request so csurf can validate tokens.
+        // Join into a single Cookie header (take only name=value parts).
+        const cookiePairs = csrfSetCookies
+          .map((c) => c.split(";")[0])
+          .join("; ");
+        loginHeaders["Cookie"] = cookiePairs;
+      }
+
       const res = await fetch(`${backend}/api/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: loginHeaders,
         body: JSON.stringify({ email, password }),
+        // Include cookies so the backend can set/read the httpOnly token cookie
+        // and csurf secret cookie.
+        credentials: "include",
       });
       const data = await res.text();
 

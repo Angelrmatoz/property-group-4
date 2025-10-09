@@ -25,22 +25,8 @@ const requireAdmin = async (
   }
 };
 
-// GET / - listar usuarios (sin passwordHash)
-usersRouter.get(
-  "/",
-  authenticate,
-  requireAdmin,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const users = await User.find().select("-passwordHash").exec();
-      res.json(users);
-    } catch (err) {
-      next(err as any);
-    }
-  }
-);
-
 // DELETE /:id - eliminar un usuario por id (admin only)
+// Nota: por diseño el rol 'admin' solo tiene permiso de eliminar usuarios.
 usersRouter.delete(
   "/:id",
   authenticate,
@@ -51,31 +37,6 @@ usersRouter.delete(
       const deleted = await User.findByIdAndDelete(id).exec();
       if (!deleted) return next(new HttpError(404, "User not found"));
       res.status(204).send();
-    } catch (err) {
-      next(err as any);
-    }
-  }
-);
-
-// PATCH /:id/promote - promover o despromover a admin (admin only)
-usersRouter.patch(
-  "/:id/promote",
-  authenticate,
-  requireAdmin,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-      const { admin } = req.body as { admin?: boolean };
-      if (typeof admin !== "boolean")
-        return next(new HttpError(400, "Missing 'admin' boolean in body"));
-
-      const user = await User.findById(id).select("-passwordHash");
-      if (!user) return next(new HttpError(404, "User not found"));
-
-      user.admin = admin;
-      await user.save();
-
-      res.json({ user });
     } catch (err) {
       next(err as any);
     }

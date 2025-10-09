@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 import User from "@/models/user";
 import * as Config from "@/utils/config";
 import { HttpError, RegisterDTO, LoginDTO, UserDTO } from "@/dto";
-import authenticate from "@/middleware/auth";
 
 const loginRouter = express.Router();
 
@@ -81,75 +80,7 @@ loginRouter.post(
   }
 );
 
-// Ruta protegida para que un usuario admin cree otros usuarios (pueden ser admin)
-loginRouter.post(
-  "/register/admin",
-  authLimiter,
-  authenticate,
-  async (req: Request, res: Response, next: NextFunction) => {
-    // El body puede incluir 'admin' pero sólo es válido si el requester es admin
-    const body = req.body as RegisterDTO & { admin?: boolean };
-
-    if (
-      !body ||
-      !body.email ||
-      !body.password ||
-      !body.firstName ||
-      !body.lastName
-    ) {
-      return next(new HttpError(400, "Missing required fields"));
-    }
-
-    try {
-      // Verificar que quien hace la petición es admin
-      const requesterId = (req as any).user?.id;
-      if (!requesterId) return next(new HttpError(401, "Unauthorized"));
-
-      const requester = await User.findById(requesterId);
-      if (!requester) return next(new HttpError(401, "Unauthorized"));
-      if (!requester.admin) return next(new HttpError(403, "Forbidden"));
-
-      const existing = await User.findOne({ email: body.email });
-      if (existing) {
-        return next(new HttpError(409, "User already exists"));
-      }
-
-      // Hashear la contraseña y crear el usuario con el flag admin si viene en body
-      const saltRounds = 10;
-      const passwordHash = await bcrypt.hash(body.password, saltRounds);
-
-      if (!passwordHash) {
-        return next(new HttpError(500, "Password hashing failed"));
-      }
-
-      const user = new User({
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-        passwordHash,
-        admin: !!body.admin,
-      });
-
-      await user.save();
-
-      const userDto: UserDTO = {
-        id: user._id.toString(),
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        admin: user.admin,
-      };
-
-      return res.status(201).json({ user: userDto });
-    } catch (err: any) {
-      console.error(
-        "Error in /register/admin handler:",
-        err && err.message ? err.message : err
-      );
-      return next(new HttpError(500, "Internal server error"));
-    }
-  }
-);
+// NOTE: creation of admin users via API has been removed - admins only may delete users
 
 // Login
 loginRouter.post(

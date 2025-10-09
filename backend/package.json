@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.15.1",
+  "packageManager": "pnpm@10.18.1",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^1.34.0",

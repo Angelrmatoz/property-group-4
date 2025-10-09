@@ -10,9 +10,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const backend = process.env.BACKEND_URL;
+  // await params in case it's a Promise-like object provided by Next
+  const { id } = (await params) as { id: string };
   if (backend) {
     try {
-      const res = await fetch(`${backend}/api/properties/${params.id}`);
+      const res = await fetch(`${backend}/api/properties/${id}`);
       const contentType = res.headers.get("content-type") || "";
       const text = await res.text();
 
@@ -36,7 +38,7 @@ export async function GET(
       );
     }
   }
-  const item = store.find((s) => s.id === params.id);
+  const item = store.find((s) => s.id === id);
   if (!item)
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   return NextResponse.json(item);
@@ -47,7 +49,8 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   const body = await req.json().catch(() => ({}));
-  const idx = store.findIndex((s) => s.id === params.id);
+  const { id } = (await params) as { id: string };
+  const idx = store.findIndex((s) => s.id === id);
   if (idx === -1)
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   store[idx] = { ...store[idx], ...body };
@@ -58,7 +61,8 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const idx = store.findIndex((s) => s.id === params.id);
+  const { id } = (await params) as { id: string };
+  const idx = store.findIndex((s) => s.id === id);
   if (idx === -1)
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   store.splice(idx, 1);

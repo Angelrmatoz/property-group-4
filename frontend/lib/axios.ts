@@ -11,12 +11,16 @@ const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    // Normalize to have a consistent error shape
-    const error = err;
-    if (error.response && error.response.data) {
-      return Promise.reject(error.response.data);
-    }
-    return Promise.reject(error);
+    // Build a richer, consistent error object so callers can inspect status/data
+    const errorInfo = {
+      message: err?.message ?? "",
+      name: err?.name ?? "",
+      status: err?.response?.status,
+      statusText: err?.response?.statusText,
+      data: err?.response?.data,
+      config: err?.config,
+    };
+    return Promise.reject(errorInfo);
   }
 );
 

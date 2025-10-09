@@ -29,6 +29,10 @@ export default function EditPropertyPage({
   const [existingImages, setExistingImages] = useState<(string | null)[]>(
     Array(10).fill(null)
   );
+  // imagePreviews: cached object URLs for selected File previews
+  const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(
+    Array(10).fill(null)
+  );
   const [furnished, setFurnished] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -261,10 +265,10 @@ export default function EditPropertyPage({
                 <div key={idx} className="flex flex-col items-stretch">
                   <div className="w-full h-24 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
                     {file ? (
-                      // preview new file
+                      // preview new file (use cached preview URL)
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={URL.createObjectURL(file)}
+                        src={imagePreviews[idx] ?? ""}
                         alt={file.name}
                         className="w-full h-full object-cover"
                       />
@@ -303,6 +307,33 @@ export default function EditPropertyPage({
                               copy[idx] = null;
                               return copy;
                             });
+                            // create and cache object URL preview (revoke previous if any)
+                            setImagePreviews((prev) => {
+                              const copy = [...prev];
+                              if (copy[idx]) {
+                                try {
+                                  URL.revokeObjectURL(copy[idx]!);
+                                } catch {
+                                  /* ignore */
+                                }
+                              }
+                              copy[idx] = URL.createObjectURL(f);
+                              return copy;
+                            });
+                          } else {
+                            // file cleared, revoke preview
+                            setImagePreviews((prev) => {
+                              const copy = [...prev];
+                              if (copy[idx]) {
+                                try {
+                                  URL.revokeObjectURL(copy[idx]!);
+                                } catch {
+                                  /* ignore */
+                                }
+                              }
+                              copy[idx] = null;
+                              return copy;
+                            });
                           }
                         }}
                         className="hidden"
@@ -324,7 +355,7 @@ export default function EditPropertyPage({
                           {file ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={URL.createObjectURL(file)}
+                              src={imagePreviews[idx] ?? ""}
                               alt={file.name}
                               className="w-full h-full object-cover"
                             />
@@ -358,6 +389,19 @@ export default function EditPropertyPage({
                             });
                             setExistingImages((prev) => {
                               const copy = [...prev];
+                              copy[idx] = null;
+                              return copy;
+                            });
+                            // revoke and clear preview if any
+                            setImagePreviews((prev) => {
+                              const copy = [...prev];
+                              if (copy[idx]) {
+                                try {
+                                  URL.revokeObjectURL(copy[idx]!);
+                                } catch {
+                                  /* ignore */
+                                }
+                              }
                               copy[idx] = null;
                               return copy;
                             });
