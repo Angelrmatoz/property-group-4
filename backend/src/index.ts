@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import path from "path";
+import csurf from "csurf";
 import { PORT } from "@/utils/config";
 
 import "@/mongo";
@@ -33,6 +34,38 @@ app.use(morgan("tiny"));
 app.use(express.json());
 // parse cookies so middleware can read httpOnly token cookies
 app.use(cookieParser());
+
+// Enable cookie-based CSRF protection by default except during tests.
+// Set ENABLE_CSRF=0 to disable (helpful for automated tests / special cases).
+const ENABLE_CSRF =
+  process.env.ENABLE_CSRF !== "0" && process.env.NODE_ENV !== "test";
+if (ENABLE_CSRF) {
+  // csurf will validate state-changing requests (POST/PUT/PATCH/DELETE)
+  // and issue a token via req.csrfToken(). We use cookie: true so the
+  // token is stored in a cookie and can also be returned to the client
+  // by the helper route below.
+  app.use(
+    csurf({
+      cookie: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      },
+    })
+  );
+
+  // Expose a convenience endpoint the frontend can call to read the
+  // current CSRF token (the endpoint itself is safe; csurf does not
+  // block GET requests, it only validates unsafe methods).
+  app.get("/api/csrf-token", (req, res) => {
+    // req.csrfToken() is provided by csurf; if it throws we return 500.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const token = (req as any).csrfToken?.();
+    if (!token)
+      return res.status(500).json({ error: "Could not generate CSRF token" });
+    return res.json({ csrfToken: token });
+  });
+}
 
 // Servir archivos subidos en /uploads
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
