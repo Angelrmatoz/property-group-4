@@ -271,7 +271,7 @@ export default function EditPropertyPage({
                     ) : url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={url}
+                        src={encodeURIComponent(url)}
                         alt={`img-${idx}`}
                         className="w-full h-full object-cover"
                       />
@@ -331,7 +331,7 @@ export default function EditPropertyPage({
                           ) : url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={url}
+                              src={encodeURIComponent(url)}
                               alt={`img-${idx}`}
                               className="w-full h-full object-cover"
                             />

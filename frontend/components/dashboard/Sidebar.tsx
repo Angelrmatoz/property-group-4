@@ -134,14 +134,12 @@ export default function Sidebar() {
           } transition-colors`}
         >
           <span className="h-6 w-6 flex items-center justify-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 block"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M10 2a1 1 0 00-.894.553l-7 14A1 1 0 003 18h14a1 1 0 00.894-1.447l-7-14A1 1 0 0010 2z" />
-            </svg>
+            {/* Use the project's PG white icon so the Inicio item matches other visuals */}
+            <img
+              src="/images/icons/PG-icon-blanco.png"
+              alt="Inicio"
+              className="h-5 w-5 block object-contain"
+            />
           </span>
           <span
             className={`transition-opacity duration-200 flex items-center leading-none ${
@@ -165,7 +163,7 @@ export default function Sidebar() {
               viewBox="0 0 20 20"
               fill="currentColor"
             >
-              <path d="M4 3h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" />
+              <path d="M10.707 1.707a1 1 0 00-1.414 0L2 9v8a1 1 0 001 1h4v-5h6v5h4a1 1 0 001-1V9l-7.293-7.293z" />
             </svg>
           </span>
           <span
