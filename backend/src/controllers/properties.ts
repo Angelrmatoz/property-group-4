@@ -157,6 +157,25 @@ propertiesRouter.post(
   upload.array("images", 10),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Debug logs to help diagnose CSRF issues during development
+      if (process.env.NODE_ENV === "development") {
+        try {
+          console.log(
+            "[PUT /api/properties/:id] Incoming headers:",
+            req.headers
+          );
+          console.log(
+            "[PUT /api/properties/:id] Cookies:",
+            (req as any).cookies || req.headers.cookie
+          );
+          console.log(
+            "[PUT /api/properties/:id] X-CSRF-Token header:",
+            req.headers["x-csrf-token"] || req.headers["X-CSRF-Token"]
+          );
+        } catch {
+          // ignore logging errors
+        }
+      }
       const body = req.body as any;
 
       // if there are files, upload each to Cloudinary and collect URLs
@@ -299,12 +318,127 @@ function toDTO(doc: any): PropertyDTO {
 }
 
 // PUT /:id - actualizar una propiedad
+// PUT /:id - actualizar una propiedad
+// Accept multipart/form-data so clients can send new images when updating.
 propertiesRouter.put(
   "/:id",
+  // accept up to 10 images with the field name 'images' (same as POST)
+  upload.array("images", 10),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Development debug: log headers/cookies/X-CSRF-Token to diagnose CSRF failures
+      if (process.env.NODE_ENV === "development") {
+        try {
+          console.log(
+            "[PUT /api/properties/:id] Incoming headers:",
+            req.headers
+          );
+          console.log(
+            "[PUT /api/properties/:id] Cookies:",
+            (req as any).cookies || req.headers.cookie
+          );
+          console.log(
+            "[PUT /api/properties/:id] X-CSRF-Token header:",
+            req.headers["x-csrf-token"] || req.headers["X-CSRF-Token"]
+          );
+        } catch (e) {
+          console.error("[PUT debug] failed to print debug info", e);
+        }
+      }
       const { id } = req.params;
-      const updates = req.body;
+      const body = req.body as any;
+
+      // If there are files, upload each to Cloudinary and collect URLs
+      const imagesPaths: string[] = [];
+      const files = (req as any).files as
+        | (Express.Multer.File & { buffer?: Buffer })[]
+        | undefined;
+
+      if (files && files.length) {
+        for (const file of files.slice(0, 10)) {
+          if (!file.buffer) continue;
+          try {
+            const result = await uploadBufferToCloudinary(
+              file.buffer,
+              "properties"
+            );
+            const url = result?.secure_url || result?.url;
+            if (url) imagesPaths.push(url);
+          } catch (e) {
+            return next(e as any);
+          }
+        }
+      }
+
+      // Collect existing images sent in the form. frontend app may append them
+      // as 'images[]' or as 'images'. Support both.
+      let existingImages: string[] = [];
+      if (Array.isArray(body.images))
+        existingImages = body.images.filter(Boolean);
+      else if (Array.isArray(body["images[]"]))
+        existingImages = body["images[]"].filter(Boolean);
+      else if (typeof body.images === "string") existingImages = [body.images];
+      else if (typeof body["images[]"] === "string")
+        existingImages = [body["images[]"]];
+
+      // Merge existing images with newly uploaded images, keeping order and limit to 10
+      const finalImages = existingImages.concat(imagesPaths).slice(0, 10);
+
+      // Normalize numeric and boolean fields similarly to POST
+      const bedrooms = getNumericFromBodyFlexible(body, [
+        "bedrooms",
+        "habitaciones",
+      ]);
+      const bathrooms = getNumericFromBodyFlexible(body, [
+        "bathrooms",
+        "banos",
+        "baos",
+      ]);
+      const halfBathrooms = getNumericFromBodyFlexible(body, [
+        "halfBathrooms",
+        "mediosBanos",
+        "mediosBaos",
+      ]);
+      const parkingSpaces = getNumericFromBodyFlexible(body, [
+        "parkingSpaces",
+        "parqueos",
+      ]);
+      const builtArea = getNumericFromBodyFlexible(body, [
+        "builtArea",
+        "construccion",
+      ]);
+      const price = getNumericFromBodyFlexible(body, ["price", "precio"]);
+
+      const rawFurnished = firstDefined(body, [
+        "furnished",
+        "amueblado",
+        "mueblado",
+      ]);
+      const furnished = parseBoolean(rawFurnished);
+
+      // Build the update object explicitly so we control fields and types
+      const updates: any = {};
+      const title = firstDefined(body, ["title", "titulo"]);
+      if (title !== undefined) updates.title = title;
+      const description = firstDefined(body, ["description", "descripcion"]);
+      if (description !== undefined) updates.description = description;
+      if (price !== undefined) updates.price = price;
+      const province = firstDefined(body, ["province", "provincia"]);
+      if (province !== undefined) updates.province = province;
+      const city = firstDefined(body, ["city", "municipio"]);
+      if (city !== undefined) updates.city = city;
+      const neighborhood = firstDefined(body, ["neighborhood", "sector"]);
+      if (neighborhood !== undefined) updates.neighborhood = neighborhood;
+      const type = firstDefined(body, ["type", "tipo"]);
+      if (type !== undefined) updates.type = type;
+      if (bedrooms !== undefined) updates.bedrooms = bedrooms;
+      if (bathrooms !== undefined) updates.bathrooms = bathrooms;
+      if (halfBathrooms !== undefined) updates.halfBathrooms = halfBathrooms;
+      if (parkingSpaces !== undefined) updates.parkingSpaces = parkingSpaces;
+      if (builtArea !== undefined) updates.builtArea = builtArea;
+      if (finalImages.length) updates.images = finalImages;
+      if (furnished !== undefined) updates.furnished = furnished;
+
       const updated = await Property.findByIdAndUpdate(id, updates, {
         new: true,
       }).exec();
@@ -313,7 +447,7 @@ propertiesRouter.put(
         e.status = 404;
         return next(e);
       }
-      res.json(updated);
+      res.json(toDTO(updated));
     } catch (err) {
       next(err as any);
     }
