@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const [openUsers, setOpenUsers] = useState(false);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const STORAGE_KEY = "dashboard:sidebarCollapsed";
 
   // Initialize to false so server/client markup match during SSR.
@@ -30,27 +29,10 @@ export default function Sidebar() {
   }, []);
   const router = useRouter();
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const res = await fetch("/api/login", { cache: "no-store" });
-        if (!mounted) return;
-        if (!res.ok) {
-          setIsAdmin(false);
-          return;
-        }
-        const data = await res.json();
-        setIsAdmin(Boolean(data?.admin));
-      } catch {
-        setIsAdmin(false);
-      }
-    }
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  // previously we fetched /api/login to determine admin rights; the
+  // 'crear' link is visible to all users in the sidebar UI now, so we no
+  // longer fetch admin status here. Keep the hook slot if later we re-add
+  // permission-specific items.
 
   // Sync collapsed state across tabs
   useEffect(() => {
@@ -223,16 +205,14 @@ export default function Sidebar() {
             >
               Lista
             </Link>
-            {isAdmin ? (
-              <Link
-                href="/dashboard/users/create"
-                className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
-                  collapsed ? "hidden" : ""
-                }`}
-              >
-                Crear usuario
-              </Link>
-            ) : null}
+            <Link
+              href="/dashboard/users/create"
+              className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
+                collapsed ? "hidden" : ""
+              }`}
+            >
+              crear
+            </Link>
           </div>
         </div>
 

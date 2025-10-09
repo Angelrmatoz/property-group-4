@@ -147,7 +147,7 @@ export default function EditPropertyPage({
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 bg-transparent"
             required
           />
         </div>
@@ -156,7 +156,7 @@ export default function EditPropertyPage({
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 bg-transparent"
             rows={4}
             required
           />
@@ -166,7 +166,7 @@ export default function EditPropertyPage({
           <input
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 bg-transparent"
             inputMode="numeric"
             pattern="[0-9]*"
           />
@@ -176,7 +176,7 @@ export default function EditPropertyPage({
           <input
             value={province}
             onChange={(e) => setProvince(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 bg-transparent"
             required
           />
         </div>
@@ -185,7 +185,7 @@ export default function EditPropertyPage({
           <input
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 bg-transparent"
             required
           />
         </div>
@@ -194,7 +194,7 @@ export default function EditPropertyPage({
           <input
             value={neighborhood}
             onChange={(e) => setNeighborhood(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 bg-transparent"
             required
           />
         </div>
@@ -204,7 +204,7 @@ export default function EditPropertyPage({
             <input
               value={bedrooms}
               onChange={(e) => setBedrooms(e.target.value)}
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 bg-transparent"
               inputMode="numeric"
             />
           </div>
@@ -213,7 +213,7 @@ export default function EditPropertyPage({
             <input
               value={bathrooms}
               onChange={(e) => setBathrooms(e.target.value)}
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 bg-transparent"
               inputMode="numeric"
             />
           </div>
@@ -224,7 +224,7 @@ export default function EditPropertyPage({
             <input
               value={halfBathrooms}
               onChange={(e) => setHalfBathrooms(e.target.value)}
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 bg-transparent"
               inputMode="numeric"
             />
           </div>
@@ -233,7 +233,7 @@ export default function EditPropertyPage({
             <input
               value={parkingSpaces}
               onChange={(e) => setParkingSpaces(e.target.value)}
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 bg-transparent"
               inputMode="numeric"
             />
           </div>
@@ -243,7 +243,7 @@ export default function EditPropertyPage({
           <input
             value={builtArea}
             onChange={(e) => setBuiltArea(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 bg-transparent"
             inputMode="numeric"
           />
         </div>
