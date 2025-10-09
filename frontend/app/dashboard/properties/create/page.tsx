@@ -6,19 +6,19 @@ import { createProperty } from "@/services/properties";
 
 export default function CreatePropertyPage() {
   const router = useRouter();
-  const [titulo, setTitulo] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [precio, setPrecio] = useState("");
-  const [provincia, setProvincia] = useState("");
-  const [municipio, setMunicipio] = useState("");
-  const [sector, setSector] = useState("");
-  const [habitaciones, setHabitaciones] = useState("");
-  const [banos, setBanos] = useState("");
-  const [mediosBanos, setMediosBanos] = useState("");
-  const [parqueos, setParqueos] = useState("");
-  const [construccion, setConstruccion] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+  const [bedrooms, setBedrooms] = useState("");
+  const [bathrooms, setBathrooms] = useState("");
+  const [halfBathrooms, setHalfBathrooms] = useState("");
+  const [parkingSpaces, setParkingSpaces] = useState("");
+  const [builtArea, setBuiltArea] = useState("");
   const [images, setImages] = useState<File[]>([]);
-  const [amueblado, setAmueblado] = useState(false);
+  const [furnished, setFurnished] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -26,18 +26,34 @@ export default function CreatePropertyPage() {
     setLoading(true);
 
     const payload = {
-      titulo,
-      descripcion,
-      precio: Number(precio),
-      provincia,
-      municipio,
-      sector,
-      habitaciones: Number(habitaciones),
-      banos: Number(banos),
-      mediosBanos: Number(mediosBanos),
-      parqueos: Number(parqueos),
-      construccion: Number(construccion),
-      amueblado,
+      title,
+      description,
+      price: Number(price),
+      province,
+      city,
+      neighborhood,
+      bedrooms: Number(bedrooms),
+      bathrooms: Number(bathrooms),
+      halfBathrooms: Number(halfBathrooms),
+      parkingSpaces: Number(parkingSpaces),
+      builtArea: Number(builtArea),
+      furnished,
+    };
+
+    // Map English internal fields to the Spanish payload expected by the API
+    const spanishPayload = {
+      titulo: payload.title,
+      descripcion: payload.description,
+      precio: payload.price,
+      provincia: payload.province,
+      municipio: payload.city,
+      sector: payload.neighborhood,
+      habitaciones: payload.bedrooms,
+      banos: payload.bathrooms,
+      mediosBanos: payload.halfBathrooms,
+      parqueos: payload.parkingSpaces,
+      construccion: payload.builtArea,
+      amueblado: payload.furnished,
     };
 
     try {
@@ -45,9 +61,9 @@ export default function CreatePropertyPage() {
         // use FormData upload
         // import createPropertyFormData dynamically to avoid circular issues
         const mod = await import("@/services/properties");
-        await mod.createPropertyFormData(payload as any, images);
+        await mod.createPropertyFormData(spanishPayload as any, images);
       } else {
-        await createProperty(payload);
+        await createProperty(spanishPayload as any);
       }
       setLoading(false);
       router.push("/dashboard/properties");
@@ -65,8 +81,8 @@ export default function CreatePropertyPage() {
         <div>
           <label className="block text-sm mb-1">Título</label>
           <input
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full rounded border px-3 py-2"
             required
           />
@@ -75,8 +91,8 @@ export default function CreatePropertyPage() {
         <div>
           <label className="block text-sm mb-1">Descripción</label>
           <textarea
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             className="w-full rounded border px-3 py-2"
             rows={4}
             required
@@ -88,8 +104,8 @@ export default function CreatePropertyPage() {
             <label className="block text-sm mb-1">Precio</label>
             <input
               type="number"
-              value={precio}
-              onChange={(e) => setPrecio(e.target.value)}
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
               className="w-full rounded border px-3 py-2"
               required
               min={0}
@@ -99,8 +115,8 @@ export default function CreatePropertyPage() {
           <div>
             <label className="block text-sm mb-1">Provincia</label>
             <input
-              value={provincia}
-              onChange={(e) => setProvincia(e.target.value)}
+              value={province}
+              onChange={(e) => setProvince(e.target.value)}
               className="w-full rounded border px-3 py-2"
               required
             />
@@ -109,8 +125,8 @@ export default function CreatePropertyPage() {
           <div>
             <label className="block text-sm mb-1">Municipio</label>
             <input
-              value={municipio}
-              onChange={(e) => setMunicipio(e.target.value)}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
               className="w-full rounded border px-3 py-2"
               required
             />
@@ -121,8 +137,8 @@ export default function CreatePropertyPage() {
           <div>
             <label className="block text-sm mb-1">Sector</label>
             <input
-              value={sector}
-              onChange={(e) => setSector(e.target.value)}
+              value={neighborhood}
+              onChange={(e) => setNeighborhood(e.target.value)}
               className="w-full rounded border px-3 py-2"
             />
           </div>
@@ -131,8 +147,8 @@ export default function CreatePropertyPage() {
             <label className="block text-sm mb-1">Habitaciones</label>
             <input
               type="number"
-              value={habitaciones}
-              onChange={(e) => setHabitaciones(e.target.value)}
+              value={bedrooms}
+              onChange={(e) => setBedrooms(e.target.value)}
               className="w-full rounded border px-3 py-2"
               min={0}
             />
@@ -142,8 +158,8 @@ export default function CreatePropertyPage() {
             <label className="block text-sm mb-1">Baños</label>
             <input
               type="number"
-              value={banos}
-              onChange={(e) => setBanos(e.target.value)}
+              value={bathrooms}
+              onChange={(e) => setBathrooms(e.target.value)}
               className="w-full rounded border px-3 py-2"
               min={0}
             />
@@ -155,8 +171,8 @@ export default function CreatePropertyPage() {
             <label className="block text-sm mb-1">Medios baños</label>
             <input
               type="number"
-              value={mediosBanos}
-              onChange={(e) => setMediosBanos(e.target.value)}
+              value={halfBathrooms}
+              onChange={(e) => setHalfBathrooms(e.target.value)}
               className="w-full rounded border px-3 py-2"
               min={0}
             />
@@ -166,8 +182,8 @@ export default function CreatePropertyPage() {
             <label className="block text-sm mb-1">Parqueos</label>
             <input
               type="number"
-              value={parqueos}
-              onChange={(e) => setParqueos(e.target.value)}
+              value={parkingSpaces}
+              onChange={(e) => setParkingSpaces(e.target.value)}
               className="w-full rounded border px-3 py-2"
               min={0}
             />
@@ -177,8 +193,8 @@ export default function CreatePropertyPage() {
             <label className="block text-sm mb-1">Construcción (m²)</label>
             <input
               type="number"
-              value={construccion}
-              onChange={(e) => setConstruccion(e.target.value)}
+              value={builtArea}
+              onChange={(e) => setBuiltArea(e.target.value)}
               className="w-full rounded border px-3 py-2"
               min={0}
             />
@@ -240,15 +256,15 @@ export default function CreatePropertyPage() {
           <div className="flex items-center gap-3">
             <label
               className={`inline-flex items-center gap-2 cursor-pointer rounded px-3 py-1 ${
-                amueblado ? "bg-amber-600 text-white" : "bg-transparent"
+                furnished ? "bg-amber-600 text-white" : "bg-transparent"
               }`}
             >
               <input
                 type="radio"
-                name="amueblado"
+                name="furnished"
                 value="true"
-                checked={amueblado === true}
-                onChange={() => setAmueblado(true)}
+                checked={furnished === true}
+                onChange={() => setFurnished(true)}
                 className="sr-only"
               />
               Sí
@@ -256,15 +272,15 @@ export default function CreatePropertyPage() {
 
             <label
               className={`inline-flex items-center gap-2 cursor-pointer rounded px-3 py-1 ${
-                amueblado ? "bg-transparent" : "bg-amber-600 text-white"
+                furnished ? "bg-transparent" : "bg-amber-600 text-white"
               }`}
             >
               <input
                 type="radio"
-                name="amueblado"
+                name="furnished"
                 value="false"
-                checked={amueblado === false}
-                onChange={() => setAmueblado(false)}
+                checked={furnished === false}
+                onChange={() => setFurnished(false)}
                 className="sr-only"
               />
               No

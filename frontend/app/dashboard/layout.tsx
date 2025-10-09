@@ -20,7 +20,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground">
+    // align items to start so the sidebar header and page headings line up
+    <div className="min-h-screen flex items-start bg-background text-foreground">
       {/* Sidebar is a client component; load dynamically to avoid SSR issues */}
       <Sidebar />
 

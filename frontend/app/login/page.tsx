@@ -6,9 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import auth from "@/services/auth";
 
-const DEMO_EMAIL = "admin@example.test";
-const DEMO_PASSWORD = "password123";
-
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,21 +29,7 @@ const Login: React.FC = () => {
     })();
   };
 
-  function demoLogin() {
-    // quick demo login (fills fields and logs in)
-    setEmail(DEMO_EMAIL);
-    setPassword(DEMO_PASSWORD);
-    // Slight delay to allow state to update before submitting
-    setTimeout(async () => {
-      try {
-        const result = await auth.login(DEMO_EMAIL, DEMO_PASSWORD);
-        if (result.ok) router.push("/dashboard");
-        else alert(result.message || "Demo login failed");
-      } catch {
-        alert("Network error on demo login");
-      }
-    }, 150);
-  }
+  // demo login removed — app requires backend auth via /api/login
 
   return (
     <main className="min-h-screen flex flex-col md:flex-row">
@@ -141,18 +124,6 @@ const Login: React.FC = () => {
               </button>
             </div>
           </form>
-
-          <div className="mt-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Prueba rápida:{" "}
-            </p>
-            <button
-              onClick={demoLogin}
-              className="mt-2 px-3 py-2 bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-200 rounded"
-            >
-              Iniciar sesión como demo
-            </button>
-          </div>
         </div>
         {/* Floating Menu button (fixed, bottom-right) to avoid overlapping the login card */}
         <button
@@ -281,17 +252,6 @@ const Login: React.FC = () => {
                   >
                     Contacto
                   </Link>
-                </li>
-                <li>
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      demoLogin();
-                    }}
-                    className="mt-4 px-4 py-2 rounded bg-amber-600 text-white"
-                  >
-                    Iniciar sesión como demo
-                  </button>
                 </li>
               </ul>
             </nav>

@@ -1,20 +1,38 @@
 import React from "react";
 import Link from "next/link";
+import projects from "../../data/projects";
+import DeletePropertyButton from "@/components/dashboard/DeletePropertyButton";
 
 type Property = {
   _id: string;
   title: string;
-  price?: number;
+  price?: string | number;
 };
 
 async function getProperties(): Promise<Property[]> {
+  // Try API first, but fall back to the local hard-coded projects when empty or on error.
   const base =
     process.env.NEXT_PUBLIC_BASE_URL ||
     `http://localhost:${process.env.PORT || 3000}`;
   const url = new URL(`/api/properties`, base).toString();
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) return [];
-  return res.json();
+
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json) && json.length > 0) return json;
+    }
+  } catch (err) {
+    // swallow - we'll use fallback below
+    console.warn("Could not fetch properties, using local sample data", err);
+  }
+
+  // Map the local projects shape to the Property type used by the dashboard
+  return projects.map((p) => ({
+    _id: p.id,
+    title: p.name,
+    price: p.price,
+  }));
 }
 
 export default async function PropertiesPage() {
@@ -45,7 +63,7 @@ export default async function PropertiesPage() {
             <p className="text-sm text-muted-foreground">
               Precio: {p.price ?? "—"}
             </p>
-            <div className="mt-2 flex gap-2">
+            <div className="mt-2 flex gap-2 items-center">
               <Link
                 href={`/dashboard/properties/${p._id}`}
                 className="text-amber-600"
@@ -58,6 +76,7 @@ export default async function PropertiesPage() {
               >
                 Editar
               </Link>
+              <DeletePropertyButton id={p._id} />
             </div>
           </article>
         ))}

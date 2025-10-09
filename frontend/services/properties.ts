@@ -47,6 +47,36 @@ export async function createPropertyFormData(
   return data;
 }
 
+// Update property with files (multipart/form-data). Similar to createPropertyFormData
+export async function updatePropertyFormData(
+  id: string,
+  payload: Partial<CreatePropertyPayload>,
+  files?: File[]
+) {
+  const fd = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    fd.append(key, String(value));
+  });
+
+  // If payload.images is an array (existing image URLs), append them as 'images[]' entries
+  if ((payload as any).images && Array.isArray((payload as any).images)) {
+    (payload as any).images.forEach((img: string) =>
+      fd.append("images[]", img)
+    );
+  }
+
+  if (files && files.length) {
+    files.forEach((f) => fd.append("images", f));
+  }
+
+  const { data } = await api.put(`/api/properties/${id}`, fd, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return data;
+}
+
 export async function getProperties() {
   const { data } = await api.get("/api/properties");
   return data;
