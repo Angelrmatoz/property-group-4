@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { updateProperty } from "@/services/properties";
 import { useNotification } from "@/components/Notification";
@@ -35,6 +35,8 @@ export default function EditPropertyPage({
   const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(
     Array(10).fill(null)
   );
+  // refs to the hidden file inputs so we can clear their value programmatically
+  const inputRefs = useRef<(HTMLInputElement | null)[]>(Array(10).fill(null));
   const [furnished, setFurnished] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -55,6 +57,22 @@ export default function EditPropertyPage({
     // For any other protocol, return empty string to prevent XSS
     return "";
   };
+
+  // Revoke object URLs when previews change or on unmount to avoid leaks
+  useEffect(() => {
+    return () => {
+      try {
+        for (const url of imagePreviews) {
+          if (url) {
+            URL.revokeObjectURL(url);
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imagePreviews]);
 
   useEffect(() => {
     async function load() {
@@ -292,34 +310,18 @@ export default function EditPropertyPage({
               const file = imagesFiles[idx];
               return (
                 <div key={idx} className="flex flex-col items-stretch">
-                  <div className="w-full h-24 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
-                    {file ? (
-                      // preview new file (use cached preview URL)
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={getSafeImageUrl(imagePreviews[idx])}
-                        alt={file.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={getSafeImageUrl(url)}
-                        alt={`img-${idx}`}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-sm text-muted-foreground">
-                        Slot {idx + 1}
-                      </div>
-                    )}
-                  </div>
+                  {/* Preview + click area is handled by the label below;
+                      removing duplicate non-interactive preview to avoid
+                      stacked/duplicated images in the UI. */}
 
                   <div className="mt-2">
                     <div className="relative">
                       {/* Hidden file input triggered by clicking the image area */}
                       <input
                         id={`file-slot-${idx}`}
+                        ref={(el) => {
+                          inputRefs.current[idx] = el;
+                        }}
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
@@ -349,6 +351,15 @@ export default function EditPropertyPage({
                               copy[idx] = URL.createObjectURL(f);
                               return copy;
                             });
+                            // clear the input value so selecting the same file later
+                            // will still trigger onChange
+                            try {
+                              if (inputRefs.current[idx]) {
+                                inputRefs.current[idx]!.value = "";
+                              }
+                            } catch {
+                              /* ignore */
+                            }
                           } else {
                             // file cleared, revoke preview
                             setImagePreviews((prev) => {
@@ -410,7 +421,15 @@ export default function EditPropertyPage({
                           onClick={(e) => {
                             // prevent the label click opening the file dialog
                             e.stopPropagation();
-                            e.nativeEvent.stopImmediatePropagation();
+                            // clear the underlying input value so re-selecting the
+                            // same filename later triggers onChange
+                            try {
+                              if (inputRefs.current[idx]) {
+                                inputRefs.current[idx]!.value = "";
+                              }
+                            } catch {
+                              /* ignore */
+                            }
                             setImagesFiles((prev) => {
                               const copy = [...prev];
                               copy[idx] = null;
