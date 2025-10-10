@@ -44,6 +44,18 @@ export default function EditPropertyPage({
   // At runtime Next will unwrap the params Promise-like object.
   const { id } = React.use(params as unknown as any) as { id: string };
 
+  // Helper function to safely validate and return image URLs
+  // This satisfies Snyk's security requirements for DOM-based XSS prevention
+  const getSafeImageUrl = (url: string | null): string => {
+    if (!url) return "";
+    // Only allow blob: URLs (from URL.createObjectURL) and https: URLs (from Cloudinary)
+    if (url.startsWith("blob:") || url.startsWith("https://")) {
+      return url;
+    }
+    // For any other protocol, return empty string to prevent XSS
+    return "";
+  };
+
   useEffect(() => {
     async function load() {
       const base = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -285,14 +297,14 @@ export default function EditPropertyPage({
                       // preview new file (use cached preview URL)
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={imagePreviews[idx] ?? ""}
+                        src={getSafeImageUrl(imagePreviews[idx])}
                         alt={file.name}
                         className="w-full h-full object-cover"
                       />
                     ) : url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={encodeURIComponent(url)}
+                        src={getSafeImageUrl(url)}
                         alt={`img-${idx}`}
                         className="w-full h-full object-cover"
                       />
@@ -372,14 +384,14 @@ export default function EditPropertyPage({
                           {file ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={imagePreviews[idx] ?? ""}
+                              src={getSafeImageUrl(imagePreviews[idx])}
                               alt={file.name}
                               className="w-full h-full object-cover"
                             />
                           ) : url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={encodeURIComponent(url)}
+                              src={getSafeImageUrl(url)}
                               alt={`img-${idx}`}
                               className="w-full h-full object-cover"
                             />
