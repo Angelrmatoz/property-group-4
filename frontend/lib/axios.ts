@@ -20,6 +20,20 @@ api.interceptors.response.use(
       data: err?.response?.data,
       config: err?.config,
     };
+    // If the backend returns 401/403, broadcast logout so other tabs can
+    // react immediately and navigate to login. We attempt to clear client
+    // state here as well.
+    const status = errorInfo.status;
+    if (status === 401 || status === 403) {
+      try {
+        // Broadcast via localStorage (fallback) so other tabs can listen
+        localStorage.setItem("pg:auth:logout", String(Date.now()));
+      } catch {}
+      try {
+        // best-effort: expire client cookie (httpOnly cookie cannot be removed reliably)
+        document.cookie = "token=; Path=/; Max-Age=0; Secure";
+      } catch {}
+    }
     return Promise.reject(errorInfo);
   }
 );
@@ -60,3 +74,34 @@ api.interceptors.request.use(async (config) => {
 });
 
 export default api;
+
+// Optional helper: start a background heartbeat that periodically calls
+// /api/login (me) to check token validity. If the call returns non-ok the
+// helper will broadcast a logout and redirect. Return a stop() function.
+export function startAuthHeartbeat(intervalMs = 30_000) {
+  let stopped = false;
+  async function tick() {
+    if (stopped) return;
+    try {
+      const r = await fetch("/api/login", { credentials: "include" });
+      if (!r.ok) {
+        // token expired or invalid
+        try {
+          localStorage.setItem("pg:auth:logout", String(Date.now()));
+        } catch {}
+        try {
+          document.cookie = "token=; Path=/; Max-Age=0; Secure";
+        } catch {}
+        if (typeof window !== "undefined") window.location.href = "/login";
+        return;
+      }
+    } catch {
+      // ignore network blips
+    }
+    setTimeout(tick, intervalMs);
+  }
+  setTimeout(tick, intervalMs);
+  return () => {
+    stopped = true;
+  };
+}

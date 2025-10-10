@@ -97,6 +97,16 @@ function parseBoolean(val: any): boolean | undefined {
   return undefined;
 }
 
+// Normalize property type values: accept Spanish and English inputs and
+// return canonical English values used internally ('sale'|'rent').
+function normalizeTypeValue(v: any): string | undefined {
+  if (v === undefined || v === null || v === "") return undefined;
+  const s = String(v).trim().toLowerCase();
+  if (s === "venta" || s === "sale") return "sale";
+  if (s === "alquiler" || s === "rent") return "rent";
+  return undefined;
+}
+
 // GET / - lista de propiedades con filtros simples
 propertiesRouter.get(
   "/",
@@ -106,7 +116,10 @@ propertiesRouter.get(
         req.query as any;
 
       const filter: any = {};
-      if (type) filter.type = type;
+      if (type) {
+        const nt = normalizeTypeValue(type);
+        if (nt) filter.type = nt;
+      }
       if (province) filter.province = province;
       if (minPrice || maxPrice) {
         filter.price = {} as any;
@@ -225,20 +238,20 @@ propertiesRouter.post(
       ]);
       const price = getNumericFromBodyFlexible(body, ["price", "precio"]);
 
-      // Validaciones básicas
-      const requiredStringFields = [
-        "title",
-        "description",
-        "province",
-        "city",
-        "neighborhood",
-        "type",
+      // Validaciones básicas: aceptar tanto claves en inglés como en español
+      const requiredStringFieldGroups: string[][] = [
+        ["title", "titulo"],
+        ["description", "descripcion"],
+        ["province", "provincia"],
+        ["city", "municipio"],
+        ["neighborhood", "sector"],
+        ["type", "tipo"],
       ];
-      for (const f of requiredStringFields) {
-        if (!firstDefined(body, [f])) {
-          return res
-            .status(400)
-            .json({ error: `Missing required field: ${f}` });
+      for (const group of requiredStringFieldGroups) {
+        if (!firstDefined(body, group)) {
+          return res.status(400).json({
+            error: `Missing required field: ${group.join("/")}`,
+          });
         }
       }
 
@@ -263,7 +276,15 @@ propertiesRouter.post(
         "amueblado",
         "mueblado",
       ]);
-      const furnished = parseBoolean(rawFurnished);
+      // parseBoolean returns boolean|undefined. Normalize to 'yes'|'no' string
+      // to store in the DB while accepting legacy booleans and textual values.
+      const parsedFurnished = parseBoolean(rawFurnished);
+      const furnished =
+        parsedFurnished === undefined
+          ? undefined
+          : parsedFurnished
+          ? "yes"
+          : "no";
 
       const created = new Property({
         title: firstDefined(body, ["title", "titulo"]),
@@ -272,7 +293,7 @@ propertiesRouter.post(
         province: firstDefined(body, ["province", "provincia"]),
         city: firstDefined(body, ["city", "municipio"]),
         neighborhood: firstDefined(body, ["neighborhood", "sector"]),
-        type: firstDefined(body, ["type", "tipo"]),
+        type: normalizeTypeValue(firstDefined(body, ["type", "tipo"])),
         bedrooms,
         bathrooms,
         halfBathrooms,
@@ -302,14 +323,28 @@ function toDTO(doc: any): PropertyDTO {
     province: doc.province,
     city: doc.city,
     neighborhood: doc.neighborhood,
-    type: doc.type,
+    // Normalize type so API consumers always see the canonical English values
+    type: (function (v: any) {
+      if (!v) return v;
+      const s = String(v).trim().toLowerCase();
+      if (s === "venta") return "sale";
+      if (s === "alquiler") return "rent";
+      if (s === "sale" || s === "rent") return s;
+      return s;
+    })(doc.type),
     bedrooms: doc.bedrooms,
     bathrooms: doc.bathrooms,
     halfBathrooms: doc.halfBathrooms,
     parkingSpaces: doc.parkingSpaces,
     builtArea: doc.builtArea,
     images: doc.images || [],
-    furnished: doc.furnished,
+    // Normalize furnished to boolean for clients: 'yes' -> true, 'no' -> false,
+    // or accept existing boolean values.
+    furnished: (function (v: any) {
+      if (v === true || v === "true" || v === "yes") return true;
+      if (v === false || v === "false" || v === "no") return false;
+      return Boolean(v);
+    })(doc.furnished),
     createdBy: doc.createdBy?.toString(),
     createdAt: doc.createdAt
       ? new Date(doc.createdAt).toISOString()
@@ -414,7 +449,13 @@ propertiesRouter.put(
         "amueblado",
         "mueblado",
       ]);
-      const furnished = parseBoolean(rawFurnished);
+      const parsedFurnished = parseBoolean(rawFurnished);
+      const furnished =
+        parsedFurnished === undefined
+          ? undefined
+          : parsedFurnished
+          ? "yes"
+          : "no";
 
       // Build the update object explicitly so we control fields and types
       const updates: any = {};
@@ -429,7 +470,8 @@ propertiesRouter.put(
       if (city !== undefined) updates.city = city;
       const neighborhood = firstDefined(body, ["neighborhood", "sector"]);
       if (neighborhood !== undefined) updates.neighborhood = neighborhood;
-      const type = firstDefined(body, ["type", "tipo"]);
+      const typeRaw = firstDefined(body, ["type", "tipo"]);
+      const type = normalizeTypeValue(typeRaw);
       if (type !== undefined) updates.type = type;
       if (bedrooms !== undefined) updates.bedrooms = bedrooms;
       if (bathrooms !== undefined) updates.bathrooms = bathrooms;

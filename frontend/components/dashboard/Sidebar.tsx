@@ -78,11 +78,21 @@ export default function Sidebar() {
     router.push("/login");
   }
 
+  // Update CSS variable with current sidebar width so layout can adjust padding
+  useEffect(() => {
+    try {
+      const width = collapsed ? "64px" : "256px";
+      document.documentElement.style.setProperty("--sidebar-width", width);
+    } catch {
+      // ignore
+    }
+  }, [collapsed]);
+
   return (
     <aside
       className={`${collapsed ? "w-16" : "w-64"} px-2 py-6 border-r ${
         hydrated ? "transition-all duration-200 ease-in-out" : "transition-none"
-      } overflow-hidden`}
+      } overflow-hidden fixed md:relative z-50 md:z-auto h-screen bg-background`}
     >
       <div className="flex items-center justify-between mb-4 px-2">
         {!collapsed && <h3 className="text-lg font-semibold">Panel</h3>}

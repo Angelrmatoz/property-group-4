@@ -68,7 +68,14 @@ export default function EditPropertyPage({
         .fill(null)
         .map((_, i) => (imagesArr[i] ? String(imagesArr[i]) : null));
       setExistingImages(slots);
-      setFurnished(Boolean(data.furnished));
+      // data.furnished may be boolean or 'yes'/'no' string
+      setFurnished(
+        data.furnished === "yes"
+          ? true
+          : data.furnished === "no"
+          ? false
+          : Boolean(data.furnished)
+      );
     }
     load();
   }, [id]);
@@ -108,7 +115,8 @@ export default function EditPropertyPage({
       mediosBanos: payload.halfBathrooms,
       parqueos: payload.parkingSpaces,
       construccion: payload.builtArea,
-      amueblado: payload.furnished,
+      // send explicit 'yes'/'no' to the API
+      amueblado: payload.furnished === true ? "yes" : "no",
     };
 
     try {

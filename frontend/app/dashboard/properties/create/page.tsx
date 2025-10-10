@@ -1,23 +1,28 @@
 "use client";
 
 import React, { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createProperty } from "@/services/properties";
+import { useNotification } from "@/components/Notification";
 
 export default function CreatePropertyPage() {
   const router = useRouter();
+  const { notify } = useNotification();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  // Internally use English canonical values 'sale'|'rent'
+  const [type, setType] = useState("sale");
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [halfBathrooms, setHalfBathrooms] = useState("");
   const [parkingSpaces, setParkingSpaces] = useState("");
   const [builtArea, setBuiltArea] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+  const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
   const [furnished, setFurnished] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -32,6 +37,7 @@ export default function CreatePropertyPage() {
       province,
       city,
       neighborhood,
+      type,
       bedrooms: Number(bedrooms),
       bathrooms: Number(bathrooms),
       halfBathrooms: Number(halfBathrooms),
@@ -48,12 +54,14 @@ export default function CreatePropertyPage() {
       provincia: payload.province,
       municipio: payload.city,
       sector: payload.neighborhood,
+      tipo: payload.type,
       habitaciones: payload.bedrooms,
       banos: payload.bathrooms,
       mediosBanos: payload.halfBathrooms,
       parqueos: payload.parkingSpaces,
       construccion: payload.builtArea,
-      amueblado: payload.furnished,
+      // send explicit 'yes'/'no' string to backend; backend accepts booleans too
+      amueblado: payload.furnished === true ? "yes" : "no",
     };
 
     try {
@@ -61,18 +69,53 @@ export default function CreatePropertyPage() {
         // use FormData upload
         // import createPropertyFormData dynamically to avoid circular issues
         const mod = await import("@/services/properties");
-        await mod.createPropertyFormData(spanishPayload as any, images);
+        await mod.createPropertyFormData(
+          spanishPayload as any,
+          images.map((i) => i.file)
+        );
       } else {
         await createProperty(spanishPayload as any);
       }
       setLoading(false);
+      // notify success
+      try {
+        notify({
+          type: "success",
+          title: "Propiedad creada",
+          message: "La propiedad se creó correctamente.",
+        });
+      } catch {}
       router.push("/dashboard/properties");
     } catch (err) {
       setLoading(false);
       console.error(err);
-      alert("Error creando la propiedad");
+      // Prefer backend-provided message when available
+      const backendMsg =
+        (err as any)?.response?.data?.error || (err as any)?.message;
+      try {
+        notify({
+          type: "error",
+          title: "Error creando propiedad",
+          message: String(backendMsg || "Error creando la propiedad"),
+          duration: 6000,
+        });
+      } catch {
+        // fallback to alert if notification fails
+        alert(String(backendMsg || "Error creando la propiedad"));
+      }
     }
   }
+
+  // Cleanup previews on unmount
+  useEffect(() => {
+    return () => {
+      for (const it of images) {
+        try {
+          if (it.preview) URL.revokeObjectURL(it.preview);
+        } catch {}
+      }
+    };
+  }, [images]);
 
   return (
     <div>
@@ -100,6 +143,23 @@ export default function CreatePropertyPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm mb-1">Tipo</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-background text-foreground cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.75rem center",
+                backgroundSize: "1rem",
+              }}
+            >
+              <option value="sale">Venta</option>
+              <option value="rent">Alquiler</option>
+            </select>
+          </div>
           <div>
             <label className="block text-sm mb-1">Precio</label>
             <input
@@ -131,9 +191,7 @@ export default function CreatePropertyPage() {
               required
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm mb-1">Sector</label>
             <input
@@ -143,6 +201,26 @@ export default function CreatePropertyPage() {
             />
           </div>
 
+          <div>
+            <label className="block text-sm mb-1">Amueblado</label>
+            <select
+              value={furnished ? "true" : "false"}
+              onChange={(e) => setFurnished(e.target.value === "true")}
+              className="w-full rounded border px-3 py-2 bg-background text-foreground cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.75rem center",
+                backgroundSize: "1rem",
+              }}
+            >
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm mb-1">Habitaciones</label>
             <input
@@ -164,9 +242,7 @@ export default function CreatePropertyPage() {
               min={0}
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm mb-1">Medios baños</label>
             <input
@@ -177,7 +253,9 @@ export default function CreatePropertyPage() {
               min={0}
             />
           </div>
+        </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm mb-1">Parqueos</label>
             <input
@@ -213,8 +291,12 @@ export default function CreatePropertyPage() {
                 multiple
                 onChange={(e) => {
                   const files = Array.from(e.target.files || []);
+                  const newItems = files.map((f) => ({
+                    file: f,
+                    preview: URL.createObjectURL(f),
+                  }));
                   // Append but cap at 10
-                  const combined = [...images, ...files].slice(0, 10);
+                  const combined = [...images, ...newItems].slice(0, 10);
                   setImages(combined);
                 }}
                 className="w-full"
@@ -226,65 +308,48 @@ export default function CreatePropertyPage() {
 
               {images.length > 0 && (
                 <div className="mt-2 grid grid-cols-3 gap-2">
-                  {images.map((file, idx) => (
-                    <div key={idx} className="relative">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={file.name}
-                        className="w-full h-24 object-cover rounded"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setImages(images.filter((_, i) => i !== idx))
-                        }
-                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1"
-                        aria-label={`Remove image ${file.name}`}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                  {images.map((it, idx) => {
+                    const safePreview =
+                      typeof it.preview === "string" &&
+                      (it.preview.startsWith("blob:") ||
+                        it.preview.startsWith("data:"))
+                        ? it.preview
+                        : undefined;
+                    return (
+                      <div key={idx} className="relative">
+                        {safePreview ? (
+                          <>
+                            {/* eslint-disable-next-line */}
+                            <div
+                              role="img"
+                              aria-label={it.file.name}
+                              style={{ backgroundImage: `url(${safePreview})` }}
+                              className="w-full h-24 bg-cover bg-center rounded"
+                            />
+                          </>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // revoke url to avoid memory leaks
+                            try {
+                              const removed = images[idx];
+                              if (removed && removed.preview)
+                                URL.revokeObjectURL(removed.preview);
+                            } catch {}
+                            setImages(images.filter((_, i) => i !== idx));
+                          }}
+                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1"
+                          aria-label={`Remove image ${it.file.name}`}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1">Amueblado</label>
-          <div className="flex items-center gap-3">
-            <label
-              className={`inline-flex items-center gap-2 cursor-pointer rounded px-3 py-1 ${
-                furnished ? "bg-amber-600 text-white" : "bg-transparent"
-              }`}
-            >
-              <input
-                type="radio"
-                name="furnished"
-                value="true"
-                checked={furnished === true}
-                onChange={() => setFurnished(true)}
-                className="sr-only"
-              />
-              Sí
-            </label>
-
-            <label
-              className={`inline-flex items-center gap-2 cursor-pointer rounded px-3 py-1 ${
-                furnished ? "bg-transparent" : "bg-amber-600 text-white"
-              }`}
-            >
-              <input
-                type="radio"
-                name="furnished"
-                value="false"
-                checked={furnished === false}
-                onChange={() => setFurnished(false)}
-                className="sr-only"
-              />
-              No
-            </label>
           </div>
         </div>
 

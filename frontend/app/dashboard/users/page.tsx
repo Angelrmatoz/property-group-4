@@ -64,18 +64,12 @@ export default function UsersListPage() {
   }
 
   return (
-    <section>
+    <section className="w-full max-w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-2">
         <h2 className="text-2xl font-semibold">Usuarios</h2>
-        <Link
-          href="/dashboard/users/create"
-          className="inline-flex items-center px-3 py-2 bg-amber-600 text-white rounded self-start sm:self-auto"
-        >
-          crear
-        </Link>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 w-full">
         {loading && <p>Cargando usuarios...</p>}
 
         {!loading && users && users.length === 0 && (
@@ -91,28 +85,28 @@ export default function UsersListPage() {
         {!loading && users && users.length > 0 && (
           <div className="space-y-3">
             {users.map((u, idx) => (
-              <Card key={u.id ?? u.email ?? idx}>
-                <CardContent className="flex items-center justify-between">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-base leading-tight truncate mt-4">
+              <Card key={u.id ?? u.email ?? idx} className="w-full">
+                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-4">
+                  <div className="min-w-0 w-full sm:w-auto flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-base leading-tight">
                         {u.firstName} {u.lastName}
                       </h3>
                       {u.admin && (
-                        <span className="inline-flex items-center text-sm font-medium text-amber-600 px-2 py-0.5 rounded mt-4">
-                          (admin)
+                        <span className="inline-flex items-center text-xs font-medium text-amber-600 px-2 py-0.5 rounded border border-amber-200">
+                          admin
                         </span>
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground mt-1 truncate">
+                    <div className="text-sm text-muted-foreground mt-1 break-all">
                       {u.email}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
                     {u.id ? (
                       <Link
                         href={`/dashboard/users/${u.id}`}
-                        className="inline-flex items-center px-3 py-1 border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50"
+                        className="inline-flex items-center px-3 py-1.5 border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50"
                         aria-label={`Ver usuario ${u.firstName} ${u.lastName}`}
                       >
                         ver
@@ -122,7 +116,7 @@ export default function UsersListPage() {
                     )}
                     {meId !== u.id && (
                       <button
-                        className="px-3 py-1 bg-red-600 text-white rounded"
+                        className="px-3 py-1.5 bg-red-600 text-white rounded text-sm hover:bg-red-700"
                         onClick={() => handleDelete(u.id)}
                       >
                         borrar

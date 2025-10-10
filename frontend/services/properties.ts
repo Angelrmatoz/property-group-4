@@ -13,7 +13,9 @@ export type CreatePropertyPayload = {
   mediosBanos?: number;
   parqueos?: number;
   construccion?: number;
-  amueblado?: boolean;
+  // accept 'yes'|'no' for explicitness, but boolean is still allowed for
+  // convenience. The backend will normalize to 'yes'/'no'.
+  amueblado?: "yes" | "no" | boolean;
 };
 
 export async function createProperty(payload: CreatePropertyPayload) {

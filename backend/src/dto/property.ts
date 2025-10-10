@@ -14,7 +14,9 @@ export interface PropertyCreateDTO {
   parkingSpaces?: number;
   builtArea?: number;
   images?: string[];
-  furnished?: boolean;
+  // 'yes' | 'no' to support multilingual UI and explicitness. Older boolean
+  // values may still be present in the DB; controllers will normalize.
+  furnished?: "yes" | "no" | boolean;
 }
 
 export interface PropertyDTO extends PropertyCreateDTO {
