@@ -1,10 +1,12 @@
 import express, { Request, Response, NextFunction } from "express";
 import { rateLimit } from "express-rate-limit";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+// bcrypt removed — user registration moved to users controller
 import User from "@/models/user";
 import * as Config from "@/utils/config";
-import { HttpError, RegisterDTO, LoginDTO, UserDTO } from "@/dto";
+import { HttpError, LoginDTO, UserDTO } from "@/dto";
+
+// auth middleware not required in this file anymore
 
 const loginRouter = express.Router();
 
@@ -17,70 +19,8 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Registro de usuario
-loginRouter.post(
-  "/register",
-  authLimiter,
-  async (req: Request, res: Response, next: NextFunction) => {
-    const body = req.body as RegisterDTO;
-
-    if (
-      !body ||
-      !body.email ||
-      !body.password ||
-      !body.firstName ||
-      !body.lastName
-    ) {
-      return next(new HttpError(400, "Missing required fields"));
-    }
-
-    try {
-      const existing = await User.findOne({ email: body.email });
-      if (existing) {
-        return next(new HttpError(409, "User already exists"));
-      }
-
-      // Hashear la contraseña aquí y pasar passwordHash al crear el usuario
-      const saltRounds = 10;
-      const passwordHash = await bcrypt.hash(body.password, saltRounds);
-
-      if (!passwordHash) {
-        return next(new HttpError(500, "Password hashing failed"));
-      }
-
-      const user = new User({
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-        passwordHash,
-      });
-
-      await user.save();
-
-      const userDto: UserDTO = {
-        id: user._id.toString(),
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        admin: user.admin,
-      };
-
-      return res.status(201).json({ user: userDto });
-    } catch (err: any) {
-      if (err && err.name === "ValidationError") {
-        console.error("ValidationError in /register:", err.errors);
-      } else {
-        console.error(
-          "Error in /register handler:",
-          err && err.message ? err.message : err
-        );
-      }
-      return next(new HttpError(500, "Internal server error"));
-    }
-  }
-);
-
-// NOTE: creation of admin users via API has been removed - admins only may delete users
+// NOTE: registration endpoint removed. User creation is handled via the
+// admin-only `/api/users` routes in the users controller.
 
 // Login
 loginRouter.post(

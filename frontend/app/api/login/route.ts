@@ -2,6 +2,102 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function GET() {
+  const backend = process.env.BACKEND_URL;
+  // If backend is configured, proxy to backend /api/auth/me so we get a
+  // structured user object (including admin flag). This requires
+  // credentials so the backend can read the httpOnly token cookie.
+  if (backend) {
+    try {
+      // forward any cookies from the incoming request so backend receives
+      // the httpOnly token cookie used by authenticate middleware
+      const cookieStore = await cookies();
+      const cookiePairs: string[] = [];
+      cookieStore
+        .getAll()
+        .forEach((c) => cookiePairs.push(`${c.name}=${c.value}`));
+
+      const res = await fetch(`${backend}/api/auth/me`, {
+        method: "GET",
+        credentials: "include",
+        headers: cookiePairs.length
+          ? { Cookie: cookiePairs.join("; ") }
+          : undefined,
+      });
+
+      const text = await res.text();
+      const contentType = res.headers.get("content-type") || "";
+
+      const forwarded: Record<string, string> = {};
+      const setCookies: string[] = [];
+      res.headers.forEach((value, key) => {
+        const k = key.toLowerCase();
+        if (k === "set-cookie") {
+          setCookies.push(value);
+          return;
+        }
+        if (
+          ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
+            k
+          )
+        )
+          return;
+        forwarded[key] = value;
+      });
+
+      if (contentType.includes("application/json")) {
+        try {
+          const json = JSON.parse(text);
+          const nextRes = NextResponse.json(json, {
+            status: res.status,
+            headers: forwarded,
+          });
+          for (const sc of setCookies) {
+            const first = sc.split(";")[0];
+            const idx = first.indexOf("=");
+            if (idx > 0) {
+              const name = first.slice(0, idx);
+              const value = first.slice(idx + 1);
+              try {
+                nextRes.cookies.set(name, value);
+              } catch {
+                // ignore
+              }
+            }
+          }
+          return nextRes;
+        } catch {
+          return NextResponse.json(
+            { error: "Invalid JSON from backend" },
+            { status: 502 }
+          );
+        }
+      }
+
+      const nextRes = new NextResponse(text, {
+        status: res.status,
+        headers: forwarded,
+      });
+      for (const sc of setCookies) {
+        const first = sc.split(";")[0];
+        const idx = first.indexOf("=");
+        if (idx > 0) {
+          const name = first.slice(0, idx);
+          const value = first.slice(idx + 1);
+          try {
+            nextRes.cookies.set(name, value);
+          } catch {}
+        }
+      }
+      return nextRes;
+    } catch {
+      return NextResponse.json(
+        { error: "Backend unavailable" },
+        { status: 502 }
+      );
+    }
+  }
+
+  // No backend configured: fallback to reading token from cookie (dev/demo)
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   return NextResponse.json({

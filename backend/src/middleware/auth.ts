@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload as _JwtPayload } from "jsonwebtoken";
 import * as Config from "@/utils/config";
+import User from "@/models/user";
 import { HttpError } from "@/dto";
 
 type JwtPayload = _JwtPayload & { id?: string; [key: string]: any };
@@ -9,11 +10,11 @@ const createError = (message: string, status = 500): HttpError => {
   return new HttpError(status, message);
 };
 
-export const authenticate = (
+export const authenticate = async (
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   // Accept token in Authorization header (Bearer) or in cookie named 'token'
   let token: string | undefined;
   const authHeader = req.headers.authorization || req.headers.Authorization;
@@ -42,8 +43,26 @@ export const authenticate = (
       return next(createError("Server configuration error", 500));
     }
 
-    // Verificamos y anexamos el payload al request
-    (req as any).user = jwt.verify(token, secret) as JwtPayload;
+    // Verify token and attach payload. Then fetch fresh user data from DB so
+    // we can check roles (admin) reliably instead of trusting token claims.
+    const payload = jwt.verify(token, secret) as JwtPayload;
+
+    // Attach basic payload first
+    (req as any).user = { ...(payload as any) } as any;
+
+    // Try to load the user from DB to get current admin flag and ensure the
+    // user still exists. If not found, treat as unauthorized.
+    try {
+      if (payload && payload.id) {
+        const u = await User.findById(payload.id).select("admin").lean().exec();
+        if (!u) return next(createError("Unauthorized", 401));
+        // ensure admin flag is present on req.user
+        (req as any).user.admin = !!(u as any).admin;
+      }
+    } catch {
+      // If DB lookup fails, don't block with 500 here; surface as unauthorized
+      return next(createError("Unauthorized", 401));
+    }
 
     return next();
   } catch (err: any) {

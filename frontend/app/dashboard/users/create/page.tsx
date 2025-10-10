@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import usersService from "@/services/users";
 
 export default function CreateUserPage() {
   const router = useRouter();
@@ -16,17 +17,18 @@ export default function CreateUserPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, email, password, admin }),
+      const { status, data } = await usersService.createUser({
+        firstName,
+        lastName,
+        email,
+        password,
+        admin,
       });
       setLoading(false);
-      if (res.ok) {
+      if (status >= 200 && status < 300) {
         router.push("/dashboard/users");
       } else {
-        const text = await res.text();
-        alert("Error: " + text);
+        alert("Error: " + JSON.stringify(data));
       }
     } catch (err) {
       setLoading(false);

@@ -28,11 +28,33 @@ export default function Sidebar() {
     // empty deps: run once on mount
   }, []);
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   // previously we fetched /api/login to determine admin rights; the
-  // 'crear' link is visible to all users in the sidebar UI now, so we no
-  // longer fetch admin status here. Keep the hook slot if later we re-add
-  // permission-specific items.
+  // 'crear' link should only be visible to admins. Fetch current user
+  // on mount and hide the Users section if not admin. We intentionally
+  // default to false so non-authenticated users won't see admin links.
+  useEffect(() => {
+    let mounted = true;
+    const ac = new AbortController();
+
+    async function loadUser() {
+      try {
+        const auth = await import("@/services/auth").then((m) => m.me());
+        if (!mounted) return;
+        setIsAdmin(Boolean((auth as any)?.user?.admin || (auth as any)?.admin));
+      } catch (err) {
+        if ((err as any)?.name === "AbortError") return;
+        setIsAdmin(false);
+      }
+    }
+
+    loadUser();
+    return () => {
+      mounted = false;
+      ac.abort();
+    };
+  }, []);
 
   // Sync collapsed state across tabs
   useEffect(() => {
@@ -157,64 +179,66 @@ export default function Sidebar() {
           </span>
         </Link>
 
-        <div>
-          <button
-            onClick={() => setOpenUsers(!openUsers)}
-            className={`w-full text-left px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 flex items-center justify-between ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <span className="h-6 w-6 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 block"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+        {isAdmin && (
+          <div>
+            <button
+              onClick={() => setOpenUsers(!openUsers)}
+              className={`w-full text-left px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 flex items-center justify-between ${
+                collapsed ? "justify-center" : ""
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="h-6 w-6 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 block"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 2a4 4 0 100 8 4 4 0 000-8zM2 18a8 8 0 1116 0H2z" />
+                  </svg>
+                </span>
+                <span
+                  className={`transition-opacity duration-200 flex items-center leading-none ${
+                    collapsed
+                      ? "opacity-0 max-w-0 overflow-hidden"
+                      : "opacity-100"
+                  }`}
                 >
-                  <path d="M10 2a4 4 0 100 8 4 4 0 000-8zM2 18a8 8 0 1116 0H2z" />
-                </svg>
-              </span>
-              <span
-                className={`transition-opacity duration-200 flex items-center leading-none ${
-                  collapsed
-                    ? "opacity-0 max-w-0 overflow-hidden"
-                    : "opacity-100"
+                  Usuarios
+                </span>
+              </div>
+              {!collapsed && (
+                <span className="text-xs">{openUsers ? "▴" : "▾"}</span>
+              )}
+            </button>
+
+            <div
+              className={`mt-2 ml-2 flex flex-col gap-1 transition-all duration-200 ${
+                openUsers && !collapsed
+                  ? "max-h-40 opacity-100"
+                  : "max-h-0 opacity-0 overflow-hidden"
+              }`}
+            >
+              <Link
+                href="/dashboard/users"
+                className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
+                  collapsed ? "hidden" : ""
                 }`}
               >
-                Usuarios
-              </span>
+                Lista
+              </Link>
+              <Link
+                href="/dashboard/users/create"
+                className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
+                  collapsed ? "hidden" : ""
+                }`}
+              >
+                crear
+              </Link>
             </div>
-            {!collapsed && (
-              <span className="text-xs">{openUsers ? "▴" : "▾"}</span>
-            )}
-          </button>
-
-          <div
-            className={`mt-2 ml-2 flex flex-col gap-1 transition-all duration-200 ${
-              openUsers && !collapsed
-                ? "max-h-40 opacity-100"
-                : "max-h-0 opacity-0 overflow-hidden"
-            }`}
-          >
-            <Link
-              href="/dashboard/users"
-              className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
-                collapsed ? "hidden" : ""
-              }`}
-            >
-              Lista
-            </Link>
-            <Link
-              href="/dashboard/users/create"
-              className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
-                collapsed ? "hidden" : ""
-              }`}
-            >
-              crear
-            </Link>
           </div>
-        </div>
+        )}
 
         <button
           onClick={logout}

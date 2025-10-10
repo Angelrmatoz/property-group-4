@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import axios from "axios";
 
 export type CreatePropertyPayload = {
   titulo: string;
@@ -100,14 +101,15 @@ export async function getProperties() {
 }
 
 export async function getPropertyById(id: string) {
+  // Use axios on the server (absolute URL) and the preconfigured `api` axios
+  // instance in the browser. This keeps code small and consistent.
   if (typeof window === "undefined") {
     const base =
       process.env.NEXT_PUBLIC_BASE_URL ||
       `http://localhost:${process.env.PORT || 3000}`;
     const url = new URL(`/api/properties/${id}`, base).toString();
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch property ${id}`);
-    return res.json();
+    const res = await axios.get(url);
+    return res.data;
   }
 
   const { data } = await api.get(`/api/properties/${id}`);

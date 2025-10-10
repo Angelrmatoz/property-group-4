@@ -1,5 +1,6 @@
 import React from "react";
 import PropertyGallery from "@/components/dashboard/PropertyGallery";
+import { getPropertyById } from "@/services/properties";
 
 type Property = {
   _id: string;
@@ -17,21 +18,6 @@ type Property = {
   sector?: string;
 };
 
-async function fetchProperty(id: string): Promise<Property | null> {
-  const base =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    `http://localhost:${process.env.PORT || 3000}`;
-  const url = new URL(`/api/properties/${id}`, base).toString();
-
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
-}
-
 export default async function PropertyPage({
   params,
 }: {
@@ -39,7 +25,7 @@ export default async function PropertyPage({
 }) {
   // params may be a Promise-like in some Next versions; await it before using
   const { id } = (await params) as { id: string };
-  const prop = await fetchProperty(id);
+  const prop = (await getPropertyById(id)) as Property | null;
   if (!prop) return <p>No encontrada</p>;
   // Normalize property fields so frontend can accept english or spanish keys
   const propNorm = {

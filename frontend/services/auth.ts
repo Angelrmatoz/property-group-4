@@ -11,36 +11,30 @@ export type LoginResult = {
   message?: string;
 };
 
+import api from "@/lib/axios";
+
 export async function login(
   email: string,
   password: string
 ): Promise<LoginResult> {
-  const res = await fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({ message: "Login failed" }));
-    return { ok: false, message: data.message || "Login failed" };
+  try {
+    const res = await api.post("/api/login", { email, password });
+    return { ok: true, ...res.data } as LoginResult;
+  } catch (err: any) {
+    return {
+      ok: false,
+      message: err?.data?.message || err?.message || "Login failed",
+    };
   }
-
-  // Try to parse JSON body if any
-  const data = await res.json().catch(() => ({}));
-  return { ok: true, ...data } as LoginResult;
 }
 
 export async function me(): Promise<LoginResult> {
-  const res = await fetch("/api/login", {
-    method: "GET",
-    cache: "no-store",
-    credentials: "include",
-  });
-  if (!res.ok) return { ok: false };
-  const data = await res.json().catch(() => ({}));
-  return { ok: true, ...data } as LoginResult;
+  try {
+    const res = await api.get("/api/login", { params: { _: Date.now() } });
+    return { ok: true, ...res.data } as LoginResult;
+  } catch {
+    return { ok: false };
+  }
 }
 
 export async function register(payload: {
@@ -49,7 +43,7 @@ export async function register(payload: {
   email: string;
   password: string;
 }) {
-  const res = await fetch("/api/register", {
+  const res = await fetch("/api/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
