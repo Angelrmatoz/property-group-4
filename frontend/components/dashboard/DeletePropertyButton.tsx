@@ -3,9 +3,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteProperty } from "@/services/properties";
+import { useNotification } from "@/components/Notification";
 
 export default function DeletePropertyButton({ id }: { id: string }) {
   const router = useRouter();
+  const { notify } = useNotification();
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
@@ -14,11 +16,23 @@ export default function DeletePropertyButton({ id }: { id: string }) {
     setLoading(true);
     try {
       await deleteProperty(id);
+      notify({
+        type: "success",
+        title: "Propiedad eliminada",
+        message: "La propiedad se eliminó correctamente.",
+      });
       // refresh the current route to reflect deletion
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert("Error eliminando la propiedad");
+      const backendMsg =
+        (err as any)?.response?.data?.error || (err as any)?.message;
+      notify({
+        type: "error",
+        title: "Error eliminando propiedad",
+        message: String(backendMsg || "Error eliminando la propiedad"),
+        duration: 6000,
+      });
     } finally {
       setLoading(false);
     }

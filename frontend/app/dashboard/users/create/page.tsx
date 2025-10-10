@@ -3,9 +3,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import usersService from "@/services/users";
+import { useNotification } from "@/components/Notification";
 
 export default function CreateUserPage() {
   const router = useRouter();
+  const { notify } = useNotification();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,13 +28,34 @@ export default function CreateUserPage() {
       });
       setLoading(false);
       if (status >= 200 && status < 300) {
+        notify({
+          type: "success",
+          title: "Usuario creado",
+          message: "El usuario ha sido creado exitosamente",
+          duration: 3000,
+        });
         router.push("/dashboard/users");
       } else {
-        alert("Error: " + JSON.stringify(data));
+        const errorMsg = (data as any)?.error || JSON.stringify(data);
+        notify({
+          type: "error",
+          title: "Error al crear usuario",
+          message: errorMsg,
+          duration: 4000,
+        });
       }
     } catch (err) {
       setLoading(false);
-      alert("Error al crear el usuario");
+      const errorMsg =
+        (err as any)?.response?.data?.error ||
+        (err as any)?.message ||
+        "Error al crear el usuario";
+      notify({
+        type: "error",
+        title: "Error al crear usuario",
+        message: errorMsg,
+        duration: 4000,
+      });
       console.error(err);
     }
   }

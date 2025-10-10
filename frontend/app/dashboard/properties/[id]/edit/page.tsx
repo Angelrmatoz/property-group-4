@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProperty } from "@/services/properties";
+import { useNotification } from "@/components/Notification";
 
 export default function EditPropertyPage({
   params,
@@ -10,6 +11,7 @@ export default function EditPropertyPage({
   params: { id: string };
 }) {
   const router = useRouter();
+  const { notify } = useNotification();
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -146,7 +148,14 @@ export default function EditPropertyPage({
     } catch (err) {
       setLoading(false);
       console.error(err);
-      alert("Error actualizando");
+      const backendMsg =
+        (err as any)?.response?.data?.error || (err as any)?.message;
+      notify({
+        type: "error",
+        title: "Error actualizando propiedad",
+        message: String(backendMsg || "Error actualizando la propiedad"),
+        duration: 6000,
+      });
     }
   }
 

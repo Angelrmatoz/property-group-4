@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useNotification } from "@/components/Notification";
 
 type User = {
   id: string;
@@ -17,6 +18,7 @@ type User = {
 export default function UserDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const { notify } = useNotification();
   const id = (params as any)?.id as string | undefined;
   const [user, setUser] = useState<User | null>(null);
   const [meId, setMeId] = useState<string | null>(null);
@@ -76,14 +78,36 @@ export default function UserDetailPage() {
       const usersService = await import("@/services/users");
       const res = await usersService.deleteUser(id);
       if (res.status >= 200 && res.status < 300) {
-        // go back to users list
+        notify({
+          type: "success",
+          title: "Usuario eliminado",
+          message: "El usuario ha sido eliminado exitosamente",
+          duration: 3000,
+        });
         router.push("/dashboard/users");
       } else {
-        alert("Error borrando usuario (status: " + res.status + ")");
+        const errorMsg =
+          (res as any)?.data?.error ||
+          `Error borrando usuario (status: ${res.status})`;
+        notify({
+          type: "error",
+          title: "Error al eliminar",
+          message: errorMsg,
+          duration: 4000,
+        });
       }
     } catch (err) {
       console.error(err);
-      alert("Error al borrar usuario");
+      const errorMsg =
+        (err as any)?.response?.data?.error ||
+        (err as any)?.message ||
+        "Error al borrar usuario";
+      notify({
+        type: "error",
+        title: "Error al eliminar",
+        message: errorMsg,
+        duration: 4000,
+      });
     }
   }
 

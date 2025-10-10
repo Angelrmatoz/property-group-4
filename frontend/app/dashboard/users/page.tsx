@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { useNotification } from "@/components/Notification";
 
 type User = {
   id: string;
@@ -13,6 +14,7 @@ type User = {
 };
 
 export default function UsersListPage() {
+  const { notify } = useNotification();
   const [users, setUsers] = useState<User[] | null>(null);
   const [meId, setMeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,17 +51,40 @@ export default function UsersListPage() {
     if (!confirm("¿Seguro que quieres eliminar este usuario?")) return;
 
     try {
-      const { status } = await import("@/services/users").then((m) =>
+      const res = await import("@/services/users").then((m) =>
         m.deleteUser(id)
       );
-      if (status >= 200 && status < 300) {
+      if (res.status >= 200 && res.status < 300) {
+        notify({
+          type: "success",
+          title: "Usuario eliminado",
+          message: "El usuario ha sido eliminado exitosamente",
+          duration: 3000,
+        });
         setUsers((prev) => (prev ? prev.filter((u) => u.id !== id) : prev));
       } else {
-        alert("Error borrando usuario (status: " + status + ")");
+        const errorMsg =
+          (res as any)?.data?.error ||
+          `Error borrando usuario (status: ${res.status})`;
+        notify({
+          type: "error",
+          title: "Error al eliminar",
+          message: errorMsg,
+          duration: 4000,
+        });
       }
     } catch (err) {
       console.error(err);
-      alert("Error al borrar usuario");
+      const errorMsg =
+        (err as any)?.response?.data?.error ||
+        (err as any)?.message ||
+        "Error al borrar usuario";
+      notify({
+        type: "error",
+        title: "Error al eliminar",
+        message: errorMsg,
+        duration: 4000,
+      });
     }
   }
 

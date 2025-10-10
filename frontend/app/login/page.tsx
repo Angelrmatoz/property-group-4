@@ -5,12 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import auth from "@/services/auth";
+import { useNotification } from "@/components/Notification";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { notify } = useNotification();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +24,19 @@ const Login: React.FC = () => {
           router.push("/dashboard");
           return;
         }
-        alert(result.message || "Credenciales incorrectas");
+        notify({
+          type: "error",
+          title: "Error de inicio de sesión",
+          message: result.message || "Credenciales incorrectas",
+          duration: 5000,
+        });
       } catch {
-        alert("Error de red al intentar iniciar sesión");
+        notify({
+          type: "error",
+          title: "Error de conexión",
+          message: "Error de red al intentar iniciar sesión",
+          duration: 5000,
+        });
       }
     })();
   };
