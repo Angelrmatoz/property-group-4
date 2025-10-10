@@ -41,6 +41,15 @@ api.interceptors.request.use(async (config) => {
         if (token) {
           config.headers = config.headers || {};
           (config.headers as any)["X-CSRF-Token"] = token;
+          // DEV debug: log that we attached a csrf token (do not log token value)
+          try {
+            if (process.env.NODE_ENV === "development") {
+              // eslint-disable-next-line no-console
+              console.debug(
+                "[axios] attached X-CSRF-Token header for mutating request"
+              );
+            }
+          } catch {}
         }
       }
     } catch {

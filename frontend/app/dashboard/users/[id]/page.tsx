@@ -104,7 +104,7 @@ export default function UserDetailPage() {
       <Card>
         <CardContent>
           <div className="mb-2">
-            <h3 className="text-xl font-semibold">
+            <h3 className="text-xl font-semibold mt-2">
               {user.firstName} {user.lastName}
             </h3>
             <div className="flex items-center gap-2 mt-2">

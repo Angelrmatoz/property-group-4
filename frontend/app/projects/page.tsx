@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -32,19 +32,75 @@ export default function ProjectsPage() {
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  // Projects are now loaded from the properties service
+  type Project = {
+    id?: string;
+    name?: string;
+    image?: string;
+    type?: string;
+    location?: string;
+    status?: string;
+    statusColor?: string;
+    price?: string;
+    bedrooms?: string | number;
+    bathrooms?: string | number;
+    area?: string | number;
+    description?: string;
+  };
+
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.location.toLowerCase().includes(searchTerm.toLowerCase());
+      (project.name || "")
+        .toString()
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (project.location || "")
+        .toString()
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
     const matchesType =
       filterType === "all" ||
-      project.type.toLowerCase().includes(filterType.toLowerCase());
+      (project.type || "")
+        .toString()
+        .toLowerCase()
+        .includes(filterType.toLowerCase());
     const matchesStatus =
       filterStatus === "all" ||
-      project.status.toLowerCase().includes(filterStatus.toLowerCase());
+      (project.status || "")
+        .toString()
+        .toLowerCase()
+        .includes(filterStatus.toLowerCase());
 
     return matchesSearch && matchesType && matchesStatus;
   });
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    // lazy-load properties from service
+    import("@/services/properties").then((m) => {
+      m.getProperties()
+        .then((data: any) => {
+          if (!mounted) return;
+          // data may be an array of properties
+          setProjects(Array.isArray(data) ? data : []);
+        })
+        .catch(() => {
+          if (!mounted) return;
+          setProjects([]);
+        })
+        .finally(() => {
+          if (!mounted) return;
+          setLoading(false);
+        });
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen transition-colors duration-300 bg-background text-foreground dark:bg-black dark:text-foreground">
@@ -126,83 +182,87 @@ export default function ProjectsPage() {
       <section className="py-12 bg-white dark:bg-black">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredProjects.map((project) => (
-              <Card
-                key={project.id}
-                className="transition-all duration-300 group overflow-hidden bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl dark:bg-gray-900 dark:border-yellow-500/20 dark:hover:border-yellow-500/50"
-              >
-                <div className="relative h-64 overflow-hidden">
-                  <Image
-                    src={project.image || "/placeholder.svg"}
-                    alt={project.name}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge
-                      className={`${project.statusColor} text-white border-0`}
-                    >
-                      {project.status}
-                    </Badge>
-                  </div>
-                  <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1">
-                    <span className="text-yellow-400 font-bold text-lg">
-                      {project.price}
-                    </span>
-                  </div>
-                </div>
-
-                <CardContent className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-2xl font-bold mb-1 text-yellow-600 dark:text-yellow-400">
-                      {project.name}
-                    </h3>
-                    <p className="text-sm mb-2 text-gray-500 dark:text-gray-400">
-                      {project.type}
-                    </p>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                      <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-                      <span className="truncate">{project.location}</span>
+            {loading ? (
+              <div className="col-span-full text-center py-12">Cargando...</div>
+            ) : (
+              filteredProjects.map((project) => (
+                <Card
+                  key={project.id || project.name}
+                  className="transition-all duration-300 group overflow-hidden bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl dark:bg-gray-900 dark:border-yellow-500/20 dark:hover:border-yellow-500/50"
+                >
+                  <div className="relative h-64 overflow-hidden">
+                    <Image
+                      src={(project.image as string) || "/placeholder.svg"}
+                      alt={(project.name as string) || "Proyecto"}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <Badge
+                        className={`${project.statusColor} text-white border-0`}
+                      >
+                        {project.status}
+                      </Badge>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
-                    {project.bedrooms !== "N/A" && (
-                      <div className="text-center">
-                        <Bed className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
-                        <span className="text-gray-600 dark:text-gray-300">
-                          {project.bedrooms}
-                        </span>
-                      </div>
-                    )}
-                    {project.bathrooms !== "N/A" && (
-                      <div className="text-center">
-                        <Bath className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
-                        <span className="text-gray-600 dark:text-gray-300">
-                          {project.bathrooms}
-                        </span>
-                      </div>
-                    )}
-                    <div className="text-center">
-                      <Square className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
-                      <span className="text-xs text-gray-600 dark:text-gray-300">
-                        {project.area}
+                    <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1">
+                      <span className="text-yellow-400 font-bold text-lg">
+                        {project.price}
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-sm mb-4 line-clamp-2 text-gray-600 dark:text-gray-400">
-                    {project.description}
-                  </p>
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      <h3 className="text-2xl font-bold mb-1 text-yellow-600 dark:text-yellow-400">
+                        {project.name}
+                      </h3>
+                      <p className="text-sm mb-2 text-gray-500 dark:text-gray-400">
+                        {project.type}
+                      </p>
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                        <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                        <span className="truncate">{project.location}</span>
+                      </div>
+                    </div>
 
-                  <div>
-                    <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
-                      Ver Detalles
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
+                      {project.bedrooms !== "N/A" && (
+                        <div className="text-center">
+                          <Bed className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
+                          <span className="text-gray-600 dark:text-gray-300">
+                            {project.bedrooms}
+                          </span>
+                        </div>
+                      )}
+                      {project.bathrooms !== "N/A" && (
+                        <div className="text-center">
+                          <Bath className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
+                          <span className="text-gray-600 dark:text-gray-300">
+                            {project.bathrooms}
+                          </span>
+                        </div>
+                      )}
+                      <div className="text-center">
+                        <Square className="w-4 h-4 mx-auto mb-1 text-yellow-600 dark:text-yellow-400" />
+                        <span className="text-xs text-gray-600 dark:text-gray-300">
+                          {project.area}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm mb-4 line-clamp-2 text-gray-600 dark:text-gray-400">
+                      {project.description}
+                    </p>
+
+                    <div>
+                      <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
+                        Ver Detalles
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
 
           {filteredProjects.length === 0 && (

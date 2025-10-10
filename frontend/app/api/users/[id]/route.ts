@@ -19,11 +19,26 @@ export async function DELETE(
       .getAll()
       .forEach((c) => cookiePairs.push(`${c.name}=${c.value}`));
 
-    // Forward CSRF token if present in incoming request headers
-    // In Next edge runtime we can't read incoming headers easily here so callers
-    // should include X-CSRF-Token as a header and the fetch below will forward it.
+    // Forward CSRF token and authorization if present in incoming request
+    // headers. We can read them from the incoming Request and pass them
+    // through to the backend fetch so csurf and auth work correctly.
     const headers: Record<string, string> = {};
     if (cookiePairs.length) headers["Cookie"] = cookiePairs.join("; ");
+    try {
+      // Next Request headers are a Headers-like object; use get to read
+      const incomingCsrf = (_req.headers as any)?.get
+        ? (_req.headers as any).get("x-csrf-token") ||
+          (_req.headers as any).get("X-CSRF-Token")
+        : undefined;
+      const incomingAuth = (_req.headers as any)?.get
+        ? (_req.headers as any).get("authorization") ||
+          (_req.headers as any).get("Authorization")
+        : undefined;
+      if (incomingCsrf) headers["X-CSRF-Token"] = incomingCsrf;
+      if (incomingAuth) headers["Authorization"] = incomingAuth;
+    } catch {
+      // ignore header read errors
+    }
 
     const p = await (params as any);
     const id = p.id as string;
@@ -69,6 +84,20 @@ export async function GET(
 
     const headers: Record<string, string> = {};
     if (cookiePairs.length) headers["Cookie"] = cookiePairs.join("; ");
+    try {
+      const incomingCsrf = (_req.headers as any)?.get
+        ? (_req.headers as any).get("x-csrf-token") ||
+          (_req.headers as any).get("X-CSRF-Token")
+        : undefined;
+      const incomingAuth = (_req.headers as any)?.get
+        ? (_req.headers as any).get("authorization") ||
+          (_req.headers as any).get("Authorization")
+        : undefined;
+      if (incomingCsrf) headers["X-CSRF-Token"] = incomingCsrf;
+      if (incomingAuth) headers["Authorization"] = incomingAuth;
+    } catch {
+      // ignore
+    }
 
     const p = await (params as any);
     const id = p.id as string;
