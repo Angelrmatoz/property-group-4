@@ -9,7 +9,7 @@
     "clean": "node -e \"const fs=require('fs'); try{fs.rmSync('./dist',{recursive:true, force:true});}catch(e){} try{fs.rmSync('./tsconfig.tsbuildinfo',{force:true});}catch(e){}\"",
     "build": "pnpm exec tsc -p .",
     "build:clean": "pnpm run clean && pnpm exec tsc -p .",
-    "start": "cross-env NODE_ENV=production node -r module-alias/register dist/index.js"
+    "start": "node -r module-alias/register dist/index.js"
   },
   "keywords": [],
   "author": "",
