@@ -5,50 +5,50 @@
 
 @font-face {
   font-family: "FashionFetishRegular";
-  src: url("/fonts/Fashion Fetish Regular.ttf") format("truetype");
+  src: url("../public/fonts/Fashion Fetish Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "FashionFetishLight";
-  src: url("/fonts/Fashion Fetish Light.ttf") format("truetype");
-  font-weight: normal;
+  src: url("../public/fonts/Fashion Fetish Light.ttf") format("truetype");
+  font-weight: 300;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "FashionFetishSmallCaps";
-  src: url("/fonts/Fashion Fetish Small Caps.ttf") format("truetype");
+  src: url("../public/fonts/Fashion Fetish Small Caps.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "FashionFetishBold";
-  src: url("/fonts/Fashion Fetish Bold.ttf") format("truetype");
+  src: url("../public/fonts/Fashion Fetish Bold.ttf") format("truetype");
   font-weight: bold;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "FashionFetishItalic";
-  src: url("/fonts/Fashion Fetish Italic.ttf") format("truetype");
+  src: url("../public/fonts/Fashion Fetish Italic.ttf") format("truetype");
   font-weight: normal;
   font-style: italic;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "FashionFetishBoldItalic";
-  src: url("/fonts/Fashion Fetish Bold Italic.ttf") format("truetype");
+  src: url("../public/fonts/Fashion Fetish Bold.ttf") format("truetype");
   font-weight: bold;
   font-style: italic;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  font-display: swap;
 }
 
 @layer base {
@@ -87,6 +87,7 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -122,6 +123,46 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Also apply the same vars automatically when the user prefers dark (system setting).
+     Keeping the .dark class ensures compatibility with any JS theme toggles that add/remove
+     the class on the document element. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 0 0% 3.9%;
+      --foreground: 0 0% 98%;
+      --card: 0 0% 3.9%;
+      --card-foreground: 0 0% 98%;
+      --popover: 0 0% 3.9%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 0 0% 98%;
+      --primary-foreground: 0 0% 9%;
+      --secondary: 0 0% 14.9%;
+      --secondary-foreground: 0 0% 98%;
+      --muted: 0 0% 14.9%;
+      --muted-foreground: 0 0% 63.9%;
+      --accent: 0 0% 14.9%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 14.9%;
+      --input: 0 0% 14.9%;
+      --ring: 0 0% 83.1%;
+      --chart-1: 220 70% 50%;
+      --chart-2: 160 60% 45%;
+      --chart-3: 30 80% 55%;
+      --chart-4: 280 65% 60%;
+      --chart-5: 340 75% 55%;
+      --sidebar-background: 240 5.9% 10%;
+      --sidebar-foreground: 240 4.8% 95.9%;
+      --sidebar-primary: 224.3 76.3% 48%;
+      --sidebar-primary-foreground: 0 0% 100%;
+      --sidebar-accent: 240 3.7% 15.9%;
+      --sidebar-accent-foreground: 240 4.8% 95.9%;
+      --sidebar-border: 240 3.7% 15.9%;
+      --sidebar-ring: 217.2 91.2% 59.8%;
+    }
+  }
+
   h1,
   h2,
   h3,
@@ -140,6 +181,7 @@
     box-sizing: border-box;
     overscroll-behavior: none;
   }
+
   *,
   *:before,
   *:after {
@@ -151,7 +193,57 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar styles */
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-thumb-yellow-500::-webkit-scrollbar-thumb {
+    background-color: #eab308;
+    border-radius: 4px;
+  }
+
+  .scrollbar-thumb-yellow-500::-webkit-scrollbar-thumb:hover {
+    background-color: #ca8a04;
+  }
+
+  .scrollbar-track-gray-200::-webkit-scrollbar-track {
+    background-color: #e5e7eb;
+    border-radius: 4px;
+  }
+
+  .dark .scrollbar-track-gray-800::-webkit-scrollbar-track {
+    background-color: #1f2937;
+    border-radius: 4px;
+  }
+
+  /* Firefox scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #eab308 #e5e7eb;
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: #eab308 #1f2937;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari and Opera */
   }
 }

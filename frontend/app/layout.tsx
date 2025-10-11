@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import FbPixel from "../components/FbPixel";
+import FbPixel from "@/components/FbPixel";
+import { NotificationProvider } from "@/components/Notification";
 
 export const metadata: Metadata = {
   title: "Property Group",
@@ -20,7 +21,7 @@ export default function RootLayout({
       </head>
       <body>
         <FbPixel />
-        {children}
+        <NotificationProvider>{children}</NotificationProvider>
       </body>
     </html>
   );

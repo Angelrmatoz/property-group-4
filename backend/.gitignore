@@ -1,0 +1,8 @@
+node_modules/
+**/node_modules/
+dist/
+tsconfig.tsbuildinfo
+.env
+.env.local
+.DS_Store
+trivy-report.json

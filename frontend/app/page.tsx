@@ -20,10 +20,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Testimonials from "@/components/Testimonials";
 import { useCarousel } from "@/hooks/useCarousel";
-import { event } from "../lib/fbpixel";
+import { event } from "@/lib/fbpixel";
 
 export default function PropertyGroupLanding() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  // Theme now follows system preference via CSS variables / Tailwind `dark:` rules.
   const { nextImage, currentImage } = useCarousel();
   const [heroImage, setHeroImage] = useState(currentImage());
   const [fade, setFade] = useState(true);
@@ -42,9 +42,7 @@ export default function PropertyGroupLanding() {
     return () => clearInterval(interval);
   }, [nextImage]);
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  // toggleTheme removed; theme is automatic
 
   const handleSmoothScroll = (
     e: React.MouseEvent<HTMLElement>,
@@ -60,14 +58,10 @@ export default function PropertyGroupLanding() {
   };
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-300 overflow-x-hidden ${
-        isDarkMode ? "bg-black text-white" : "bg-white text-gray-900"
-      }`}
-    >
+    <div className="min-h-screen transition-colors duration-300 overflow-x-hidden bg-background text-foreground dark:bg-black dark:text-foreground">
       {/* Header */}
 
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+      <Header />
 
       {/* Hero Section */}
       <section
@@ -98,14 +92,14 @@ export default function PropertyGroupLanding() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
               <span className="text-satin-sheen-gold">Property</span>
               <br />
-              <span className="text-white">Group</span>
+              <span className="text-foreground">Group</span>
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed max-w-3xl">
               Expertos en bienes raíces con más de 15 años de experiencia.
               Convertimos tus sueños inmobiliarios en realidad.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-md sm:max-w-none">
-              <Link href="#/projects" className="flex-1 sm:flex-none">
+              <Link href="/projects" className="flex-1 sm:flex-none">
                 <Button
                   size="lg"
                   className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-lg px-8 py-4"
@@ -172,107 +166,59 @@ export default function PropertyGroupLanding() {
       {/* Services Section */}
       <section
         id="servicios"
-        className={`py-16 md:py-20 transition-colors duration-300 ${
-          isDarkMode ? "bg-gray-900" : "bg-gray-50"
-        }`}
+        className="py-16 md:py-20 transition-colors duration-300 bg-gray-50 dark:bg-gray-900"
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
               Nuestros <span className="text-yellow-400">Servicios</span>
             </h2>
-            <p
-              className={`text-xl max-w-3xl mx-auto ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
+            <p className="text-xl max-w-3xl mx-auto text-gray-700 dark:text-gray-300">
               Ofrecemos soluciones integrales en el sector inmobiliario,
               adaptadas a las necesidades específicas de cada cliente.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card
-              className={`transition-all duration-300 group ${
-                isDarkMode
-                  ? "bg-black border-yellow-500/20 hover:border-yellow-500/50"
-                  : "bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl"
-              }`}
-            >
+            <Card className="transition-all duration-300 group bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl dark:bg-black dark:border-yellow-500/20 dark:hover:border-yellow-500/50">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-saffron rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Building2 className="w-8 h-8 text-black" />
                 </div>
-                <h3
-                  className={`text-2xl font-bold mb-4 ${
-                    isDarkMode ? "text-saffron" : "text-satin-sheen-gold"
-                  }`}
-                >
+                <h3 className="text-2xl font-bold mb-4 text-satin-sheen-gold dark:text-saffron">
                   Venta de Propiedades
                 </h3>
-                <p
-                  className={`leading-relaxed ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
+                <p className="leading-relaxed text-gray-600 dark:text-gray-300">
                   Asesoría completa en la venta de casas, apartamentos, locales
                   comerciales y terrenos.
                 </p>
               </CardContent>
             </Card>
 
-            <Card
-              className={`transition-all duration-300 group ${
-                isDarkMode
-                  ? "bg-black border-yellow-500/20 hover:border-yellow-500/50"
-                  : "bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl"
-              }`}
-            >
+            <Card className="transition-all duration-300 group bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl dark:bg-black dark:border-yellow-500/20 dark:hover:border-yellow-500/50">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-saffron rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <TrendingUp className="w-8 h-8 text-black" />
                 </div>
-                <h3
-                  className={`text-2xl font-bold mb-4 ${
-                    isDarkMode ? "text-saffron" : "text-satin-sheen-gold"
-                  }`}
-                >
+                <h3 className="text-2xl font-bold mb-4 text-satin-sheen-gold dark:text-saffron">
                   Inversión Inmobiliaria
                 </h3>
-                <p
-                  className={`leading-relaxed ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
+                <p className="leading-relaxed text-gray-600 dark:text-gray-300">
                   Análisis de mercado y oportunidades de inversión para
                   maximizar tu rentabilidad.
                 </p>
               </CardContent>
             </Card>
 
-            <Card
-              className={`transition-all duration-300 group md:col-span-2 lg:col-span-1 ${
-                isDarkMode
-                  ? "bg-black border-yellow-500/20 hover:border-yellow-500/50"
-                  : "bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl"
-              }`}
-            >
+            <Card className="transition-all duration-300 group md:col-span-2 lg:col-span-1 bg-white border-gray-200 hover:border-yellow-500/50 shadow-lg hover:shadow-xl dark:bg-black dark:border-yellow-500/20 dark:hover:border-yellow-500/50">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-saffron rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Users className="w-8 h-8 text-black" />
                 </div>
-                <h3
-                  className={`text-2xl font-bold mb-4 ${
-                    isDarkMode ? "text-saffron" : "text-satin-sheen-gold"
-                  }`}
-                >
+                <h3 className="text-2xl font-bold mb-4 text-satin-sheen-gold dark:text-saffron">
                   Asesoría Personalizada
                 </h3>
-                <p
-                  className={`leading-relaxed ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
+                <p className="leading-relaxed text-gray-600 dark:text-gray-300">
                   Acompañamiento integral desde la búsqueda hasta la firma de
                   escrituras.
                 </p>
@@ -284,35 +230,24 @@ export default function PropertyGroupLanding() {
 
       {/* Testimonials Section */}
       <section id="Testimonios">
-        <Testimonials isDarkMode={isDarkMode} />
+        <Testimonials />
       </section>
 
       {/* About Section */}
-      <section
-        id="nosotros"
-        className={`py-16 md:py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}
-      >
+      <section id="nosotros" className="py-16 md:py-20 bg-white dark:bg-black">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="order-2 lg:order-1">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-8">
                 Sobre <span className="text-saffron">Nosotros</span>
               </h2>
-              <p
-                className={`text-xl mb-6 leading-relaxed ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
+              <p className="text-xl mb-6 leading-relaxed text-gray-700 dark:text-gray-300">
                 Property Group nació de la pasión por ayudar a las familias a
                 encontrar el hogar de sus sueños. Con más de 15 años en el
                 mercado inmobiliario, nos hemos consolidado como una empresa de
                 confianza.
               </p>
-              <p
-                className={`text-lg mb-8 leading-relaxed ${
-                  isDarkMode ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
+              <p className="text-lg mb-8 leading-relaxed text-gray-600 dark:text-gray-400">
                 Nuestro enfoque personalizado y conocimiento profundo del
                 mercado local nos permite ofrecer las mejores oportunidades a
                 nuestros clientes, ya sea que busquen comprar, vender o
@@ -321,31 +256,19 @@ export default function PropertyGroupLanding() {
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <div className="w-3 h-3 bg-saffron rounded-full flex-shrink-0"></div>
-                  <span
-                    className={`text-lg ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
+                  <span className="text-lg text-gray-900 dark:text-white">
                     Experiencia comprobada en el mercado
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="w-3 h-3 bg-saffron rounded-full flex-shrink-0"></div>
-                  <span
-                    className={`text-lg ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
+                  <span className="text-lg text-gray-900 dark:text-white">
                     Atención personalizada y profesional
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="w-3 h-3 bg-saffron rounded-full flex-shrink-0"></div>
-                  <span
-                    className={`text-lg ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
+                  <span className="text-lg text-gray-900 dark:text-white">
                     Red amplia de contactos y propiedades
                   </span>
                 </div>
@@ -358,6 +281,7 @@ export default function PropertyGroupLanding() {
                   src="/images/Person/CEO/img6.jpg"
                   alt="Equipo Property Group"
                   fill
+                  sizes="(min-width: 1024px) 800px, 100vw"
                   className="object-cover object-[center_top] md:object-[center_15%] lg:object-[center_30%]"
                 />
               </div>
@@ -369,86 +293,60 @@ export default function PropertyGroupLanding() {
       {/* Contact Section */}
       <section
         id="contacto"
-        className={`py-16 md:py-20 transition-colors duration-300 ${
-          isDarkMode
-            ? "bg-gradient-to-br from-gray-900 to-black"
-            : "bg-gradient-to-br from-gray-100 to-gray-200"
-        }`}
+        className="py-16 md:py-20 transition-colors duration-300 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black"
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
               <span className="text-saffron">Contacta</span> con Nosotros
             </h2>
-            <p
-              className={`text-xl max-w-3xl mx-auto ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
+            <p className="text-xl max-w-3xl mx-auto text-gray-700 dark:text-gray-300">
               ¿Listo para dar el siguiente paso? Estamos aquí para ayudarte en
               tu próxima decisión inmobiliaria.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16 justify-center">
-            <div>
-              <h3 className="text-2xl font-bold text-saffron mb-8">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
+            <div className="order-1 lg:order-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-saffron mb-6 sm:mb-8">
                 Información de Contacto
               </h3>
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-6 h-6 text-black " />
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0 mt-1 sm:mt-0">
+                    <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                   </div>
-                  <div>
-                    <p
-                      className={isDarkMode ? "text-gray-400" : "text-gray-600"}
-                    >
+                  <div className="min-w-0">
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       Teléfono
                     </p>
-                    <p
-                      className={`text-xl font-semibold ${
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      }`}
-                    >
+                    <p className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                       +1 (829) 638-0380
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-black" />
+                <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0 mt-1 sm:mt-0">
+                    <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                   </div>
-                  <div className="min-w-0">
-                    <p
-                      className={isDarkMode ? "text-gray-400" : "text-gray-600"}
-                    >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       Email
                     </p>
-                    <p
-                      className={`text-xl font-semibold break-words ${
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      }`}
-                    >
+                    <p className="text-lg sm:text-xl font-semibold break-words text-gray-900 dark:text-white">
                       Propertygrouprd@gmail.com
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-black" />
+                <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-saffron rounded-lg flex items-center justify-center flex-shrink-0 mt-1 sm:mt-0">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                   </div>
-                  <div>
-                    <p
-                      className={isDarkMode ? "text-gray-400" : "text-gray-600"}
-                    >
+                  <div className="min-w-0">
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       Dirección
                     </p>
-                    <p
-                      className={`text-xl font-semibold ${
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      }`}
-                    >
+                    <p className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                       Punta Cana, República Dominicana
                     </p>
                   </div>
@@ -456,99 +354,61 @@ export default function PropertyGroupLanding() {
               </div>
             </div>
 
-            <Card
-              className={`mx-auto w-full max-w-md transition-all duration-300 ${
-                isDarkMode
-                  ? "bg-black border-yellow-500/20"
-                  : "bg-white border-gray-200 shadow-lg"
-              }`}
-            >
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-saffron mb-6">
+            <Card className="order-2 lg:order-2 w-full transition-all duration-300 bg-white border-gray-200 shadow-lg dark:bg-black dark:border-yellow-500/20">
+              <CardContent className="p-6 sm:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-saffron mb-4 sm:mb-6">
                   Envíanos un Mensaje
                 </h3>
                 <form
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                   action={"https://formspree.io/f/mqalbgej"}
                   method="POST"
                   onSubmit={() => event("Lead", { location: "ContactForm" })}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label
-                        className={`block text-sm font-medium mb-2 ${
-                          isDarkMode ? "text-white" : "text-gray-700"
-                        }`}
-                      >
+                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-white">
                         Nombre
                       </label>
                       <Input
                         name="nombre"
-                        className={
-                          isDarkMode
-                            ? "bg-gray-900 border-gray-700 text-white focus:border-yellow-500"
-                            : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
-                        }
+                        className="bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                         placeholder="Tu nombre"
                       />
                     </div>
                     <div>
-                      <label
-                        className={`block text-sm font-medium mb-2 ${
-                          isDarkMode ? "text-white" : "text-gray-700"
-                        }`}
-                      >
+                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-white">
                         Teléfono
                       </label>
                       <Input
                         name="telefono"
-                        className={
-                          isDarkMode
-                            ? "bg-gray-900 border-gray-700 text-white focus:border-yellow-500"
-                            : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
-                        }
+                        className="bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                         placeholder="Tu teléfono"
                       />
                     </div>
                   </div>
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDarkMode ? "text-white" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-white">
                       Email
                     </label>
                     <Input
                       name="email"
                       type="email"
-                      className={
-                        isDarkMode
-                          ? "bg-gray-900 border-gray-700 text-white focus:border-yellow-500"
-                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500"
-                      }
+                      className="bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                       placeholder="tu@email.com"
                     />
                   </div>
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDarkMode ? "text-white" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-white">
                       Mensaje
                     </label>
                     <Textarea
                       name="mensaje"
-                      className={
-                        isDarkMode
-                          ? "resize-none bg-gray-900 border-gray-700 text-white focus:border-yellow-500 min-h-[120px]"
-                          : "resize-none bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 min-h-[120px]"
-                      }
+                      className="resize-none bg-gray-50 border-gray-300 text-gray-900 focus:border-yellow-500 min-h-[100px] sm:min-h-[120px] dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                       placeholder="Cuéntanos cómo podemos ayudarte..."
                     />
                   </div>
-                  <Button className="w-full bg-saffron hover:bg-satin-sheen-gold text-black font-semibold text-lg py-3">
+                  <Button className="w-full bg-saffron hover:bg-satin-sheen-gold text-black font-semibold text-base sm:text-lg py-3">
                     Enviar Mensaje
                   </Button>
                 </form>
@@ -559,7 +419,7 @@ export default function PropertyGroupLanding() {
       </section>
 
       {/* Footer */}
-      <Footer isDarkMode={isDarkMode} />
+      <Footer />
     </div>
   );
 }

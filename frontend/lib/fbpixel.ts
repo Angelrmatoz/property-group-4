@@ -26,7 +26,7 @@ export function injectFbPixel() {
     v: any,
     n: any,
     t: any,
-    s: any
+    s: any,
   ) {
     if (f.fbq) return;
     n = f.fbq = function () {
@@ -47,7 +47,7 @@ export function injectFbPixel() {
     window,
     document,
     "script",
-    "https://connect.facebook.net/en_US/fbevents.js"
+    "https://connect.facebook.net/en_US/fbevents.js",
   );
   (window as any).fbq("init", FB_PIXEL_ID);
 }
