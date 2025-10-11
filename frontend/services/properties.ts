@@ -89,7 +89,12 @@ export async function getProperties() {
   // not have a proper baseURL configured. Use native fetch with an absolute
   // URL in that case. In the browser, keep using the axios instance.
   if (typeof window === "undefined") {
+    // Prefer an explicit API URL for server-side fetches. NEXT_PUBLIC_API_URL
+    // can be set at build time to the deployed backend. Fall back to the
+    // frontend base URL for server-side rendering when not provided.
     const base =
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
       process.env.NEXT_PUBLIC_BASE_URL ||
       `http://localhost:${process.env.PORT || 3000}`;
     const url = new URL(`/api/properties`, base).toString();
@@ -107,6 +112,8 @@ export async function getPropertyById(id: string) {
   // instance in the browser. This keeps code small and consistent.
   if (typeof window === "undefined") {
     const base =
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
       process.env.NEXT_PUBLIC_BASE_URL ||
       `http://localhost:${process.env.PORT || 3000}`;
     const url = new URL(`/api/properties/${id}`, base).toString();

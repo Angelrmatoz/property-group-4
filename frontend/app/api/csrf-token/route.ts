@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import axios from "axios";
 
 export async function GET() {
   const backend = process.env.BACKEND_URL;
@@ -10,30 +11,35 @@ export async function GET() {
   }
 
   try {
-    // Fetch CSRF token from backend and forward Set-Cookie headers
-    const res = await fetch(`${backend}/api/csrf-token`, {
-      method: "GET",
-      // include credentials so backend can set the csurf secret cookie
-      credentials: "include",
+    // Request CSRF token from backend using axios so we can access headers
+    const res = await axios.get(`${backend}/api/csrf-token`, {
+      // In Node, axios exposes Set-Cookie headers in res.headers['set-cookie']
+      withCredentials: true,
+      responseType: "text",
+      validateStatus: () => true, // handle non-2xx manually
     });
 
-    const text = await res.text();
-    const contentType = res.headers.get("content-type") || "";
+    const text =
+      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    const contentType = (res.headers &&
+      (res.headers["content-type"] || "")) as string;
 
     const forwarded: Record<string, string> = {};
     const setCookies: string[] = [];
-    res.headers.forEach((value, key) => {
+
+    for (const [key, value] of Object.entries(res.headers || {})) {
       const k = key.toLowerCase();
       if (k === "set-cookie") {
-        setCookies.push(value);
-        return;
+        if (Array.isArray(value)) setCookies.push(...(value as string[]));
+        else if (value) setCookies.push(String(value));
+        continue;
       }
       if (
         ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(k)
       )
-        return;
-      forwarded[key] = value;
-    });
+        continue;
+      if (value !== undefined && value !== null) forwarded[key] = String(value);
+    }
 
     if (contentType.includes("application/json")) {
       try {
@@ -78,7 +84,7 @@ export async function GET() {
       }
     }
     return nextRes;
-  } catch {
+  } catch (err) {
     return NextResponse.json({ error: "Backend unavailable" }, { status: 502 });
   }
 }

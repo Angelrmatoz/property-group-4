@@ -1,8 +1,7 @@
 import axios from "axios";
 
-// Use relative baseURL so services call the frontend proxy (e.g. /api/..)
 const api = axios.create({
-  baseURL: undefined,
+  baseURL: process.env.BACKEND_URL || undefined,
   timeout: 15000,
   withCredentials: true, // include cookies so requests to /api/* carry httpOnly cookies (csurf/token)
 });
