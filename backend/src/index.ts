@@ -6,36 +6,13 @@ import path from "path";
 import csurf from "csurf";
 import { PORT } from "@/utils/config";
 
-// Temporary ENV CHECK for diagnosing Render startup failures
-console.log(
-  "ENV CHECK: MONGODB_URI present=",
-  !!process.env.MONGODB_URI,
-  "JWT_SECRET present=",
-  !!process.env.JWT_SECRET,
-  "NODE_ENV=",
-  process.env.NODE_ENV
-);
-
 import "@/mongo";
 import authRouter from "@/controllers/auth";
 import propertiesRouter from "@/controllers/properties";
 import usersRouter from "@/controllers/users";
 import errorHandler from "@/middleware/error";
 
-// Global handlers for uncaught exceptions and unhandled promise rejections
-process.on("uncaughtException", (err) => {
-  console.error(
-    "Uncaught Exception:",
-    err instanceof Error ? err.stack || err.message : err
-  );
-  // In many setups we want to exit after an uncaught exception so process managers can restart
-  // but here we just log so Render's logs capture the stack before the process exits.
-  process.exit(1);
-});
 
-process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Rejection:", reason);
-});
 
 const app = express();
 app.disable("x-powered-by");
