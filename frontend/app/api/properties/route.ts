@@ -14,8 +14,10 @@ export async function GET() {
         validateStatus: () => true,
         responseType: "text",
       });
-      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
-      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const contentType = (res.headers &&
+        (res.headers["content-type"] || "")) as string;
+      const text =
+        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       // Prefer to return parsed JSON to the client so we don't forward raw
       // backend headers (which may contain relative Location values that
@@ -84,8 +86,10 @@ export async function POST(req: Request) {
         responseType: "text",
       });
 
-      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
-      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const contentType = (res.headers &&
+        (res.headers["content-type"] || "")) as string;
+      const text =
+        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       // Collect headers to forward back to the client (except hop-by-hop)
       const respHeaders: Record<string, string> = {};
@@ -104,7 +108,8 @@ export async function POST(req: Request) {
           )
         )
           continue;
-        if (value !== undefined && value !== null) respHeaders[key] = String(value);
+        if (value !== undefined && value !== null)
+          respHeaders[key] = String(value);
       }
 
       if (contentType.includes("application/json")) {

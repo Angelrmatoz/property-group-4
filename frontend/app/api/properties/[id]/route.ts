@@ -19,8 +19,10 @@ export async function GET(
         validateStatus: () => true,
         responseType: "text",
       });
-      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
-      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const contentType = (res.headers &&
+        (res.headers["content-type"] || "")) as string;
+      const text =
+        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       if (contentType.includes("application/json")) {
         try {
@@ -92,14 +94,20 @@ export async function PUT(
       // directly to the backend. Do not request a new token server-side
       // because that would generate a different secret and cause a mismatch.
 
-      const res = await axios.put(`${backend}/api/properties/${id}`, bodyBuffer, {
-        headers: forwarded as any,
-        validateStatus: () => true,
-        responseType: "text",
-      });
+      const res = await axios.put(
+        `${backend}/api/properties/${id}`,
+        bodyBuffer,
+        {
+          headers: forwarded as any,
+          validateStatus: () => true,
+          responseType: "text",
+        }
+      );
 
-      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
-      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const contentType = (res.headers &&
+        (res.headers["content-type"] || "")) as string;
+      const text =
+        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       // Collect headers to forward back to the client (except hop-by-hop)
       const respHeaders: Record<string, string> = {};
@@ -118,7 +126,8 @@ export async function PUT(
           )
         )
           continue;
-        if (value !== undefined && value !== null) respHeaders[key] = String(value);
+        if (value !== undefined && value !== null)
+          respHeaders[key] = String(value);
       }
 
       if (contentType.includes("application/json")) {
@@ -214,7 +223,8 @@ export async function DELETE(
         responseType: "text",
       });
 
-      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const text =
+        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       const respHeaders: Record<string, string> = {};
       const setCookies: string[] = [];
@@ -232,7 +242,8 @@ export async function DELETE(
           )
         )
           continue;
-        if (value !== undefined && value !== null) respHeaders[key] = String(value);
+        if (value !== undefined && value !== null)
+          respHeaders[key] = String(value);
       }
 
       const nextRes = new NextResponse(text, {

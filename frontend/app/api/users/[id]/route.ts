@@ -55,8 +55,10 @@ export async function DELETE(
     });
 
     if (res.status === 204) return new NextResponse(null, { status: 204 });
-    const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-    const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+    const text =
+      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    const contentType = (res.headers &&
+      (res.headers["content-type"] || "")) as string;
     if (contentType.includes("application/json")) {
       return NextResponse.json(JSON.parse(text), { status: res.status });
     }
@@ -114,8 +116,10 @@ export async function GET(
       responseType: "text",
     });
 
-    const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-    const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+    const text =
+      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    const contentType = (res.headers &&
+      (res.headers["content-type"] || "")) as string;
     if (contentType.includes("application/json")) {
       return NextResponse.json(JSON.parse(text), { status: res.status });
     }

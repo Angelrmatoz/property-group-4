@@ -26,8 +26,10 @@ export async function GET() {
       responseType: "text",
     });
 
-    const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-    const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+    const text =
+      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    const contentType = (res.headers &&
+      (res.headers["content-type"] || "")) as string;
 
     const forwarded: Record<string, string> = {};
     const setCookies: string[] = [];
@@ -124,7 +126,8 @@ export async function POST(req: Request) {
       responseType: "text",
     });
 
-    const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    const text =
+      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
     const forwarded: Record<string, string> = {};
     const setCookies: string[] = [];
     for (const [key, value] of Object.entries(res.headers || {})) {
@@ -141,7 +144,8 @@ export async function POST(req: Request) {
       if (value !== undefined && value !== null) forwarded[key] = String(value);
     }
 
-    const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+    const contentType = (res.headers &&
+      (res.headers["content-type"] || "")) as string;
     if (contentType.includes("application/json")) {
       try {
         const json = JSON.parse(text);

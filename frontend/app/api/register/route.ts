@@ -13,7 +13,8 @@ export async function POST(req: Request) {
         validateStatus: () => true,
         responseType: "text",
       });
-      const data = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const data =
+        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       const forwarded: Record<string, string> = {};
       const setCookies: string[] = [];
@@ -31,7 +32,8 @@ export async function POST(req: Request) {
           )
         )
           continue;
-        if (value !== undefined && value !== null) forwarded[key] = String(value);
+        if (value !== undefined && value !== null)
+          forwarded[key] = String(value);
       }
 
       const nextRes = new NextResponse(data, {

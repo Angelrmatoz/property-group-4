@@ -26,8 +26,10 @@ export async function GET() {
         responseType: "text",
       });
 
-      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+      const text =
+        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const contentType = (res.headers &&
+        (res.headers["content-type"] || "")) as string;
 
       const forwarded: Record<string, string> = {};
       const setCookies: string[] = [];
@@ -44,7 +46,8 @@ export async function GET() {
           )
         )
           continue;
-        if (value !== undefined && value !== null) forwarded[key] = String(value);
+        if (value !== undefined && value !== null)
+          forwarded[key] = String(value);
       }
 
       if (contentType.includes("application/json")) {
@@ -156,7 +159,8 @@ export async function POST(req: Request) {
         loginHeaders["Cookie"] = cookiePairs;
       }
 
-      const res = await axios.post(`${backend}/api/auth/login`, 
+      const res = await axios.post(
+        `${backend}/api/auth/login`,
         { email, password },
         {
           headers: loginHeaders,
@@ -165,7 +169,8 @@ export async function POST(req: Request) {
           responseType: "text",
         }
       );
-      const data = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const data =
+        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       const forwarded: Record<string, string> = {};
       const setCookies: string[] = [];
@@ -183,7 +188,8 @@ export async function POST(req: Request) {
           )
         )
           continue;
-        if (value !== undefined && value !== null) forwarded[key] = String(value);
+        if (value !== undefined && value !== null)
+          forwarded[key] = String(value);
       }
 
       const nextRes = new NextResponse(data, {
