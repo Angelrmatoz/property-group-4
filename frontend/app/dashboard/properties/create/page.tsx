@@ -16,7 +16,6 @@ export default function CreatePropertyPage() {
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
-  // Internally use English canonical values 'sale'|'rent'
   const [type, setType] = useState("sale");
   const [category, setCategory] = useState("apartment");
   const [bedrooms, setBedrooms] = useState("");
