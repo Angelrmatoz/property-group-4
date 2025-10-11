@@ -44,13 +44,12 @@ api.interceptors.request.use(async (config) => {
   const method = (config.method || "").toLowerCase();
   if (["post", "put", "patch", "delete"].includes(method)) {
     try {
-      const res = await fetch("/api/csrf-token", {
-        method: "GET",
-        credentials: "include",
+      // Use axios instead of fetch to ensure consistent cookie handling
+      const res = await axios.get("/api/csrf-token", {
+        withCredentials: true,
       });
-      if (res.ok) {
-        const j = await res.json().catch(() => ({}));
-        const token = (j as any).csrfToken;
+      if (res.status === 200 && res.data) {
+        const token = res.data.csrfToken;
         if (token) {
           config.headers = config.headers || {};
           (config.headers as any)["X-CSRF-Token"] = token;
@@ -82,8 +81,12 @@ export function startAuthHeartbeat(intervalMs = 30_000) {
   async function tick() {
     if (stopped) return;
     try {
-      const r = await fetch("/api/login", { credentials: "include" });
-      if (!r.ok) {
+      // Use axios for consistency with the rest of the app
+      const r = await axios.get("/api/login", {
+        withCredentials: true,
+        validateStatus: () => true, // don't throw on non-2xx
+      });
+      if (r.status !== 200) {
         // token expired or invalid
         try {
           localStorage.setItem("pg:auth:logout", String(Date.now()));
