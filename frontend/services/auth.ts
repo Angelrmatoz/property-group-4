@@ -21,9 +21,22 @@ export async function login(
     const res = await api.post("/api/login", { email, password });
     return { ok: true, ...res.data } as LoginResult;
   } catch (err: any) {
+    // If backend returns a 401, return a friendly message instead of exposing status
+    const status = err?.response?.status || err?.status;
+    if (status === 401) {
+      return {
+        ok: false,
+        message: "Usuario o contraseña incorrecto",
+      };
+    }
+
     return {
       ok: false,
-      message: err?.data?.message || err?.message || "Login failed",
+      message:
+        err?.response?.data?.message ||
+        err?.data?.message ||
+        err?.message ||
+        "Login failed",
     };
   }
 }

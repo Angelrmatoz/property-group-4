@@ -29,7 +29,7 @@ export default function PropertyGallery({ images = [] }: Props) {
               <img
                 src={src}
                 alt={`Imagen ${i + 1}`}
-                className="w-full h-full object-cover rounded"
+                className="w-full h-full object-contain rounded bg-black/5"
               />
             </CarouselItem>
           ))}

@@ -397,14 +397,14 @@ export default function EditPropertyPage({
                             <img
                               src={getSafeImageUrl(imagePreviews[idx])}
                               alt={file.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain bg-black/5"
                             />
                           ) : url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={getSafeImageUrl(url)}
                               alt={`img-${idx}`}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain bg-black/5"
                             />
                           ) : (
                             <div className="text-sm text-muted-foreground">
