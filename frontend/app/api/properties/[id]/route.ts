@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import axios from "axios";
 
 type Property = { id: string; title: string; price?: number };
 
@@ -14,9 +15,12 @@ export async function GET(
   const { id } = (await params) as { id: string };
   if (backend) {
     try {
-      const res = await fetch(`${backend}/api/properties/${id}`);
-      const contentType = res.headers.get("content-type") || "";
-      const text = await res.text();
+      const res = await axios.get(`${backend}/api/properties/${id}`, {
+        validateStatus: () => true,
+        responseType: "text",
+      });
+      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       if (contentType.includes("application/json")) {
         try {
@@ -88,35 +92,34 @@ export async function PUT(
       // directly to the backend. Do not request a new token server-side
       // because that would generate a different secret and cause a mismatch.
 
-      const fetchOptions: any = {
-        method: "PUT",
+      const res = await axios.put(`${backend}/api/properties/${id}`, bodyBuffer, {
         headers: forwarded as any,
-      };
-      if (bodyBuffer) fetchOptions.body = bodyBuffer;
+        validateStatus: () => true,
+        responseType: "text",
+      });
 
-      const res = await fetch(`${backend}/api/properties/${id}`, fetchOptions);
-
-      const contentType = res.headers.get("content-type") || "";
-      const text = await res.text();
+      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       // Collect headers to forward back to the client (except hop-by-hop)
       const respHeaders: Record<string, string> = {};
       const setCookies: string[] = [];
-      res.headers.forEach((value, key) => {
+      for (const [key, value] of Object.entries(res.headers || {})) {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
-          setCookies.push(value);
-          return;
+          if (Array.isArray(value)) setCookies.push(...(value as string[]));
+          else if (value) setCookies.push(String(value));
+          continue;
         }
-        if (k === "location" || k === "content-location") return;
+        if (k === "location" || k === "content-location") continue;
         if (
           ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
             k
           )
         )
-          return;
-        respHeaders[key] = value;
-      });
+          continue;
+        if (value !== undefined && value !== null) respHeaders[key] = String(value);
+      }
 
       if (contentType.includes("application/json")) {
         try {
@@ -205,30 +208,32 @@ export async function DELETE(
       const cookie = req.headers.get("cookie");
       if (cookie) forwarded["Cookie"] = cookie;
 
-      const res = await fetch(`${backend}/api/properties/${id}`, {
-        method: "DELETE",
+      const res = await axios.delete(`${backend}/api/properties/${id}`, {
         headers: forwarded as any,
+        validateStatus: () => true,
+        responseType: "text",
       });
 
-      const text = await res.text();
+      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       const respHeaders: Record<string, string> = {};
       const setCookies: string[] = [];
-      res.headers.forEach((value, key) => {
+      for (const [key, value] of Object.entries(res.headers || {})) {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
-          setCookies.push(value);
-          return;
+          if (Array.isArray(value)) setCookies.push(...(value as string[]));
+          else if (value) setCookies.push(String(value));
+          continue;
         }
-        if (k === "location" || k === "content-location") return;
+        if (k === "location" || k === "content-location") continue;
         if (
           ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
             k
           )
         )
-          return;
-        respHeaders[key] = value;
-      });
+          continue;
+        if (value !== undefined && value !== null) respHeaders[key] = String(value);
+      }
 
       const nextRes = new NextResponse(text, {
         status: res.status,

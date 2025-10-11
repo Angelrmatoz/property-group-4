@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import axios from "axios";
 
 export async function DELETE(
   _req: Request,
@@ -46,15 +47,16 @@ export async function DELETE(
       console.error("/api/users/[id] proxy called without id (DELETE)");
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
-    const res = await fetch(`${backend}/api/users/${id}`, {
-      method: "DELETE",
-      credentials: "include",
+    const res = await axios.delete(`${backend}/api/users/${id}`, {
+      withCredentials: true,
       headers,
+      validateStatus: () => true,
+      responseType: "text",
     });
 
     if (res.status === 204) return new NextResponse(null, { status: 204 });
-    const text = await res.text();
-    const contentType = res.headers.get("content-type") || "";
+    const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
     if (contentType.includes("application/json")) {
       return NextResponse.json(JSON.parse(text), { status: res.status });
     }
@@ -105,14 +107,15 @@ export async function GET(
       console.error("/api/users/[id] proxy called without id (GET)");
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
-    const res = await fetch(`${backend}/api/users/${id}`, {
-      method: "GET",
-      credentials: "include",
+    const res = await axios.get(`${backend}/api/users/${id}`, {
+      withCredentials: true,
       headers,
+      validateStatus: () => true,
+      responseType: "text",
     });
 
-    const text = await res.text();
-    const contentType = res.headers.get("content-type") || "";
+    const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
     if (contentType.includes("application/json")) {
       return NextResponse.json(JSON.parse(text), { status: res.status });
     }

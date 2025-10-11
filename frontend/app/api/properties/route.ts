@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import axios from "axios";
 
 type Property = { id: string; title: string; price?: number };
 
@@ -9,9 +10,12 @@ export async function GET() {
   const backend = process.env.BACKEND_URL;
   if (backend) {
     try {
-      const res = await fetch(`${backend}/api/properties`);
-      const contentType = res.headers.get("content-type") || "";
-      const text = await res.text();
+      const res = await axios.get(`${backend}/api/properties`, {
+        validateStatus: () => true,
+        responseType: "text",
+      });
+      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       // Prefer to return parsed JSON to the client so we don't forward raw
       // backend headers (which may contain relative Location values that
@@ -74,32 +78,34 @@ export async function POST(req: Request) {
         bodyBuffer = null;
       }
 
-      const fetchOptions: any = { method: "POST", headers: forwarded as any };
-      if (bodyBuffer) fetchOptions.body = bodyBuffer;
+      const res = await axios.post(`${backend}/api/properties`, bodyBuffer, {
+        headers: forwarded as any,
+        validateStatus: () => true,
+        responseType: "text",
+      });
 
-      const res = await fetch(`${backend}/api/properties`, fetchOptions);
-
-      const contentType = res.headers.get("content-type") || "";
-      const text = await res.text();
+      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
+      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       // Collect headers to forward back to the client (except hop-by-hop)
       const respHeaders: Record<string, string> = {};
       const setCookies: string[] = [];
-      res.headers.forEach((value, key) => {
+      for (const [key, value] of Object.entries(res.headers || {})) {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
-          setCookies.push(value);
-          return;
+          if (Array.isArray(value)) setCookies.push(...(value as string[]));
+          else if (value) setCookies.push(String(value));
+          continue;
         }
-        if (k === "location" || k === "content-location") return;
+        if (k === "location" || k === "content-location") continue;
         if (
           ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
             k
           )
         )
-          return;
-        respHeaders[key] = value;
-      });
+          continue;
+        if (value !== undefined && value !== null) respHeaders[key] = String(value);
+      }
 
       if (contentType.includes("application/json")) {
         try {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import axios from "axios";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
@@ -7,30 +8,31 @@ export async function POST(req: Request) {
   const backend = process.env.BACKEND_URL;
   if (backend) {
     try {
-      const res = await fetch(`${backend}/api/register`, {
-        method: "POST",
+      const res = await axios.post(`${backend}/api/register`, body, {
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        validateStatus: () => true,
+        responseType: "text",
       });
-      const data = await res.text();
+      const data = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       const forwarded: Record<string, string> = {};
       const setCookies: string[] = [];
-      res.headers.forEach((value, key) => {
+      for (const [key, value] of Object.entries(res.headers || {})) {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
-          setCookies.push(value);
-          return;
+          if (Array.isArray(value)) setCookies.push(...(value as string[]));
+          else if (value) setCookies.push(String(value));
+          continue;
         }
-        if (k === "location" || k === "content-location") return;
+        if (k === "location" || k === "content-location") continue;
         if (
           ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
             k
           )
         )
-          return;
-        forwarded[key] = value;
-      });
+          continue;
+        if (value !== undefined && value !== null) forwarded[key] = String(value);
+      }
 
       const nextRes = new NextResponse(data, {
         status: res.status,

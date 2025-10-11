@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import axios from "axios";
 
 export async function GET() {
   const backend = process.env.BACKEND_URL;
@@ -16,33 +17,35 @@ export async function GET() {
         .getAll()
         .forEach((c) => cookiePairs.push(`${c.name}=${c.value}`));
 
-      const res = await fetch(`${backend}/api/auth/me`, {
-        method: "GET",
-        credentials: "include",
+      const res = await axios.get(`${backend}/api/auth/me`, {
+        withCredentials: true,
         headers: cookiePairs.length
           ? { Cookie: cookiePairs.join("; ") }
           : undefined,
+        validateStatus: () => true,
+        responseType: "text",
       });
 
-      const text = await res.text();
-      const contentType = res.headers.get("content-type") || "";
+      const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+      const contentType = (res.headers && (res.headers["content-type"] || "")) as string;
 
       const forwarded: Record<string, string> = {};
       const setCookies: string[] = [];
-      res.headers.forEach((value, key) => {
+      for (const [key, value] of Object.entries(res.headers || {})) {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
-          setCookies.push(value);
-          return;
+          if (Array.isArray(value)) setCookies.push(...(value as string[]));
+          else if (value) setCookies.push(String(value));
+          continue;
         }
         if (
           ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
             k
           )
         )
-          return;
-        forwarded[key] = value;
-      });
+          continue;
+        if (value !== undefined && value !== null) forwarded[key] = String(value);
+      }
 
       if (contentType.includes("application/json")) {
         try {
@@ -115,26 +118,25 @@ export async function POST(req: Request) {
     try {
       // First fetch CSRF token from backend so we can include it in the login request.
       // We must include credentials so the backend can set/read the csurf secret cookie.
-      const csrfRes = await fetch(`${backend}/api/csrf-token`, {
-        method: "GET",
-        credentials: "include",
+      const csrfRes = await axios.get(`${backend}/api/csrf-token`, {
+        withCredentials: true,
+        validateStatus: () => true,
       });
       let csrfToken: string | undefined = undefined;
       // Capture any Set-Cookie headers the backend sent so we can forward the
       // csurf secret cookie in the subsequent login request.
       const csrfSetCookies: string[] = [];
-      if (csrfRes) {
+      if (csrfRes && csrfRes.data) {
         try {
-          const j = await csrfRes.json().catch(() => ({}));
-          csrfToken = (j as any).csrfToken;
+          csrfToken = csrfRes.data.csrfToken;
         } catch {
           // ignore
         }
         try {
-          // Node/edge fetch may present set-cookie as multiple headers; collect them
-          csrfRes.headers.forEach((value, key) => {
-            if (key.toLowerCase() === "set-cookie") csrfSetCookies.push(value);
-          });
+          // Axios exposes set-cookie in headers['set-cookie']
+          const sc = csrfRes.headers["set-cookie"];
+          if (Array.isArray(sc)) csrfSetCookies.push(...sc);
+          else if (sc) csrfSetCookies.push(String(sc));
         } catch {
           // ignore
         }
@@ -154,33 +156,35 @@ export async function POST(req: Request) {
         loginHeaders["Cookie"] = cookiePairs;
       }
 
-      const res = await fetch(`${backend}/api/auth/login`, {
-        method: "POST",
-        headers: loginHeaders,
-        body: JSON.stringify({ email, password }),
-        // Include cookies so the backend can set/read the httpOnly token cookie
-        // and csurf secret cookie.
-        credentials: "include",
-      });
-      const data = await res.text();
+      const res = await axios.post(`${backend}/api/auth/login`, 
+        { email, password },
+        {
+          headers: loginHeaders,
+          withCredentials: true,
+          validateStatus: () => true,
+          responseType: "text",
+        }
+      );
+      const data = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       const forwarded: Record<string, string> = {};
       const setCookies: string[] = [];
-      res.headers.forEach((value, key) => {
+      for (const [key, value] of Object.entries(res.headers || {})) {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
-          setCookies.push(value);
-          return;
+          if (Array.isArray(value)) setCookies.push(...(value as string[]));
+          else if (value) setCookies.push(String(value));
+          continue;
         }
-        if (k === "location" || k === "content-location") return;
+        if (k === "location" || k === "content-location") continue;
         if (
           ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
             k
           )
         )
-          return;
-        forwarded[key] = value;
-      });
+          continue;
+        if (value !== undefined && value !== null) forwarded[key] = String(value);
+      }
 
       const nextRes = new NextResponse(data, {
         status: res.status,
