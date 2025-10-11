@@ -1,7 +1,13 @@
 import axios from "axios";
 
+// For client-side requests, leave baseURL undefined so axios calls are relative
+// to the frontend origin (e.g., http://localhost:3000). The frontend proxy routes
+// in app/api/* will forward requests to the backend configured via BACKEND_URL.
+// If you want the client to call the backend directly, set NEXT_PUBLIC_API_URL
+// in the frontend environment and uncomment the line below.
 const api = axios.create({
-  baseURL: process.env.BACKEND_URL || undefined,
+  baseURL: undefined, // relative URLs → calls frontend proxy
+  // baseURL: process.env.NEXT_PUBLIC_API_URL || undefined, // uncomment to call backend directly
   timeout: 15000,
   withCredentials: true, // include cookies so requests to /api/* carry httpOnly cookies (csurf/token)
 });
@@ -44,10 +50,11 @@ api.interceptors.request.use(async (config) => {
   const method = (config.method || "").toLowerCase();
   if (["post", "put", "patch", "delete"].includes(method)) {
     try {
-      // Use axios instead of fetch to ensure consistent cookie handling
-      const res = await axios.get("/api/csrf-token", {
-        withCredentials: true,
-      });
+      // Use a direct axios call (not the `api` instance) to avoid baseURL interference
+      // and to prevent infinite interceptor loops. This call goes to the frontend proxy.
+      const res = await axios
+        .create({ withCredentials: true })
+        .get("/api/csrf-token");
       if (res.status === 200 && res.data) {
         const token = res.data.csrfToken;
         if (token) {
@@ -64,7 +71,11 @@ api.interceptors.request.use(async (config) => {
           } catch {}
         }
       }
-    } catch {
+    } catch (err) {
+      // Log error in dev for debugging
+      if (process.env.NODE_ENV === "development") {
+        console.error("[axios] Failed to fetch CSRF token:", err);
+      }
       // ignore; the request may still proceed and the backend will respond 403 if necessary
     }
   }
