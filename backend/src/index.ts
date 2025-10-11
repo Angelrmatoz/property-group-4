@@ -12,8 +12,6 @@ import propertiesRouter from "@/controllers/properties";
 import usersRouter from "@/controllers/users";
 import errorHandler from "@/middleware/error";
 
-
-
 const app = express();
 app.disable("x-powered-by");
 
@@ -71,6 +69,21 @@ if (ENABLE_CSRF) {
 
 // Servir archivos subidos en /uploads
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+
+// Healthcheck and root route
+app.get("/api/health", (_req, res) => {
+  return res.json({ status: "ok", env: process.env.NODE_ENV || "development" });
+});
+
+// Provide a friendly root response so hosting platforms probing `/` get 200
+app.get("/", (_req, res) => {
+  // small HTML to make it easy to load in a browser
+  res
+    .status(200)
+    .send(
+      '<html><body><h1>Property Group API</h1><p>See <a href="/api/health">/api/health</a></p></body></html>'
+    );
+});
 
 app.use("/api/auth", authRouter);
 app.use("/api/properties", propertiesRouter);
