@@ -4,5 +4,6 @@ dist/
 tsconfig.tsbuildinfo
 .env
 .env.local
+.npmrc
 .DS_Store
-trivy-report.json
+trivy-report.json.npmrc
