@@ -6,6 +6,9 @@ import path from "path";
 import csurf from "csurf";
 import { PORT } from "@/utils/config";
 
+// Temporary ENV CHECK for diagnosing Render startup failures
+console.log('ENV CHECK: MONGODB_URI present=', !!process.env.MONGODB_URI, 'JWT_SECRET present=', !!process.env.JWT_SECRET, 'NODE_ENV=', process.env.NODE_ENV);
+
 import "@/mongo";
 import authRouter from "@/controllers/auth";
 import propertiesRouter from "@/controllers/properties";
