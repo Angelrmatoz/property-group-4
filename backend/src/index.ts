@@ -12,6 +12,8 @@ import propertiesRouter from "@/controllers/properties";
 import usersRouter from "@/controllers/users";
 import errorHandler from "@/middleware/error";
 
+
+
 const app = express();
 app.disable("x-powered-by");
 
