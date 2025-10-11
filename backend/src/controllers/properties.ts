@@ -246,6 +246,7 @@ propertiesRouter.post(
         ["city", "municipio"],
         ["neighborhood", "sector"],
         ["type", "tipo"],
+        ["category", "categoria"],
       ];
       for (const group of requiredStringFieldGroups) {
         if (!firstDefined(body, group)) {
@@ -290,10 +291,12 @@ propertiesRouter.post(
         title: firstDefined(body, ["title", "titulo"]),
         description: firstDefined(body, ["description", "descripcion"]),
         price,
+        currency: firstDefined(body, ["currency", "moneda"]) || "USD",
         province: firstDefined(body, ["province", "provincia"]),
         city: firstDefined(body, ["city", "municipio"]),
         neighborhood: firstDefined(body, ["neighborhood", "sector"]),
         type: normalizeTypeValue(firstDefined(body, ["type", "tipo"])),
+        category: firstDefined(body, ["category", "categoria"]),
         bedrooms,
         bathrooms,
         halfBathrooms,
@@ -320,6 +323,7 @@ function toDTO(doc: any): PropertyDTO {
     title: doc.title,
     description: doc.description,
     price: doc.price,
+    currency: doc.currency || "USD",
     province: doc.province,
     city: doc.city,
     neighborhood: doc.neighborhood,
@@ -332,6 +336,7 @@ function toDTO(doc: any): PropertyDTO {
       if (s === "sale" || s === "rent") return s;
       return s;
     })(doc.type),
+    category: doc.category,
     bedrooms: doc.bedrooms,
     bathrooms: doc.bathrooms,
     halfBathrooms: doc.halfBathrooms,
@@ -464,6 +469,8 @@ propertiesRouter.put(
       const description = firstDefined(body, ["description", "descripcion"]);
       if (description !== undefined) updates.description = description;
       if (price !== undefined) updates.price = price;
+      const currency = firstDefined(body, ["currency", "moneda"]);
+      if (currency !== undefined) updates.currency = currency;
       const province = firstDefined(body, ["province", "provincia"]);
       if (province !== undefined) updates.province = province;
       const city = firstDefined(body, ["city", "municipio"]);
@@ -473,6 +480,8 @@ propertiesRouter.put(
       const typeRaw = firstDefined(body, ["type", "tipo"]);
       const type = normalizeTypeValue(typeRaw);
       if (type !== undefined) updates.type = type;
+      const category = firstDefined(body, ["category", "categoria"]);
+      if (category !== undefined) updates.category = category;
       if (bedrooms !== undefined) updates.bedrooms = bedrooms;
       if (bathrooms !== undefined) updates.bathrooms = bathrooms;
       if (halfBathrooms !== undefined) updates.halfBathrooms = halfBathrooms;

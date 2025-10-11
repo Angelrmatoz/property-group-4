@@ -4,10 +4,12 @@ export interface PropertyCreateDTO {
   title: string;
   description: string;
   price: number;
+  currency?: "USD" | "DOP";
   province: string;
   city: string;
   neighborhood?: string;
   type?: string;
+  category?: "apartment" | "house" | "land" | "commercial";
   bedrooms: number;
   bathrooms: number;
   halfBathrooms?: number;

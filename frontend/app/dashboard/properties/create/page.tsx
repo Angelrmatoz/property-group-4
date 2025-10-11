@@ -12,11 +12,13 @@ export default function CreatePropertyPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState("USD");
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   // Internally use English canonical values 'sale'|'rent'
   const [type, setType] = useState("sale");
+  const [category, setCategory] = useState("apartment");
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [halfBathrooms, setHalfBathrooms] = useState("");
@@ -34,10 +36,12 @@ export default function CreatePropertyPage() {
       title,
       description,
       price: Number(price),
+      currency,
       province,
       city,
       neighborhood,
       type,
+      category,
       bedrooms: Number(bedrooms),
       bathrooms: Number(bathrooms),
       halfBathrooms: Number(halfBathrooms),
@@ -51,10 +55,12 @@ export default function CreatePropertyPage() {
       titulo: payload.title,
       descripcion: payload.description,
       precio: payload.price,
+      currency: payload.currency,
       provincia: payload.province,
       municipio: payload.city,
       sector: payload.neighborhood,
       tipo: payload.type,
+      category: payload.category,
       habitaciones: payload.bedrooms,
       banos: payload.bathrooms,
       mediosBanos: payload.halfBathrooms,
@@ -142,7 +148,7 @@ export default function CreatePropertyPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm mb-1">Tipo</label>
             <select
@@ -160,6 +166,29 @@ export default function CreatePropertyPage() {
               <option value="rent">Alquiler</option>
             </select>
           </div>
+
+          <div>
+            <label className="block text-sm mb-1">Categoría</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-background text-foreground cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.75rem center",
+                backgroundSize: "1rem",
+              }}
+            >
+              <option value="apartment">Apartamento</option>
+              <option value="house">Casa/Residencial</option>
+              <option value="land">Terreno</option>
+              <option value="commercial">Comercial</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm mb-1">Precio</label>
             <input
@@ -172,6 +201,26 @@ export default function CreatePropertyPage() {
             />
           </div>
 
+          <div>
+            <label className="block text-sm mb-1">Moneda</label>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-background text-foreground cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.75rem center",
+                backgroundSize: "1rem",
+              }}
+            >
+              <option value="USD">Dólares (USD)</option>
+              <option value="DOP">Pesos Dominicanos (RD$)</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm mb-1">Provincia</label>
             <input
@@ -200,7 +249,9 @@ export default function CreatePropertyPage() {
               className="w-full rounded border px-3 py-2 bg-transparent"
             />
           </div>
+        </div>
 
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <label className="block text-sm mb-1">Amueblado</label>
             <select

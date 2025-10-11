@@ -13,11 +13,14 @@ export default function EditPropertyPage({
   const router = useRouter();
   const { notify } = useNotification();
   const [title, setTitle] = useState("");
-  const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState("USD");
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [type, setType] = useState("sale");
+  const [category, setCategory] = useState("apartment");
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [halfBathrooms, setHalfBathrooms] = useState("");
@@ -86,9 +89,12 @@ export default function EditPropertyPage({
       setTitle(data.title || "");
       setDescription(data.description || "");
       setPrice(data.price?.toString() || "");
+      setCurrency(data.currency || "USD");
       setProvince(data.province || "");
       setCity(data.city || "");
       setNeighborhood(data.neighborhood || "");
+      setType(data.type || "sale");
+      setCategory(data.category || "apartment");
       setBedrooms(data.bedrooms?.toString() || "");
       setBathrooms(data.bathrooms?.toString() || "");
       setHalfBathrooms(data.halfBathrooms?.toString() || "");
@@ -120,9 +126,12 @@ export default function EditPropertyPage({
       title,
       description,
       price: Number(price),
+      currency,
       province,
       city,
       neighborhood,
+      type,
+      category,
       bedrooms: Number(bedrooms),
       bathrooms: Number(bathrooms),
       halfBathrooms: Number(halfBathrooms),
@@ -139,9 +148,12 @@ export default function EditPropertyPage({
       titulo: payload.title,
       descripcion: payload.description,
       precio: payload.price,
+      currency: payload.currency,
       provincia: payload.province,
       municipio: payload.city,
       sector: payload.neighborhood,
+      tipo: payload.type,
+      category: payload.category,
       habitaciones: payload.bedrooms,
       banos: payload.bathrooms,
       mediosBanos: payload.halfBathrooms,
@@ -192,7 +204,7 @@ export default function EditPropertyPage({
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Editar propiedad</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
           <label className="block text-sm mb-1">Título</label>
           <input
@@ -202,6 +214,7 @@ export default function EditPropertyPage({
             required
           />
         </div>
+
         <div>
           <label className="block text-sm mb-1">Descripción</label>
           <textarea
@@ -212,91 +225,187 @@ export default function EditPropertyPage({
             required
           />
         </div>
-        <div>
-          <label className="block text-sm mb-1">Precio</label>
-          <input
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="w-full rounded border px-3 py-2 bg-transparent"
-            inputMode="numeric"
-            pattern="[0-9]*"
-          />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm mb-1">Tipo</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-background text-foreground cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.75rem center",
+                backgroundSize: "1rem",
+              }}
+            >
+              <option value="sale">Venta</option>
+              <option value="rent">Alquiler</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Categoría</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-background text-foreground cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.75rem center",
+                backgroundSize: "1rem",
+              }}
+            >
+              <option value="apartment">Apartamento</option>
+              <option value="house">Casa/Residencial</option>
+              <option value="land">Terreno</option>
+              <option value="commercial">Comercial</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm mb-1">Provincia</label>
-          <input
-            value={province}
-            onChange={(e) => setProvince(e.target.value)}
-            className="w-full rounded border px-3 py-2 bg-transparent"
-            required
-          />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm mb-1">Precio</label>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-transparent"
+              required
+              min={0}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Moneda</label>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-background text-foreground cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.75rem center",
+                backgroundSize: "1rem",
+              }}
+            >
+              <option value="USD">Dólares (USD)</option>
+              <option value="DOP">Pesos Dominicanos (RD$)</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm mb-1">Ciudad</label>
-          <input
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full rounded border px-3 py-2 bg-transparent"
-            required
-          />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm mb-1">Provincia</label>
+            <input
+              value={province}
+              onChange={(e) => setProvince(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Municipio</label>
+            <input
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Sector</label>
+            <input
+              value={neighborhood}
+              onChange={(e) => setNeighborhood(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-transparent"
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm mb-1">Sector / Barrio</label>
-          <input
-            value={neighborhood}
-            onChange={(e) => setNeighborhood(e.target.value)}
-            className="w-full rounded border px-3 py-2 bg-transparent"
-            required
-          />
+
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <label className="block text-sm mb-1">Amueblado</label>
+            <select
+              value={furnished ? "true" : "false"}
+              onChange={(e) => setFurnished(e.target.value === "true")}
+              className="w-full rounded border px-3 py-2 bg-background text-foreground cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.75rem center",
+                backgroundSize: "1rem",
+              }}
+            >
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm mb-1">Habitaciones</label>
             <input
+              type="number"
               value={bedrooms}
               onChange={(e) => setBedrooms(e.target.value)}
               className="w-full rounded border px-3 py-2 bg-transparent"
-              inputMode="numeric"
+              min={0}
             />
           </div>
+
           <div>
             <label className="block text-sm mb-1">Baños</label>
             <input
+              type="number"
               value={bathrooms}
               onChange={(e) => setBathrooms(e.target.value)}
               className="w-full rounded border px-3 py-2 bg-transparent"
-              inputMode="numeric"
+              min={0}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+
           <div>
             <label className="block text-sm mb-1">Medios baños</label>
             <input
+              type="number"
               value={halfBathrooms}
               onChange={(e) => setHalfBathrooms(e.target.value)}
               className="w-full rounded border px-3 py-2 bg-transparent"
-              inputMode="numeric"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Parqueos</label>
-            <input
-              value={parkingSpaces}
-              onChange={(e) => setParkingSpaces(e.target.value)}
-              className="w-full rounded border px-3 py-2 bg-transparent"
-              inputMode="numeric"
+              min={0}
             />
           </div>
         </div>
-        <div>
-          <label className="block text-sm mb-1">Área construida (m²)</label>
-          <input
-            value={builtArea}
-            onChange={(e) => setBuiltArea(e.target.value)}
-            className="w-full rounded border px-3 py-2 bg-transparent"
-            inputMode="numeric"
-          />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm mb-1">Parqueos</label>
+            <input
+              type="number"
+              value={parkingSpaces}
+              onChange={(e) => setParkingSpaces(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-transparent"
+              min={0}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Construcción (m²)</label>
+            <input
+              type="number"
+              value={builtArea}
+              onChange={(e) => setBuiltArea(e.target.value)}
+              className="w-full rounded border px-3 py-2 bg-transparent"
+              min={0}
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm mb-2">Imágenes (10 slots)</label>
@@ -467,42 +576,7 @@ export default function EditPropertyPage({
             })}
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-sm">Amueblado</div>
-          <div className="flex items-center gap-3">
-            <label
-              className={`inline-flex items-center gap-2 cursor-pointer rounded px-3 py-1 ${
-                furnished ? "bg-amber-600 text-white" : "bg-transparent"
-              }`}
-            >
-              <input
-                type="radio"
-                name="furnished"
-                value="true"
-                checked={furnished === true}
-                onChange={() => setFurnished(true)}
-                className="sr-only"
-              />
-              Sí
-            </label>
 
-            <label
-              className={`inline-flex items-center gap-2 cursor-pointer rounded px-3 py-1 ${
-                furnished ? "bg-transparent" : "bg-amber-600 text-white"
-              }`}
-            >
-              <input
-                type="radio"
-                name="furnished"
-                value="false"
-                checked={furnished === false}
-                onChange={() => setFurnished(false)}
-                className="sr-only"
-              />
-              No
-            </label>
-          </div>
-        </div>
         <div>
           <button
             type="submit"
