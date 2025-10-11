@@ -12,11 +12,23 @@ export default function CreateUserPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [admin, setAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // validate passwords match
+    if (password !== confirmPassword) {
+      notify({
+        type: "error",
+        title: "Contraseñas no coinciden",
+        message:
+          "La contraseña y la confirmación no coinciden. Por favor verifica.",
+        duration: 4000,
+      });
+      return;
+    }
     setLoading(true);
     try {
       const { status, data } = await usersService.createUser({
@@ -104,6 +116,17 @@ export default function CreateUserPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded border px-3 py-2 bg-background text-foreground"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">Confirmar contraseña</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full rounded border px-3 py-2 bg-background text-foreground"
             required
           />

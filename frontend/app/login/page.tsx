@@ -12,6 +12,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  // keep overlay mounted briefly during close animation
+  const [menuVisible, setMenuVisible] = useState(false);
   const { notify } = useNotification();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -140,7 +142,17 @@ const Login: React.FC = () => {
         {/* Floating Menu button (fixed, bottom-right) to avoid overlapping the login card */}
         <button
           aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
-          onClick={() => setMenuOpen((s) => !s)}
+          onClick={() => {
+            if (!menuOpen) {
+              setMenuVisible(true);
+              setMenuOpen(true);
+            } else {
+              // start closing animation
+              setMenuOpen(false);
+              // wait for animation to finish before unmounting
+              window.setTimeout(() => setMenuVisible(false), 250);
+            }
+          }}
           className="fixed right-6 bottom-6 md:top-6 md:bottom-auto z-50 p-3 rounded-full bg-black/60 dark:bg-white/10 hover:bg-black/70 dark:hover:bg-white/20 shadow-lg"
         >
           {/* simple hamburger / close icon */}
@@ -177,16 +189,28 @@ const Login: React.FC = () => {
           )}
         </button>
 
-        {/* Fullscreen translucent menu overlay */}
-        {menuOpen && (
+        {/* Fullscreen translucent menu overlay with enter/leave animations */}
+        {menuVisible && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${
+              menuOpen
+                ? "bg-black/60 backdrop-blur-sm"
+                : "bg-black/0 backdrop-blur-0 pointer-events-none"
+            }`}
             role="dialog"
             aria-modal="true"
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              // trigger closing animation
+              setMenuOpen(false);
+              window.setTimeout(() => setMenuVisible(false), 250);
+            }}
           >
             <nav
-              className="w-full max-w-md mx-4 bg-white/80 dark:bg-neutral-900/80 rounded-lg p-6 shadow-lg text-center max-h-[90vh] overflow-auto"
+              className={`w-full max-w-md mx-4 rounded-lg p-6 shadow-lg text-center max-h-[90vh] overflow-auto bg-white/80 dark:bg-neutral-900/80 transform transition-all duration-250 ${
+                menuOpen
+                  ? "opacity-100 scale-100 translate-y-0"
+                  : "opacity-0 scale-95 -translate-y-4"
+              }`}
               onClick={(e) => e.stopPropagation()}
             >
               <button
