@@ -75,6 +75,12 @@ export async function PUT(
         forwarded[key] = value;
       });
 
+      // Explicitly forward CSRF token if present
+      const csrfToken = req.headers.get("x-csrf-token");
+      if (csrfToken) {
+        forwarded["X-CSRF-Token"] = csrfToken;
+      }
+
       // If the client sent cookies, forward them to the backend
       const cookie = req.headers.get("cookie");
       if (cookie) forwarded["Cookie"] = cookie;
@@ -214,6 +220,13 @@ export async function DELETE(
           return;
         forwarded[key] = value;
       });
+
+      // Explicitly forward CSRF token if present
+      const csrfToken = req.headers.get("x-csrf-token");
+      if (csrfToken) {
+        forwarded["X-CSRF-Token"] = csrfToken;
+      }
+
       const cookie = req.headers.get("cookie");
       if (cookie) forwarded["Cookie"] = cookie;
 

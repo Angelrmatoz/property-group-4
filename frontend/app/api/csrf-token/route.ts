@@ -15,12 +15,12 @@ export async function GET() {
     const res = await axios.get(`${backend}/api/csrf-token`, {
       // In Node, axios exposes Set-Cookie headers in res.headers['set-cookie']
       withCredentials: true,
-      responseType: "text",
       validateStatus: () => true, // handle non-2xx manually
     });
 
-    const text =
-      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    console.log("[csrf-token proxy] Backend response status:", res.status);
+    console.log("[csrf-token proxy] Backend response data:", res.data);
+
     const contentType = (res.headers &&
       (res.headers["content-type"] || "")) as string;
 
@@ -43,7 +43,9 @@ export async function GET() {
 
     if (contentType.includes("application/json")) {
       try {
-        const json = JSON.parse(text);
+        // res.data is already parsed JSON when we don't specify responseType: "text"
+        const json =
+          typeof res.data === "object" ? res.data : JSON.parse(res.data);
         const nextRes = NextResponse.json(json, {
           status: res.status,
           headers: forwarded,
@@ -68,6 +70,9 @@ export async function GET() {
       }
     }
 
+    // Non-JSON response
+    const text =
+      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
     const nextRes = new NextResponse(text, {
       status: res.status,
       headers: forwarded,

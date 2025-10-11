@@ -68,6 +68,35 @@ export async function POST(req: Request) {
         forwarded[key] = value;
       });
 
+      // Explicitly forward CSRF token if present
+      const csrfToken = req.headers.get("x-csrf-token");
+      const csrfTokenUpper = req.headers.get("X-CSRF-Token");
+      const actualCsrf = csrfToken || csrfTokenUpper;
+
+      // DEBUG: Log what we received
+      console.log("[properties POST proxy] Incoming headers check:");
+      console.log(
+        "  x-csrf-token (lowercase):",
+        csrfToken ? "PRESENT" : "MISSING"
+      );
+      console.log(
+        "  X-CSRF-Token (uppercase):",
+        csrfTokenUpper ? "PRESENT" : "MISSING"
+      );
+      console.log(
+        "  Actual CSRF token to forward:",
+        actualCsrf ? actualCsrf.substring(0, 10) + "..." : "NONE"
+      );
+
+      if (actualCsrf) {
+        forwarded["X-CSRF-Token"] = actualCsrf;
+        forwarded["x-csrf-token"] = actualCsrf;
+      } else {
+        console.error(
+          "[properties POST proxy] NO CSRF TOKEN FOUND IN INCOMING REQUEST!"
+        );
+      }
+
       // Forward cookie if present
       const cookie = req.headers.get("cookie");
       if (cookie) forwarded["Cookie"] = cookie;

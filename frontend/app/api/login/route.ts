@@ -23,8 +23,16 @@ export async function GET() {
           ? { Cookie: cookiePairs.join("; ") }
           : undefined,
         validateStatus: () => true,
-        responseType: "text",
       });
+
+      console.log(
+        "[login GET proxy] Backend /api/auth/me response status:",
+        res.status
+      );
+      console.log(
+        "[login GET proxy] Backend /api/auth/me response data:",
+        res.data
+      );
 
       const text =
         typeof res.data === "string" ? res.data : JSON.stringify(res.data);
@@ -166,9 +174,18 @@ export async function POST(req: Request) {
           headers: loginHeaders,
           withCredentials: true,
           validateStatus: () => true,
-          responseType: "text",
         }
       );
+
+      console.log(
+        "[login POST proxy] Backend /api/auth/login response status:",
+        res.status
+      );
+      console.log(
+        "[login POST proxy] Backend /api/auth/login response data:",
+        res.data
+      );
+
       const data =
         typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 

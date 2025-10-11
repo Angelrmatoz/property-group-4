@@ -50,26 +50,42 @@ api.interceptors.request.use(async (config) => {
   const method = (config.method || "").toLowerCase();
   if (["post", "put", "patch", "delete"].includes(method)) {
     try {
-      // Use a direct axios call (not the `api` instance) to avoid baseURL interference
-      // and to prevent infinite interceptor loops. This call goes to the frontend proxy.
-      const res = await axios
-        .create({ withCredentials: true })
-        .get("/api/csrf-token");
-      if (res.status === 200 && res.data) {
-        const token = res.data.csrfToken;
+      // Use native fetch (not axios) to avoid baseURL issues and interceptor loops.
+      // This call goes to the frontend proxy at /api/csrf-token.
+      const res = await fetch("/api/csrf-token", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const token = data.csrfToken;
         if (token) {
           config.headers = config.headers || {};
           (config.headers as any)["X-CSRF-Token"] = token;
-          // DEV debug: log that we attached a csrf token (do not log token value)
+          (config.headers as any)["x-csrf-token"] = token; // also set lowercase version
+          // DEV debug: log that we attached a csrf token
           try {
             if (process.env.NODE_ENV === "development") {
               // eslint-disable-next-line no-console
-              console.debug(
-                "[axios] attached X-CSRF-Token header for mutating request"
+              console.log(
+                "[axios interceptor] Successfully attached X-CSRF-Token header. Token starts with:",
+                token.substring(0, 10) + "..."
               );
+              console.log("[axios interceptor] Request URL:", config.url);
+              console.log("[axios interceptor] Request method:", config.method);
             }
           } catch {}
+        } else {
+          console.error(
+            "[axios interceptor] CSRF token is missing in response data:",
+            data
+          );
         }
+      } else {
+        console.error(
+          "[axios interceptor] Failed to fetch CSRF token. Status:",
+          res.status
+        );
       }
     } catch (err) {
       // Log error in dev for debugging
@@ -92,12 +108,11 @@ export function startAuthHeartbeat(intervalMs = 30_000) {
   async function tick() {
     if (stopped) return;
     try {
-      // Use axios for consistency with the rest of the app
-      const r = await axios.get("/api/login", {
-        withCredentials: true,
-        validateStatus: () => true, // don't throw on non-2xx
+      // Use native fetch to avoid axios configuration issues
+      const r = await fetch("/api/login", {
+        credentials: "include",
       });
-      if (r.status !== 200) {
+      if (!r.ok) {
         // token expired or invalid
         try {
           localStorage.setItem("pg:auth:logout", String(Date.now()));
