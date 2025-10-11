@@ -14,7 +14,10 @@ import errorHandler from "@/middleware/error";
 
 // Global handlers for uncaught exceptions and unhandled promise rejections
 process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err instanceof Error ? err.stack || err.message : err);
+  console.error(
+    "Uncaught Exception:",
+    err instanceof Error ? err.stack || err.message : err
+  );
   // In many setups we want to exit after an uncaught exception so process managers can restart
   // but here we just log so Render's logs capture the stack before the process exits.
   process.exit(1);
