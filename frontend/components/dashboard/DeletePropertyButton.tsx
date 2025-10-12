@@ -24,7 +24,6 @@ export default function DeletePropertyButton({ id }: { id: string }) {
       // refresh the current route to reflect deletion
       router.refresh();
     } catch (err) {
-      console.error(err);
       const backendMsg =
         (err as any)?.response?.data?.error || (err as any)?.message;
       notify({

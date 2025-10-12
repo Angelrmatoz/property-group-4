@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { parseSetCookie } from "@/lib/proxy-helper";
 
-export async function GET() {
+export async function GET(_req: Request) {
   const backend = process.env.BACKEND_URL;
   if (!backend) {
     return NextResponse.json(
@@ -9,19 +10,24 @@ export async function GET() {
     );
   }
 
+  // DEV DEBUG: log if incoming request contained any forwarded headers
+  // During development we previously printed forwarded header values for debugging.
+  // Those debug logs are no longer necessary.
+
   try {
-    // Fetch CSRF token from backend and forward Set-Cookie headers
+    // Request CSRF token from backend using fetch
     const res = await fetch(`${backend}/api/csrf-token`, {
-      method: "GET",
-      // include credentials so backend can set the csurf secret cookie
       credentials: "include",
     });
 
-    const text = await res.text();
+    // no debug logging
+
     const contentType = res.headers.get("content-type") || "";
 
     const forwarded: Record<string, string> = {};
     const setCookies: string[] = [];
+
+    // Extract headers
     res.headers.forEach((value, key) => {
       const k = key.toLowerCase();
       if (k === "set-cookie") {
@@ -29,7 +35,14 @@ export async function GET() {
         return;
       }
       if (
-        ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(k)
+        [
+          "transfer-encoding",
+          "connection",
+          "keep-alive",
+          "upgrade",
+          "content-encoding",
+          "content-length",
+        ].includes(k)
       )
         return;
       forwarded[key] = value;
@@ -37,21 +50,25 @@ export async function GET() {
 
     if (contentType.includes("application/json")) {
       try {
-        const json = JSON.parse(text);
+        const json = await res.json();
+        // backend response parsed
+
         const nextRes = NextResponse.json(json, {
           status: res.status,
           headers: forwarded,
         });
+
         for (const sc of setCookies) {
-          const first = sc.split(";")[0];
-          const idx = first.indexOf("=");
-          if (idx > 0) {
-            const name = first.slice(0, idx);
-            const value = first.slice(idx + 1);
-            try {
-              nextRes.cookies.set(name, value);
-            } catch {}
-          }
+          try {
+            const parsed = parseSetCookie(sc);
+            if (parsed) {
+              nextRes.cookies.set(
+                parsed.name,
+                parsed.value,
+                parsed.options as any
+              );
+            }
+          } catch {}
         }
         return nextRes;
       } catch {
@@ -62,20 +79,20 @@ export async function GET() {
       }
     }
 
+    // Non-JSON response
+    const text = await res.text();
     const nextRes = new NextResponse(text, {
       status: res.status,
       headers: forwarded,
     });
+
     for (const sc of setCookies) {
-      const first = sc.split(";")[0];
-      const idx = first.indexOf("=");
-      if (idx > 0) {
-        const name = first.slice(0, idx);
-        const value = first.slice(idx + 1);
-        try {
-          nextRes.cookies.set(name, value);
-        } catch {}
-      }
+      try {
+        const parsed = parseSetCookie(sc);
+        if (parsed) {
+          nextRes.cookies.set(parsed.name, parsed.value, parsed.options as any);
+        }
+      } catch {}
     }
     return nextRes;
   } catch {

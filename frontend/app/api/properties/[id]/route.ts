@@ -1,80 +1,33 @@
 import { NextResponse } from "next/server";
+import { proxyToBackend, parseSetCookie } from "@/lib/proxy-helper";
 
 type Property = { id: string; title: string; price?: number };
 
-// Reference the same simple in-memory store as route.ts (note: in dev this lives per server instance)
+// Small in-memory fallback store used when BACKEND_URL is not set
 const store: Property[] = [];
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request, context: any) {
+  const { id } = (await context.params) as { id: string };
   const backend = process.env.BACKEND_URL;
-  // await params in case it's a Promise-like object provided by Next
-  const { id } = (await params) as { id: string };
   if (backend) {
-    try {
-      const res = await fetch(`${backend}/api/properties/${id}`);
-      const contentType = res.headers.get("content-type") || "";
-      const text = await res.text();
-
-      if (contentType.includes("application/json")) {
-        try {
-          const json = JSON.parse(text);
-          return NextResponse.json(json, { status: res.status });
-        } catch {
-          return NextResponse.json(
-            { error: "Invalid JSON from backend" },
-            { status: 502 }
-          );
-        }
-      }
-
-      return new NextResponse(text, { status: res.status });
-    } catch {
-      return NextResponse.json(
-        { error: "Backend unavailable" },
-        { status: 502 }
-      );
-    }
+    return await proxyToBackend(`${backend}/api/properties/${id}`, {
+      method: "GET",
+      headers: { ...(req.headers as any) },
+    });
   }
+
   const item = store.find((s) => s.id === id);
   if (!item)
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   return NextResponse.json(item);
 }
 
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = (await params) as { id: string };
+export async function PUT(req: Request, context: any) {
+  const { id } = (await context.params) as { id: string };
   const backend = process.env.BACKEND_URL;
   if (backend) {
     try {
-      // Forward incoming headers except hop-by-hop headers
-      const forwarded: Record<string, string> = {};
-      req.headers.forEach((value, key) => {
-        const k = key.toLowerCase();
-        if (
-          [
-            "connection",
-            "keep-alive",
-            "transfer-encoding",
-            "upgrade",
-            "host",
-          ].includes(k)
-        )
-          return;
-        forwarded[key] = value;
-      });
-
-      // If the client sent cookies, forward them to the backend
-      const cookie = req.headers.get("cookie");
-      if (cookie) forwarded["Cookie"] = cookie;
-
-      // Read raw body (works for JSON and multipart/form-data). Use arrayBuffer
-      // so we forward the exact bytes received to the backend.
+      // Read raw body so multipart/form-data is forwarded unchanged
       let bodyBuffer: ArrayBuffer | null = null;
       try {
         bodyBuffer = await req.arrayBuffer();
@@ -82,26 +35,69 @@ export async function PUT(
         bodyBuffer = null;
       }
 
-      // The client already fetches /api/csrf-token and includes the
-      // X-CSRF-Token header and cookies when calling this route.
-      // Forward the incoming headers (including Cookie and X-CSRF-Token)
-      // directly to the backend. Do not request a new token server-side
-      // because that would generate a different secret and cause a mismatch.
+      // Request a fresh CSRF token from backend
+      const csrfRes = await fetch(`${backend}/api/csrf-token`, {
+        credentials: "include",
+      });
 
-      const fetchOptions: any = {
+      let csrfToken: string | undefined = undefined;
+      const csrfSetCookies: string[] = [];
+      if (csrfRes.ok) {
+        try {
+          const json = await csrfRes.json();
+          csrfToken = json.csrfToken;
+        } catch {}
+
+        csrfRes.headers.forEach((value, key) => {
+          if (key.toLowerCase() === "set-cookie") csrfSetCookies.push(value);
+        });
+      }
+
+      // Merge incoming cookies with csrf set-cookie values
+      const incomingCookie = req.headers.get("cookie") || "";
+      const cookieMap = new Map<string, string>();
+      for (const part of incomingCookie.split(";")) {
+        const p = part.trim();
+        if (!p) continue;
+        const idx = p.indexOf("=");
+        if (idx <= 0) continue;
+        const name = p.slice(0, idx);
+        const value = p.slice(idx + 1);
+        cookieMap.set(name, value);
+      }
+      for (const sc of csrfSetCookies) {
+        try {
+          const first = sc.split(";")[0];
+          const eq = first.indexOf("=");
+          if (eq > 0) {
+            const name = first.slice(0, eq);
+            const value = first.slice(eq + 1);
+            cookieMap.set(name, value);
+          }
+        } catch {}
+      }
+      const cookiePairs: string[] = [];
+      cookieMap.forEach((v, k) => cookiePairs.push(`${k}=${v}`));
+
+      // Prepare headers to forward: preserve content-type and include csrf token
+      const forwarded: Record<string, string> = {};
+      const incomingContentType = req.headers.get("content-type");
+      if (incomingContentType) forwarded["content-type"] = incomingContentType;
+      if (csrfToken) forwarded["x-csrf-token"] = csrfToken;
+      if (cookiePairs.length) forwarded["Cookie"] = cookiePairs.join("; ");
+
+      const res = await fetch(`${backend}/api/properties/${id}`, {
         method: "PUT",
-        headers: forwarded as any,
-      };
-      if (bodyBuffer) fetchOptions.body = bodyBuffer;
+        headers: forwarded,
+        body: bodyBuffer,
+        credentials: "include",
+      });
 
-      const res = await fetch(`${backend}/api/properties/${id}`, fetchOptions);
-
+      // Collect response headers and set-cookies
       const contentType = res.headers.get("content-type") || "";
-      const text = await res.text();
-
-      // Collect headers to forward back to the client (except hop-by-hop)
       const respHeaders: Record<string, string> = {};
       const setCookies: string[] = [];
+
       res.headers.forEach((value, key) => {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
@@ -110,63 +106,58 @@ export async function PUT(
         }
         if (k === "location" || k === "content-location") return;
         if (
-          ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
-            k
-          )
+          [
+            "transfer-encoding",
+            "connection",
+            "keep-alive",
+            "upgrade",
+            "content-encoding",
+            "content-length",
+          ].includes(k)
         )
           return;
         respHeaders[key] = value;
       });
 
+      let nextRes: NextResponse;
       if (contentType.includes("application/json")) {
         try {
-          const json = JSON.parse(text);
-          const nextRes = NextResponse.json(json, {
+          const json = await res.json();
+          nextRes = NextResponse.json(json, {
             status: res.status,
             headers: respHeaders,
           });
-          for (const sc of setCookies) {
-            const first = sc.split(";")[0];
-            const idx = first.indexOf("=");
-            if (idx > 0) {
-              const name = first.slice(0, idx);
-              const value = first.slice(idx + 1);
-              try {
-                nextRes.cookies.set(name, value);
-              } catch {}
-            }
-          }
-          return nextRes;
         } catch {
           return NextResponse.json(
             { error: "Invalid JSON from backend" },
             { status: 502 }
           );
         }
+      } else {
+        const text = await res.text();
+        nextRes = new NextResponse(text, {
+          status: res.status,
+          headers: respHeaders,
+        });
       }
 
-      // Non-JSON response
-      const nextRes = new NextResponse(text, {
-        status: res.status,
-        headers: respHeaders,
-      });
+      // Forward Set-Cookie headers (preserve attributes)
       for (const sc of setCookies) {
-        const first = sc.split(";")[0];
-        const idx = first.indexOf("=");
-        if (idx > 0) {
-          const name = first.slice(0, idx);
-          const value = first.slice(idx + 1);
-          try {
-            nextRes.cookies.set(name, value);
-          } catch {}
-        }
+        try {
+          const parsed = parseSetCookie(sc);
+          if (parsed) {
+            nextRes.cookies.set(
+              parsed.name,
+              parsed.value,
+              parsed.options as any
+            );
+          }
+        } catch {}
       }
+
       return nextRes;
-    } catch {
-      return NextResponse.json(
-        { error: "Backend unavailable" },
-        { status: 502 }
-      );
+    } catch (err) {
+      return NextResponse.json({ error: String(err) }, { status: 500 });
     }
   }
 
@@ -179,79 +170,21 @@ export async function PUT(
   return NextResponse.json(store[idx]);
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = (await params) as { id: string };
+export async function DELETE(req: Request, context: any) {
+  const { id } = (await context.params) as { id: string };
   const backend = process.env.BACKEND_URL;
   if (backend) {
-    try {
-      const forwarded: Record<string, string> = {};
-      req.headers.forEach((value, key) => {
-        const k = key.toLowerCase();
-        if (
-          [
-            "connection",
-            "keep-alive",
-            "transfer-encoding",
-            "upgrade",
-            "host",
-          ].includes(k)
-        )
-          return;
-        forwarded[key] = value;
-      });
-      const cookie = req.headers.get("cookie");
-      if (cookie) forwarded["Cookie"] = cookie;
+    // forward CSRF header and Cookie if present
+    const headers: Record<string, string> = {};
+    const csrfToken = req.headers.get("x-csrf-token");
+    if (csrfToken) headers["x-csrf-token"] = csrfToken;
+    const cookie = req.headers.get("cookie");
+    if (cookie) headers["Cookie"] = cookie;
 
-      const res = await fetch(`${backend}/api/properties/${id}`, {
-        method: "DELETE",
-        headers: forwarded as any,
-      });
-
-      const text = await res.text();
-
-      const respHeaders: Record<string, string> = {};
-      const setCookies: string[] = [];
-      res.headers.forEach((value, key) => {
-        const k = key.toLowerCase();
-        if (k === "set-cookie") {
-          setCookies.push(value);
-          return;
-        }
-        if (k === "location" || k === "content-location") return;
-        if (
-          ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
-            k
-          )
-        )
-          return;
-        respHeaders[key] = value;
-      });
-
-      const nextRes = new NextResponse(text, {
-        status: res.status,
-        headers: respHeaders,
-      });
-      for (const sc of setCookies) {
-        const first = sc.split(";")[0];
-        const idx = first.indexOf("=");
-        if (idx > 0) {
-          const name = first.slice(0, idx);
-          const value = first.slice(idx + 1);
-          try {
-            nextRes.cookies.set(name, value);
-          } catch {}
-        }
-      }
-      return nextRes;
-    } catch {
-      return NextResponse.json(
-        { error: "Backend unavailable" },
-        { status: 502 }
-      );
-    }
+    return await proxyToBackend(`${backend}/api/properties/${id}`, {
+      method: "DELETE",
+      headers,
+    });
   }
 
   const idx = store.findIndex((s) => s.id === id);

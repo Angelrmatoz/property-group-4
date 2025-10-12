@@ -68,7 +68,6 @@ export default function CreateUserPage() {
         message: errorMsg,
         duration: 4000,
       });
-      console.error(err);
     }
   }
 

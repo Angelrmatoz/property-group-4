@@ -43,21 +43,24 @@ export async function DELETE(
     const p = await (params as any);
     const id = p.id as string;
     if (!id) {
-      console.error("/api/users/[id] proxy called without id (DELETE)");
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
+
     const res = await fetch(`${backend}/api/users/${id}`, {
       method: "DELETE",
-      credentials: "include",
       headers,
+      credentials: "include",
     });
 
     if (res.status === 204) return new NextResponse(null, { status: 204 });
-    const text = await res.text();
+
     const contentType = res.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
-      return NextResponse.json(JSON.parse(text), { status: res.status });
+      const json = await res.json();
+      return NextResponse.json(json, { status: res.status });
     }
+
+    const text = await res.text();
     return new NextResponse(text, { status: res.status });
   } catch {
     return NextResponse.json({ error: "Backend unavailable" }, { status: 502 });
@@ -102,23 +105,24 @@ export async function GET(
     const p = await (params as any);
     const id = p.id as string;
     if (!id) {
-      console.error("/api/users/[id] proxy called without id (GET)");
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
+
     const res = await fetch(`${backend}/api/users/${id}`, {
       method: "GET",
-      credentials: "include",
       headers,
+      credentials: "include",
     });
 
-    const text = await res.text();
     const contentType = res.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
-      return NextResponse.json(JSON.parse(text), { status: res.status });
+      const json = await res.json();
+      return NextResponse.json(json, { status: res.status });
     }
+
+    const text = await res.text();
     return new NextResponse(text, { status: res.status });
-  } catch (err) {
-    console.error("/api/users/[id] proxy GET error:", err);
+  } catch {
     return NextResponse.json({ error: "Backend unavailable" }, { status: 502 });
   }
 }

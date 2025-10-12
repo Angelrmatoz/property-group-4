@@ -33,8 +33,7 @@ export default function UsersListPage() {
         );
         if (!mounted) return;
         setUsers(list || []);
-      } catch (err) {
-        console.error(err);
+      } catch {
         if (mounted) setUsers([]);
       } finally {
         if (mounted) setLoading(false);
@@ -74,7 +73,6 @@ export default function UsersListPage() {
         });
       }
     } catch (err) {
-      console.error(err);
       const errorMsg =
         (err as any)?.response?.data?.error ||
         (err as any)?.message ||

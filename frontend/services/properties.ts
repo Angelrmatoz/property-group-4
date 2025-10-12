@@ -1,5 +1,4 @@
-import api from "@/lib/axios";
-import axios from "axios";
+import api from "@/lib/fetch";
 
 export type CreatePropertyPayload = {
   titulo: string;
@@ -44,7 +43,7 @@ export async function createPropertyFormData(
 
   const { data } = await api.post("/api/properties", fd, {
     // Let the browser set Content-Type (including boundary). Do NOT set
-    // Content-Type manually or axios will omit the boundary which breaks
+    // Content-Type manually or fetch will omit the boundary which breaks
     // multipart requests.
     // headers: { "Content-Type": "multipart/form-data" },
   });
@@ -85,33 +84,46 @@ export async function updatePropertyFormData(
 }
 
 export async function getProperties() {
-  // When executing on the server (Next server components / SSR) axios may
-  // not have a proper baseURL configured. Use native fetch with an absolute
-  // URL in that case. In the browser, keep using the axios instance.
+  // When executing on the server (Next server components / SSR), use an absolute
+  // URL pointing to the Next.js server (frontend) which will proxy to backend.
+  // In the browser, use relative URLs through our fetch wrapper.
   if (typeof window === "undefined") {
-    const base =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      `http://localhost:${process.env.PORT || 3000}`;
+    // For SSR, use localhost to call the Next.js frontend API routes
+    // which will then proxy to BACKEND_URL
+    const base = `http://localhost:${process.env.PORT || 3000}`;
     const url = new URL(`/api/properties`, base).toString();
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch properties");
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch properties");
+    }
     return res.json();
   }
 
-  const { data } = await api.get("/api/properties");
-  return data;
+  try {
+    const { data } = await api.get("/api/properties");
+    return data;
+  } catch (error: any) {
+    // If it's a 502 error, the backend is likely cold starting
+    if (error?.status === 502) {
+      throw new Error(
+        "El servidor está iniciando. Por favor, intenta de nuevo en unos segundos."
+      );
+    }
+    throw error;
+  }
 }
 
 export async function getPropertyById(id: string) {
-  // Use axios on the server (absolute URL) and the preconfigured `api` axios
-  // instance in the browser. This keeps code small and consistent.
+  // Use absolute URL on the server (pointing to Next.js frontend) and relative URL in the browser
   if (typeof window === "undefined") {
-    const base =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      `http://localhost:${process.env.PORT || 3000}`;
+    // For SSR, use localhost to call the Next.js frontend API routes
+    // which will then proxy to BACKEND_URL (https://property-group-4.onrender.com)
+    const base = `http://localhost:${process.env.PORT || 3000}`;
     const url = new URL(`/api/properties/${id}`, base).toString();
-    const res = await axios.get(url);
-    return res.data;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch property");
+    return res.json();
   }
 
   const { data } = await api.get(`/api/properties/${id}`);
@@ -127,6 +139,11 @@ export async function updateProperty(
 }
 
 export async function deleteProperty(id: string) {
-  const { data } = await api.delete(`/api/properties/${id}`);
-  return data;
+  // Treat 404 as an idempotent success (resource already removed).
+  const res = await api.delete(`/api/properties/${id}`, {
+    throwOnError: false,
+  });
+  // If backend returned 404, return null to indicate nothing to delete
+  if (res.status === 404) return null;
+  return res.data;
 }

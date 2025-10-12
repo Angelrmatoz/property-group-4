@@ -18,11 +18,7 @@ type Property = {
   sector?: string;
 };
 
-export default async function PropertyPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function PropertyPage({ params }: { params: any }) {
   // params may be a Promise-like in some Next versions; await it before using
   const { id } = (await params) as { id: string };
   const prop = (await getPropertyById(id)) as Property | null;
