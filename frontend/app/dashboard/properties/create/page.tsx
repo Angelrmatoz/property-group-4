@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createProperty } from "@/services/properties";
 import { useNotification } from "@/components/Notification";
+import heic2any from "heic2any";
 
 export default function CreatePropertyPage() {
   const router = useRouter();
@@ -371,7 +372,7 @@ export default function CreatePropertyPage() {
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(e) => {
+                onChange={async (e) => {
                   const files = Array.from(e.target.files || []);
                   const accepted: { file: File; preview: string }[] = [];
                   const maxBytes = 10 * 1024 * 1024; // 10 MB
@@ -405,18 +406,80 @@ export default function CreatePropertyPage() {
                       continue;
                     }
 
-                    if (f.size > maxBytes) {
+                    // Check if it's HEIF/HEIC and convert to JPEG automatically
+                    let processedFile = f;
+                    const isHEIF =
+                      f.type === "image/heif" ||
+                      f.type === "image/heic" ||
+                      f.name.toLowerCase().endsWith(".heif") ||
+                      f.name.toLowerCase().endsWith(".heic");
+
+                    if (isHEIF) {
+                      try {
+                        notify({
+                          type: "info",
+                          title: "Convirtiendo imagen",
+                          message: `Convirtiendo ${f.name} de HEIF a JPEG...`,
+                          duration: 3000,
+                        });
+
+                        // Convert HEIF to JPEG blob
+                        const convertedBlob = await heic2any({
+                          blob: f,
+                          toType: "image/jpeg",
+                          quality: 0.9,
+                        });
+
+                        // heic2any can return Blob or Blob[] depending on input
+                        const finalBlob = Array.isArray(convertedBlob)
+                          ? convertedBlob[0]
+                          : convertedBlob;
+
+                        // Create new File from converted blob
+                        const newFileName = f.name.replace(
+                          /\.(heif|heic)$/i,
+                          ".jpg"
+                        );
+                        processedFile = new File([finalBlob], newFileName, {
+                          type: "image/jpeg",
+                        });
+
+                        notify({
+                          type: "success",
+                          title: "Conversión exitosa",
+                          message: `${f.name} convertido a JPEG correctamente.`,
+                          duration: 3000,
+                        });
+                      } catch (conversionError) {
+                        console.error(
+                          "HEIF conversion failed:",
+                          conversionError
+                        );
+                        notify({
+                          type: "error",
+                          title: "Error de conversión",
+                          message: `No se pudo convertir ${f.name}. Inténtalo con formato JPEG o PNG.`,
+                          duration: 5000,
+                        });
+                        continue;
+                      }
+                    }
+
+                    if (processedFile.size > maxBytes) {
                       try {
                         notify({
                           type: "error",
                           title: "Imagen demasiado grande",
-                          message: `El archivo ${f.name} supera los 10 MB y ha sido rechazado.`,
+                          message: `El archivo ${processedFile.name} supera los 10 MB y ha sido rechazado.`,
                         });
                       } catch {}
                       continue;
                     }
 
-                    accepted.push({ file: f, preview: URL.createObjectURL(f) });
+                    accepted.push({
+                      file: processedFile,
+                      preview: URL.createObjectURL(processedFile),
+                    });
                   }
 
                   if (accepted.length === 0) return;
@@ -428,8 +491,8 @@ export default function CreatePropertyPage() {
                 className="w-full"
               />
               <p className="text-xs text-gray-500">
-                Puedes subir hasta 10 imágenes. Las imágenes adicionales serán
-                ignoradas.
+                Puedes subir hasta 10 imágenes. Las imágenes en formato
+                HEIF/HEIC (iPhone) se convertirán automáticamente a JPEG.
               </p>
 
               {images.length > 0 && (

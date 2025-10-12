@@ -2,7 +2,10 @@ import express, { Request, Response, NextFunction } from "express";
 import multer from "multer";
 import Property from "@/models/property";
 import authenticate from "@/middleware/auth";
-import { uploadBufferToCloudinary } from "@/utils/cloudinary";
+import {
+  uploadBufferToCloudinary,
+  deleteMultipleFromCloudinary,
+} from "@/utils/cloudinary";
 import { PropertyDTO } from "@/dto/property";
 
 const propertiesRouter = express.Router();
@@ -523,6 +526,14 @@ propertiesRouter.put(
         }
       }
 
+      // Fetch the current property to check which images are being removed
+      const currentProperty = await Property.findById(id).exec();
+      if (!currentProperty) {
+        const e: any = new Error("Property not found");
+        e.status = 404;
+        return next(e);
+      }
+
       // Collect existing images sent in the form. frontend app may append them
       // as 'images[]' or as 'images'. Support both.
       let existingImages: string[] = [];
@@ -536,6 +547,28 @@ propertiesRouter.put(
 
       // Merge existing images with newly uploaded images, keeping order and limit to 10
       const finalImages = existingImages.concat(imagesPaths).slice(0, 10);
+
+      // Identify images that were removed (exist in DB but not in finalImages)
+      // and delete them from Cloudinary
+      if (currentProperty.images && currentProperty.images.length > 0) {
+        const removedImages = currentProperty.images.filter(
+          (img) => !finalImages.includes(img)
+        );
+        if (removedImages.length > 0) {
+          try {
+            await deleteMultipleFromCloudinary(removedImages);
+            console.info(
+              `[properties] Deleted ${removedImages.length} removed image(s) from Cloudinary for property ${id}`
+            );
+          } catch (cloudinaryError) {
+            console.error(
+              `[properties] Error deleting removed images from Cloudinary for property ${id}:`,
+              cloudinaryError
+            );
+            // Don't fail the update if Cloudinary deletion fails
+          }
+        }
+      }
 
       // Normalize numeric and boolean fields similarly to POST
       const bedrooms = getNumericFromBodyFlexible(body, [
@@ -624,12 +657,38 @@ propertiesRouter.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const deleted = await Property.findByIdAndDelete(id).exec();
-      if (!deleted) {
+
+      // First, find the property to get its images
+      const property = await Property.findById(id).exec();
+      if (!property) {
         const e: any = new Error("Property not found");
         e.status = 404;
         return next(e);
       }
+
+      // Delete images from Cloudinary if they exist
+      if (
+        property.images &&
+        Array.isArray(property.images) &&
+        property.images.length > 0
+      ) {
+        try {
+          await deleteMultipleFromCloudinary(property.images);
+          console.info(
+            `[properties] Deleted ${property.images.length} image(s) from Cloudinary for property ${id}`
+          );
+        } catch (cloudinaryError) {
+          // Log the error but don't fail the deletion
+          console.error(
+            `[properties] Error deleting images from Cloudinary for property ${id}:`,
+            cloudinaryError
+          );
+        }
+      }
+
+      // Now delete the property from the database
+      await Property.findByIdAndDelete(id).exec();
+
       res.status(204).send();
     } catch (err) {
       next(err as any);
