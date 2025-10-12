@@ -108,10 +108,13 @@ const Header = () => {
                 </a>
                 <Link
                   href="/login"
-                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors text-foreground"
+                  className="group text-sm lg:text-base hover:text-satin-sheen-gold transition-colors text-foreground"
                   aria-label="Login"
                 >
-                  <LogIn size={18} className="text-foreground" />
+                  <LogIn
+                    size={18}
+                    className="text-foreground group-hover:text-satin-sheen-gold transition-colors"
+                  />
                 </Link>
               </>
             ) : (
@@ -148,10 +151,13 @@ const Header = () => {
                 </Link>
                 <Link
                   href="/login"
-                  className="text-sm lg:text-base hover:text-satin-sheen-gold transition-colors text-foreground"
+                  className="group text-sm lg:text-base hover:text-satin-sheen-gold transition-colors text-foreground"
                   aria-label="Login"
                 >
-                  <LogIn size={18} className="text-foreground" />
+                  <LogIn
+                    size={18}
+                    className="text-foreground group-hover:text-satin-sheen-gold transition-colors"
+                  />
                 </Link>
               </>
             )}
@@ -240,11 +246,14 @@ const Header = () => {
             </a>
             <a
               href="/login"
-              className="text-foreground flex items-center gap-2 px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
+              className="group text-foreground flex items-center gap-2 px-4 py-2 text-base hover:text-satin-sheen-gold hover:bg-yellow-500/10 rounded-lg transition-colors"
               onClick={() => handleNavClick("/login")}
               aria-label="Login"
             >
-              <LogIn size={18} className="text-foreground" />
+              <LogIn
+                size={18}
+                className="text-foreground group-hover:text-satin-sheen-gold transition-colors"
+              />
               <span>Login</span>
             </a>
             <div className="px-4 py-2">
