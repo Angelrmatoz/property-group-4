@@ -29,7 +29,13 @@ async function fetchCsrfToken(): Promise<string> {
   }
 }
 
-async function getCsrfToken(): Promise<string> {
+async function getCsrfToken(forceRefresh = false): Promise<string> {
+  // If force refresh is requested, clear the cached token
+  if (forceRefresh) {
+    csrfToken = null;
+    csrfTokenPromise = null;
+  }
+
   // If we already have a token, return it
   if (csrfToken) return csrfToken;
 
@@ -44,9 +50,19 @@ async function getCsrfToken(): Promise<string> {
   return token;
 }
 
+/**
+ * Invalidate the cached CSRF token, forcing a refresh on next request
+ */
+export function invalidateCsrfToken(): void {
+  csrfToken = null;
+  csrfTokenPromise = null;
+}
+
 interface FetchOptions extends RequestInit {
   // Allow custom error handling
   throwOnError?: boolean;
+  // Force refresh CSRF token before this request
+  refreshCsrf?: boolean;
 }
 
 /**
@@ -60,7 +76,7 @@ export async function apiFetch<T = any>(
   url: string,
   options: FetchOptions = {}
 ): Promise<{ data: T; status: number; ok: boolean }> {
-  const { throwOnError = true, ...fetchOptions } = options;
+  const { throwOnError = true, refreshCsrf = false, ...fetchOptions } = options;
 
   // Always include credentials
   fetchOptions.credentials = fetchOptions.credentials || "include";
@@ -71,7 +87,7 @@ export async function apiFetch<T = any>(
   // For mutating requests, fetch and attach CSRF token
   const method = (fetchOptions.method || "GET").toUpperCase();
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    const token = await getCsrfToken();
+    const token = await getCsrfToken(refreshCsrf);
     if (token) {
       // Use a single canonical header name (lowercase) to avoid duplicate
       // comma-separated values when proxies forward both forms.
@@ -100,6 +116,20 @@ export async function apiFetch<T = any>(
       data = await response.json();
     } else {
       data = await response.text();
+    }
+
+    // If we get a 403 CSRF error and haven't already retried with fresh token, retry once
+    if (
+      response.status === 403 &&
+      !refreshCsrf &&
+      ["POST", "PUT", "PATCH", "DELETE"].includes(method) &&
+      (data?.error?.includes("csrf") ||
+        data?.error?.includes("CSRF") ||
+        data?.message?.includes("csrf"))
+    ) {
+      // Invalidate token and retry once with fresh token
+      invalidateCsrfToken();
+      return apiFetch<T>(url, { ...options, refreshCsrf: true });
     }
 
     // If response is not ok and throwOnError is true, throw an error

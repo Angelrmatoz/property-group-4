@@ -26,10 +26,18 @@ export default function DeletePropertyButton({ id }: { id: string }) {
     } catch (err) {
       const backendMsg =
         (err as any)?.response?.data?.error || (err as any)?.message;
+
+      // If it's a CSRF error, suggest refreshing
+      const isCsrfError =
+        backendMsg?.toLowerCase().includes("csrf") ||
+        (err as any)?.response?.status === 403;
+
       notify({
         type: "error",
         title: "Error eliminando propiedad",
-        message: String(backendMsg || "Error eliminando la propiedad"),
+        message: isCsrfError
+          ? "Error de autenticación. Por favor, recarga la página e intenta de nuevo."
+          : String(backendMsg || "Error eliminando la propiedad"),
         duration: 6000,
       });
     } finally {
