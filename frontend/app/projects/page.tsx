@@ -335,16 +335,18 @@ export default function ProjectsPage() {
                   </div>
 
                   <CardContent className="p-6">
-                    <div className="mb-4">
-                      <h3 className="text-2xl font-bold mb-1 text-yellow-600 dark:text-yellow-400">
-                        {project.name}
-                      </h3>
-                      <p className="text-sm mb-2 text-gray-500 dark:text-gray-400">
-                        {project.type}
-                      </p>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                        <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-                        <span className="truncate">{project.location}</span>
+                    <div className="mb-5">
+                      <div className="mb-2">
+                        <h3 className="text-lg font-semibold mb-1 text-gray-900 dark:text-white truncate">
+                          {project.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {project.type}
+                        </p>
+                        <div className="flex items-center text-gray-700 dark:text-gray-300">
+                          <MapPin className="w-4 h-4 mr-2 text-yellow-600" />
+                          <span className="text-sm">{project.location}</span>
+                        </div>
                       </div>
                     </div>
 
@@ -518,8 +520,11 @@ export default function ProjectsPage() {
             {/* Content */}
             <div className="p-6">
               <div className="mb-5">
-                <h2 className="text-3xl font-bold mb-2 text-yellow-600 dark:text-yellow-400">
-                  {selectedProject.name}
+                <h2 className="text-2xl md:text-3xl font-bold mb-2 text-yellow-600 dark:text-yellow-400 leading-tight break-words">
+                  {/* Clamp on very small screens, allow wrap on larger */}
+                  <span className="line-clamp-2 md:line-clamp-none">
+                    {selectedProject.name}
+                  </span>
                 </h2>
                 <p className="text-base mb-2 text-gray-600 dark:text-gray-400">
                   {selectedProject.type}
@@ -570,9 +575,10 @@ export default function ProjectsPage() {
                 <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
                   Descripción
                 </h3>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                {/* Description: preserve whitespace, wrap long words, and make scrollable on overflow */}
+                <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed max-h-44 md:max-h-72 overflow-auto scrollbar-hide break-words whitespace-pre-wrap">
                   {selectedProject.description}
-                </p>
+                </div>
               </div>
 
               {/* Additional Details */}

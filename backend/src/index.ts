@@ -15,8 +15,14 @@ import errorHandler from "@/middleware/error";
 const app = express();
 app.disable("x-powered-by");
 
-// Configure CORS to allow the frontend origin and credentials when provided
+// Configure CORS to allow the frontend origin(s) and credentials when provided
+// FRONTEND_ORIGIN may be a single origin or a comma-separated list:
+// e.g. "https://app.example.com,https://my-preview.vercel.app,http://localhost:3000"
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || undefined;
+const allowedOrigins = (FRONTEND_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 // If the app is behind a proxy (e.g. Render), trust first proxy so secure cookies work
 if (process.env.TRUST_PROXY === "1" || process.env.NODE_ENV === "production") {
@@ -25,7 +31,13 @@ if (process.env.TRUST_PROXY === "1" || process.env.NODE_ENV === "production") {
 
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN || true,
+    // Validate the request Origin against a configured allow-list. If the
+    // request has no Origin (server-to-server calls, curl, cron jobs), allow it.
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
     exposedHeaders: ["Set-Cookie"],
   })

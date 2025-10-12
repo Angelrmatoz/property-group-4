@@ -21,8 +21,34 @@ type Property = {
 export default async function PropertyPage({ params }: { params: any }) {
   // params may be a Promise-like in some Next versions; await it before using
   const { id } = (await params) as { id: string };
-  const prop = (await getPropertyById(id)) as Property | null;
-  if (!prop) return <p>No encontrada</p>;
+
+  let prop: Property | null = null;
+  try {
+    prop = (await getPropertyById(id)) as Property | null;
+  } catch (error) {
+    console.error("Error fetching property:", error);
+    prop = null;
+  }
+
+  if (!prop)
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold">Propiedad no encontrada</h3>
+          <p className="text-sm text-muted-foreground mt-2">
+            La propiedad que buscas no existe o no está disponible.
+          </p>
+          <div className="mt-4">
+            <a
+              href="/dashboard/properties"
+              className="text-amber-600 hover:underline"
+            >
+              Volver al listado
+            </a>
+          </div>
+        </div>
+      </div>
+    );
   // Normalize property fields so frontend can accept english or spanish keys
   const propNorm = {
     _id: prop._id ?? (prop as any).id,
@@ -50,11 +76,15 @@ export default async function PropertyPage({ params }: { params: any }) {
         </div>
 
         <div>
-          <h2 className="text-2xl font-semibold">{propNorm.title}</h2>
+          <h2 className="text-2xl font-semibold break-words max-w-full">
+            {propNorm.title}
+          </h2>
           <p className="text-sm text-muted-foreground">
             Precio: {propNorm.price ?? "—"}
           </p>
-          <p className="mt-4">{propNorm.description}</p>
+          <p className="mt-4 break-words whitespace-pre-wrap max-h-48 overflow-auto">
+            {propNorm.description}
+          </p>
 
           <div className="mt-4">
             <h4 className="font-medium">Detalles</h4>

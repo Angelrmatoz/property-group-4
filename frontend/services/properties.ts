@@ -84,20 +84,31 @@ export async function updatePropertyFormData(
 }
 
 export async function getProperties() {
-  // When executing on the server (Next server components / SSR), use an absolute
-  // URL pointing to the Next.js server (frontend) which will proxy to backend.
-  // In the browser, use relative URLs through our fetch wrapper.
+  // When executing on the server (Next server components / SSR), call backend directly
+  // In the browser, use relative URLs through our fetch wrapper which goes through Next.js proxy
   if (typeof window === "undefined") {
-    // For SSR, use localhost to call the Next.js frontend API routes
-    // which will then proxy to BACKEND_URL
-    const base = `http://localhost:${process.env.PORT || 3000}`;
-    const url = new URL(`/api/properties`, base).toString();
-    const res = await fetch(url);
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.message || "Failed to fetch properties");
+    const backendUrl = process.env.BACKEND_URL;
+    if (!backendUrl) {
+      throw new Error("BACKEND_URL is not configured");
     }
-    return res.json();
+
+    try {
+      const res = await fetch(`${backendUrl}/api/properties`, {
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("[SSR] Failed to fetch properties:", errorData);
+        throw new Error(errorData.message || "Failed to fetch properties");
+      }
+      return res.json();
+    } catch (error) {
+      console.error("[SSR] Error fetching properties:", error);
+      throw error;
+    }
   }
 
   try {
@@ -115,19 +126,33 @@ export async function getProperties() {
 }
 
 export async function getPropertyById(id: string) {
-  // Use absolute URL on the server (pointing to Next.js frontend) and relative URL in the browser
+  // When executing on the server (Next server components / SSR), call backend directly
+  // In the browser, use relative URLs through our fetch wrapper which goes through Next.js proxy
   if (typeof window === "undefined") {
-    // For SSR, use localhost to call the Next.js frontend API routes
-    // which will then proxy to BACKEND_URL (https://property-group-4.onrender.com)
-    const base = `http://localhost:${process.env.PORT || 3000}`;
-    const url = new URL(`/api/properties/${id}`, base).toString();
-    const res = await fetch(url);
-    if (!res.ok) {
-      // Return null for server-side rendering when backend fails so React Server
-      // Components can render a friendly fallback instead of throwing.
+    const backendUrl = process.env.BACKEND_URL;
+    if (!backendUrl) {
+      console.error("[SSR] BACKEND_URL is not configured");
       return null as any;
     }
-    return res.json();
+
+    try {
+      const res = await fetch(`${backendUrl}/api/properties/${id}`, {
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        console.error(
+          `[SSR] Failed to fetch property ${id}: ${res.status} ${res.statusText}`
+        );
+        return null as any;
+      }
+      return res.json();
+    } catch (error) {
+      console.error(`[SSR] Error fetching property ${id}:`, error);
+      return null as any;
+    }
   }
 
   const { data } = await api.get(`/api/properties/${id}`);

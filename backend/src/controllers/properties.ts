@@ -207,6 +207,17 @@ propertiesRouter.post(
         });
       }
 
+      // Server-side validation: title max length (100 chars)
+      let rawTitle = firstDefined(body, ["title", "titulo"]);
+      if (Array.isArray(rawTitle)) rawTitle = rawTitle[0];
+      const titleString =
+        rawTitle === undefined || rawTitle === null ? "" : String(rawTitle);
+      if (titleString.length > 100) {
+        return res.status(400).json({
+          error: "El título no puede superar los 100 caracteres.",
+        });
+      }
+
       // if there are files, upload each to Cloudinary and collect URLs
       const imagesPaths: string[] = [];
       const files = (req as any).files as
@@ -431,6 +442,17 @@ propertiesRouter.put(
       if (descString.length > 2000) {
         return res.status(400).json({
           error: "La descripción no puede superar los 2,000 caracteres.",
+        });
+      }
+
+      // Server-side validation: title max length (100 chars) for updates
+      let rawTitle = firstDefined(body, ["title", "titulo"]);
+      if (Array.isArray(rawTitle)) rawTitle = rawTitle[0];
+      const titleString =
+        rawTitle === undefined || rawTitle === null ? "" : String(rawTitle);
+      if (titleString && titleString.length > 100) {
+        return res.status(400).json({
+          error: "El título no puede superar los 100 caracteres.",
         });
       }
 
