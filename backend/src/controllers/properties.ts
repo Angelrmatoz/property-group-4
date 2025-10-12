@@ -10,14 +10,43 @@ const propertiesRouter = express.Router();
 // configuración de multer -> usar memoria para enviar buffer a Cloudinary
 const storage = multer.memoryStorage();
 
+// Helper: accept a broad set of image MIME types and common image file extensions.
+function isAcceptedImage(file: Express.Multer.File) {
+  if (!file) return false;
+  const mime = String(file.mimetype || "").toLowerCase();
+  // If mimetype starts with image/ accept it (covers many cases)
+  if (mime.startsWith("image/")) return true;
+
+  // Fallback: check file extension in originalname for cases where the
+  // browser/OS sends a generic mimetype like application/octet-stream.
+  const name = String(file.originalname || "").toLowerCase();
+  const ext = name.split(".").pop() || "";
+  const acceptedExts = new Set([
+    "jpg",
+    "jpeg",
+    "png",
+    "webp",
+    "avif",
+    "heic",
+    "heif",
+    "gif",
+    "svg",
+    "tif",
+    "tiff",
+    "bmp",
+    "ico",
+  ]);
+  if (acceptedExts.has(ext)) return true;
+
+  return false;
+}
+
 const fileFilter = (
   _req: any,
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) => {
-  // Accept any image/* MIME type (reject videos and other types)
-  if (file && file.mimetype && file.mimetype.startsWith("image/"))
-    cb(null, true);
+  if (isAcceptedImage(file)) cb(null, true);
   else cb(new Error("Tipo de archivo no válido. Solo se permiten imágenes."));
 };
 
@@ -229,8 +258,8 @@ propertiesRouter.post(
         for (const file of files.slice(0, 10)) {
           if (!file.buffer) continue;
 
-          // Validate MIME type server-side again
-          if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+          // Validate MIME type / extension server-side again using centralized check
+          if (!isAcceptedImage(file)) {
             return res.status(400).json({
               error: `El archivo ${file.originalname} no es una imagen válida.`,
             });
@@ -467,8 +496,8 @@ propertiesRouter.put(
         for (const file of files.slice(0, 10)) {
           if (!file.buffer) continue;
 
-          // Validate MIME type server-side
-          if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+          // Validate MIME type / extension server-side
+          if (!isAcceptedImage(file)) {
             return res.status(400).json({
               error: `El archivo ${file.originalname} no es una imagen válida.`,
             });
