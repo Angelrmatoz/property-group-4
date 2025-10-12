@@ -54,20 +54,61 @@ export function uploadBufferToCloudinary(
 /**
  * Extracts the public_id from a Cloudinary URL.
  * Example URL: https://res.cloudinary.com/demo/image/upload/v1234/properties/abc123.jpg
+ * Example with transformations: https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/v1234/properties/abc123.jpg
  * Returns: properties/abc123
  */
 export function extractPublicId(cloudinaryUrl: string): string | null {
   try {
     if (!cloudinaryUrl || typeof cloudinaryUrl !== "string") return null;
 
-    // Match pattern: /upload/v{version}/{folder}/{filename}.{ext}
-    // or /upload/{folder}/{filename}.{ext}
-    const match = cloudinaryUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
+    // Match pattern: /upload/[transformations]/v{version}/{folder}/{filename}.{ext}
+    // or /upload/[transformations]/{folder}/{filename}.{ext}
+    // Transformations are optional and can include things like f_auto,q_auto,w_500,h_300
+
+    // First, find the /upload/ part
+    const uploadIndex = cloudinaryUrl.indexOf("/upload/");
+    if (uploadIndex === -1) return null;
+
+    // Get everything after /upload/
+    const afterUpload = cloudinaryUrl.substring(uploadIndex + 8); // 8 = length of '/upload/'
+
+    // Remove any transformation parameters (anything before the version or folder path)
+    // Transformations typically contain commas and underscores like f_auto,q_auto
+    // The actual path starts with either v{digits}/ or directly with the folder name
+
+    // Split by / to get parts
+    const parts = afterUpload.split("/");
+
+    // Find where the actual path starts (skip transformation parameters)
+    let pathStartIndex = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      // If part starts with v followed by digits, or doesn't contain commas/transformation syntax
+      if (/^v\d+$/.test(part)) {
+        // This is a version, next part is the actual path
+        pathStartIndex = i + 1;
+        break;
+      } else if (part && !part.includes(",") && !part.includes("_")) {
+        // This looks like a folder name (no transformation syntax)
+        pathStartIndex = i;
+        break;
+      }
+    }
+
+    // Get the path parts (folder/filename)
+    const pathParts = parts.slice(pathStartIndex);
+    if (pathParts.length === 0) return null;
+
+    // Join back and remove extension
+    const fullPath = pathParts.join("/");
+    const match = fullPath.match(/^(.+)\.\w+$/);
     if (match && match[1]) {
       return match[1];
     }
+
     return null;
-  } catch {
+  } catch (error) {
+    console.error("[cloudinary] Error extracting public_id:", error);
     return null;
   }
 }
@@ -97,15 +138,8 @@ export async function deleteFromCloudinary(
     // Delete from Cloudinary
     const result = await cloudinary.uploader.destroy(publicId);
 
-    if (result.result === "ok") {
-      console.info(`[cloudinary] Successfully deleted image: ${publicId}`);
-    } else if (result.result === "not found") {
-      console.warn(`[cloudinary] Image not found: ${publicId}`);
-    } else {
-      console.warn(
-        `[cloudinary] Unexpected result when deleting ${publicId}:`,
-        result
-      );
+    if (result.result === "not found") {
+      console.warn(`[cloudinary] Image not found in Cloudinary: ${publicId}`);
     }
   } catch (error) {
     console.error(`[cloudinary] Error deleting image ${publicIdOrUrl}:`, error);
@@ -123,10 +157,6 @@ export async function deleteMultipleFromCloudinary(
   if (!Array.isArray(publicIdsOrUrls) || publicIdsOrUrls.length === 0) {
     return;
   }
-
-  console.info(
-    `[cloudinary] Deleting ${publicIdsOrUrls.length} image(s) from Cloudinary...`
-  );
 
   // Delete in parallel for better performance
   await Promise.all(

@@ -654,6 +654,7 @@ propertiesRouter.put(
 // DELETE /:id - eliminar una propiedad
 propertiesRouter.delete(
   "/:id",
+  authenticate,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
@@ -674,9 +675,6 @@ propertiesRouter.delete(
       ) {
         try {
           await deleteMultipleFromCloudinary(property.images);
-          console.info(
-            `[properties] Deleted ${property.images.length} image(s) from Cloudinary for property ${id}`
-          );
         } catch (cloudinaryError) {
           // Log the error but don't fail the deletion
           console.error(

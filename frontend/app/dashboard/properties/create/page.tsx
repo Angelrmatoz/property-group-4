@@ -72,44 +72,11 @@ export default function CreatePropertyPage() {
     try {
       if (images && images.length > 0) {
         // use FormData upload
-        console.log("📤 Preparando subida de imágenes...");
-        console.log("🖼️ Total de imágenes a subir:", images.length);
-
         const files = images.map((i) => i.file);
-
-        // Log each file details
-        files.forEach((file, idx) => {
-          console.log(`📁 Imagen ${idx + 1}:`, {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            sizeKB: Math.round(file.size / 1024),
-            sizeMB: (file.size / (1024 * 1024)).toFixed(2),
-          });
-        });
-
-        console.log("🔄 Llamando a createPropertyFormData...");
         // import createPropertyFormData dynamically to avoid circular issues
         const mod = await import("@/services/properties");
-
-        try {
-          const result = await mod.createPropertyFormData(
-            spanishPayload as any,
-            files
-          );
-          console.log("✅ Respuesta del servidor:", result);
-        } catch (uploadErr) {
-          console.error("❌ Error durante la subida:", uploadErr);
-          console.error("📋 Detalles del error:", {
-            message: (uploadErr as any)?.message,
-            response: (uploadErr as any)?.response,
-            status: (uploadErr as any)?.response?.status,
-            data: (uploadErr as any)?.response?.data,
-          });
-          throw uploadErr;
-        }
+        await mod.createPropertyFormData(spanishPayload as any, files);
       } else {
-        console.log("📝 Creando propiedad sin imágenes...");
         await createProperty(spanishPayload as any);
       }
       setLoading(false);
@@ -124,13 +91,10 @@ export default function CreatePropertyPage() {
       router.push("/dashboard/properties");
     } catch (err) {
       setLoading(false);
-      console.error("❌ Error completo en handleSubmit:", err);
 
       // Prefer backend-provided message when available
       const backendMsg =
         (err as any)?.response?.data?.error || (err as any)?.message;
-
-      console.error("💬 Mensaje de error a mostrar:", backendMsg);
 
       try {
         notify({
