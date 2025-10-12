@@ -129,10 +129,26 @@ export default function CreatePropertyPage() {
           <label className="block text-sm mb-1">Título</label>
           <input
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val.length > 100) {
+                try {
+                  notify({
+                    type: "error",
+                    title: "Título demasiado largo",
+                    message: "El título no puede superar los 100 caracteres.",
+                  });
+                } catch {}
+                return;
+              }
+              setTitle(val);
+            }}
             className="w-full rounded border px-3 py-2 bg-transparent"
             required
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Máx 100 caracteres. {title.length}/100
+          </p>
         </div>
 
         <div>
