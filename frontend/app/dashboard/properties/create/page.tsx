@@ -394,6 +394,7 @@ export default function CreatePropertyPage() {
                   // Only process up to the remaining slots
                   const toProcess = files.slice(0, remainingSlots);
 
+                  // Process all files sequentially
                   for (const f of toProcess) {
                     // Allow files that either have an image/* mimetype or
                     // have a known image extension (covers cases where some
@@ -493,11 +494,15 @@ export default function CreatePropertyPage() {
                     });
                   }
 
-                  if (accepted.length === 0) return;
-
-                  // Append accepted files but cap at maxImages total
-                  const combined = [...images, ...accepted].slice(0, maxImages);
-                  setImages(combined);
+                  // Update state only if we have accepted images
+                  if (accepted.length > 0) {
+                    // Append accepted files but cap at maxImages total
+                    const combined = [...images, ...accepted].slice(
+                      0,
+                      maxImages
+                    );
+                    setImages(combined);
+                  }
                 }}
                 className="w-full"
               />
