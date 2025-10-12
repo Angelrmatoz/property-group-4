@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { transformCloudinaryUrl } from "@/lib/utils";
 
 type Property = {
   id?: string;
@@ -224,6 +225,9 @@ export default function DashboardPage() {
                 property.imagenes?.[0] ||
                 property.imagen ||
                 "/placeholder.svg";
+              // Transform Cloudinary URLs to ensure HEIF/HEIC are served as JPEG
+              const transformedImage = transformCloudinaryUrl(firstImage);
+
               const location = [
                 property.neighborhood || property.sector,
                 property.city || property.municipio,
@@ -239,7 +243,7 @@ export default function DashboardPage() {
                 >
                   <div className="relative h-48 overflow-hidden bg-muted">
                     <Image
-                      src={firstImage}
+                      src={transformedImage}
                       alt={property.title || property.titulo || "Propiedad"}
                       fill
                       className="object-contain group-hover:scale-105 transition-transform duration-300"

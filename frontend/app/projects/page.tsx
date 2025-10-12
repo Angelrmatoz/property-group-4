@@ -26,6 +26,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { transformCloudinaryUrl } from "@/lib/utils";
 
 export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -126,14 +127,18 @@ export default function ProjectsPage() {
               const categoryLabel = getCategoryLabel(prop.category || "");
               const typeLabel = getTypeLabel(prop.type || "");
 
+              // Get first image and transform Cloudinary URLs to ensure HEIF/HEIC are served as JPEG
+              const rawImage =
+                prop.images?.[0] ||
+                prop.imagenes?.[0] ||
+                prop.imagen ||
+                "/placeholder.svg";
+              const transformedImage = transformCloudinaryUrl(rawImage);
+
               return {
                 id: prop.id || prop._id,
                 name: prop.title || prop.titulo || "Sin título",
-                image:
-                  prop.images?.[0] ||
-                  prop.imagenes?.[0] ||
-                  prop.imagen ||
-                  "/placeholder.svg",
+                image: transformedImage,
                 type: `${categoryLabel} en ${typeLabel}`,
                 location:
                   [
@@ -452,10 +457,15 @@ export default function ProjectsPage() {
                 const images = selectedProject.fullData?.images ||
                   selectedProject.fullData?.imagenes || [selectedProject.image];
 
+                // Transform Cloudinary URLs to ensure HEIF/HEIC images are served as JPEG
+                const transformedImageUrl = transformCloudinaryUrl(
+                  images[currentImageIndex] || "/placeholder.svg"
+                );
+
                 return (
                   <>
                     <Image
-                      src={images[currentImageIndex] || "/placeholder.svg"}
+                      src={transformedImageUrl}
                       alt={selectedProject.name || "Propiedad"}
                       fill
                       // Use priority for the first image in the modal when it's likely above the fold

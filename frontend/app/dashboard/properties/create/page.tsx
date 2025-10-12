@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createProperty } from "@/services/properties";
 import { useNotification } from "@/components/Notification";
-import heic2any from "heic2any";
 
 export default function CreatePropertyPage() {
   const router = useRouter();
@@ -73,13 +72,44 @@ export default function CreatePropertyPage() {
     try {
       if (images && images.length > 0) {
         // use FormData upload
+        console.log("📤 Preparando subida de imágenes...");
+        console.log("🖼️ Total de imágenes a subir:", images.length);
+
+        const files = images.map((i) => i.file);
+
+        // Log each file details
+        files.forEach((file, idx) => {
+          console.log(`📁 Imagen ${idx + 1}:`, {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            sizeKB: Math.round(file.size / 1024),
+            sizeMB: (file.size / (1024 * 1024)).toFixed(2),
+          });
+        });
+
+        console.log("🔄 Llamando a createPropertyFormData...");
         // import createPropertyFormData dynamically to avoid circular issues
         const mod = await import("@/services/properties");
-        await mod.createPropertyFormData(
-          spanishPayload as any,
-          images.map((i) => i.file)
-        );
+
+        try {
+          const result = await mod.createPropertyFormData(
+            spanishPayload as any,
+            files
+          );
+          console.log("✅ Respuesta del servidor:", result);
+        } catch (uploadErr) {
+          console.error("❌ Error durante la subida:", uploadErr);
+          console.error("📋 Detalles del error:", {
+            message: (uploadErr as any)?.message,
+            response: (uploadErr as any)?.response,
+            status: (uploadErr as any)?.response?.status,
+            data: (uploadErr as any)?.response?.data,
+          });
+          throw uploadErr;
+        }
       } else {
+        console.log("📝 Creando propiedad sin imágenes...");
         await createProperty(spanishPayload as any);
       }
       setLoading(false);
@@ -94,9 +124,14 @@ export default function CreatePropertyPage() {
       router.push("/dashboard/properties");
     } catch (err) {
       setLoading(false);
+      console.error("❌ Error completo en handleSubmit:", err);
+
       // Prefer backend-provided message when available
       const backendMsg =
         (err as any)?.response?.data?.error || (err as any)?.message;
+
+      console.error("💬 Mensaje de error a mostrar:", backendMsg);
+
       try {
         notify({
           type: "error",
@@ -372,9 +407,8 @@ export default function CreatePropertyPage() {
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={async (e) => {
+                onChange={(e) => {
                   const files = Array.from(e.target.files || []);
-                  const accepted: { file: File; preview: string }[] = [];
                   const maxBytes = 10 * 1024 * 1024; // 10 MB
                   const maxImages = 10;
                   const remainingSlots = Math.max(0, maxImages - images.length);
@@ -391,14 +425,12 @@ export default function CreatePropertyPage() {
                     } catch {}
                   }
 
-                  // Only process up to the remaining slots
+                  // Process only up to the remaining slots
                   const toProcess = files.slice(0, remainingSlots);
+                  const newImages: { file: File; preview: string }[] = [];
 
-                  // Process all files sequentially
                   for (const f of toProcess) {
-                    // Allow files that either have an image/* mimetype or
-                    // have a known image extension (covers cases where some
-                    // browsers/devices send an empty or generic mimetype).
+                    // Validate: accept image mimetype OR known image file extension
                     const nameLower = (f.name || "").toLowerCase();
                     const hasImageMime = Boolean(
                       f.type && f.type.startsWith("image/")
@@ -407,6 +439,7 @@ export default function CreatePropertyPage() {
                       /\.(jpg|jpeg|png|gif|webp|avif|heic|heif|tiff|tif|bmp|svg|ico)$/i.test(
                         nameLower
                       );
+
                     if (!hasImageMime && !hasImageExt) {
                       try {
                         notify({
@@ -418,97 +451,34 @@ export default function CreatePropertyPage() {
                       continue;
                     }
 
-                    // Check if it's HEIF/HEIC and convert to JPEG automatically
-                    let processedFile = f;
-                    const isHEIF =
-                      f.type === "image/heif" ||
-                      f.type === "image/heic" ||
-                      f.name.toLowerCase().endsWith(".heif") ||
-                      f.name.toLowerCase().endsWith(".heic");
-
-                    if (isHEIF) {
-                      try {
-                        notify({
-                          type: "info",
-                          title: "Convirtiendo imagen",
-                          message: `Convirtiendo ${f.name} de HEIF a JPEG...`,
-                          duration: 3000,
-                        });
-
-                        // Convert HEIF to JPEG blob
-                        const convertedBlob = await heic2any({
-                          blob: f,
-                          toType: "image/jpeg",
-                          quality: 0.9,
-                        });
-
-                        // heic2any can return Blob or Blob[] depending on input
-                        const finalBlob = Array.isArray(convertedBlob)
-                          ? convertedBlob[0]
-                          : convertedBlob;
-
-                        // Create new File from converted blob
-                        const newFileName = f.name.replace(
-                          /\.(heif|heic)$/i,
-                          ".jpg"
-                        );
-                        processedFile = new File([finalBlob], newFileName, {
-                          type: "image/jpeg",
-                        });
-
-                        notify({
-                          type: "success",
-                          title: "Conversión exitosa",
-                          message: `${f.name} convertido a JPEG correctamente.`,
-                          duration: 3000,
-                        });
-                      } catch (conversionError) {
-                        console.error(
-                          "HEIF conversion failed:",
-                          conversionError
-                        );
-                        notify({
-                          type: "error",
-                          title: "Error de conversión",
-                          message: `No se pudo convertir ${f.name}. Por favor intenta con otra imagen.`,
-                          duration: 5000,
-                        });
-                        continue;
-                      }
-                    }
-
-                    if (processedFile.size > maxBytes) {
+                    // Validate size
+                    if (f.size > maxBytes) {
                       try {
                         notify({
                           type: "error",
                           title: "Imagen demasiado grande",
-                          message: `El archivo ${processedFile.name} supera los 10 MB y ha sido rechazado.`,
+                          message: `El archivo ${f.name} supera los 10 MB y ha sido rechazado.`,
                         });
                       } catch {}
                       continue;
                     }
 
-                    accepted.push({
-                      file: processedFile,
-                      preview: URL.createObjectURL(processedFile),
-                    });
+                    // Create preview and add to state
+                    const preview = URL.createObjectURL(f);
+                    newImages.push({ file: f, preview });
                   }
 
-                  // Update state only if we have accepted images
-                  if (accepted.length > 0) {
-                    // Append accepted files but cap at maxImages total
-                    const combined = [...images, ...accepted].slice(
-                      0,
-                      maxImages
+                  // Add all validated images to state at once
+                  if (newImages.length > 0) {
+                    setImages((prev) =>
+                      [...prev, ...newImages].slice(0, maxImages)
                     );
-                    setImages(combined);
                   }
                 }}
                 className="w-full"
               />
               <p className="text-xs text-gray-500">
-                Puedes subir hasta 10 imágenes. Las imágenes en formato
-                HEIF/HEIC (iPhone) se convertirán automáticamente a JPEG.
+                Puedes subir hasta 10 imágenes (máx 10 MB cada una).
               </p>
 
               {images.length > 0 && (
@@ -520,6 +490,14 @@ export default function CreatePropertyPage() {
                         it.preview.startsWith("data:"))
                         ? it.preview
                         : undefined;
+
+                    // Check if it's HEIF/HEIC format (may not preview in all browsers)
+                    const isHEIF =
+                      it.file.type === "image/heif" ||
+                      it.file.type === "image/heic" ||
+                      it.file.name.toLowerCase().endsWith(".heif") ||
+                      it.file.name.toLowerCase().endsWith(".heic");
+
                     return (
                       <div key={idx} className="relative">
                         {safePreview ? (
@@ -529,10 +507,39 @@ export default function CreatePropertyPage() {
                               role="img"
                               aria-label={it.file.name}
                               style={{ backgroundImage: `url(${safePreview})` }}
-                              className="w-full h-24 bg-cover bg-center rounded"
+                              className="w-full h-24 bg-cover bg-center rounded border border-gray-300"
+                              onError={(e) => {
+                                // If preview fails to load (common with HEIF in some browsers),
+                                // hide the background image and show fallback
+                                (
+                                  e.target as HTMLDivElement
+                                ).style.backgroundImage = "none";
+                              }}
                             />
+                            {isHEIF && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 rounded pointer-events-none">
+                                <div className="text-center p-2">
+                                  <div className="text-2xl mb-1">📷</div>
+                                  <div className="text-xs text-gray-700 break-all">
+                                    {it.file.name}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    HEIF/HEIC
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </>
-                        ) : null}
+                        ) : (
+                          <div className="w-full h-24 bg-gray-100 rounded border border-gray-300 flex items-center justify-center">
+                            <div className="text-center p-2">
+                              <div className="text-2xl mb-1">📷</div>
+                              <div className="text-xs text-gray-700 break-all">
+                                {it.file.name}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <button
                           type="button"
                           onClick={() => {
@@ -544,7 +551,7 @@ export default function CreatePropertyPage() {
                             } catch {}
                             setImages(images.filter((_, i) => i !== idx));
                           }}
-                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1"
+                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition-colors"
                           aria-label={`Remove image ${it.file.name}`}
                         >
                           ×
