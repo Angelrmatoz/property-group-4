@@ -21,7 +21,15 @@ type Property = {
 export default async function PropertyPage({ params }: { params: any }) {
   // params may be a Promise-like in some Next versions; await it before using
   const { id } = (await params) as { id: string };
-  const prop = (await getPropertyById(id)) as Property | null;
+
+  let prop: Property | null = null;
+  try {
+    prop = (await getPropertyById(id)) as Property | null;
+  } catch (error) {
+    console.error("Error fetching property:", error);
+    prop = null;
+  }
+
   if (!prop)
     return (
       <div className="flex items-center justify-center py-16">
