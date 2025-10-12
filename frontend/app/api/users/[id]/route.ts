@@ -43,7 +43,6 @@ export async function DELETE(
     const p = await (params as any);
     const id = p.id as string;
     if (!id) {
-      console.error("/api/users/[id] proxy called without id (DELETE)");
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
 
@@ -106,7 +105,6 @@ export async function GET(
     const p = await (params as any);
     const id = p.id as string;
     if (!id) {
-      console.error("/api/users/[id] proxy called without id (GET)");
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
 
@@ -124,8 +122,7 @@ export async function GET(
 
     const text = await res.text();
     return new NextResponse(text, { status: res.status });
-  } catch (err) {
-    console.error("/api/users/[id] proxy GET error:", err);
+  } catch {
     return NextResponse.json({ error: "Backend unavailable" }, { status: 502 });
   }
 }

@@ -47,7 +47,7 @@ export async function proxyToBackend(
   incomingCookies?: ReadonlyRequestCookies | Record<string, string>,
   retries: number = 2
 ): Promise<NextResponse> {
-  let lastError: Error | null = null;
+  // lastError removed; we don't log internal errors to avoid noisy output
 
   // Retry loop for backend cold starts
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -75,12 +75,7 @@ export async function proxyToBackend(
         }
       }
 
-      if (process.env.NODE_ENV === "development" && stripped.length) {
-        console.log(
-          "[proxy helper] Stripped upstream headers:",
-          stripped.join(", ")
-        );
-      }
+      // In development we may strip upstream headers; not logged to avoid noisy output
 
       // Forward cookies from incoming request if provided
       if (incomingCookies) {
@@ -221,24 +216,19 @@ export async function proxyToBackend(
       }
 
       return nextRes;
-    } catch (err) {
-      lastError = err as Error;
-      console.error(
-        `[proxy helper] Attempt ${attempt + 1}/${retries + 1} failed:`,
-        err
-      );
+    } catch {
+      // lastError is not declared; handle error appropriately
 
       // If not the last attempt, wait before retrying
       if (attempt < retries) {
         const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000); // Exponential backoff, max 5s
-        console.log(`[proxy helper] Retrying in ${waitTime}ms...`);
         await new Promise((resolve) => setTimeout(resolve, waitTime));
       }
     }
   }
 
   // All retries failed
-  console.error("[proxy helper] All retry attempts failed:", lastError);
+  // All attempts exhausted; return 502 to the client
   return NextResponse.json(
     {
       error: "Backend unavailable",

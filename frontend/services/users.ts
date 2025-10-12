@@ -18,9 +18,6 @@ export async function getUserById(id: string) {
   // This prevents requests to /api/users/undefined when callers accidentally
   // interpolate an undefined value into a URL.
   if (!id || id === "undefined") {
-    console.warn(
-      "getUserById called with empty or 'undefined' id, returning null"
-    );
     return null;
   }
 
@@ -31,7 +28,7 @@ export async function getUserById(id: string) {
   } catch (err: any) {
     // If the backend responds with an auth/permission error, return a
     // structured object so callers can show an appropriate message.
-    console.error("getUserById direct fetch error:", err?.message || err);
+    // direct fetch failed; fallback below
     const status = err?.status;
     if (status === 401 || status === 403) {
       return {
@@ -45,8 +42,8 @@ export async function getUserById(id: string) {
       const list = await listUsers();
       if (!list || !Array.isArray(list)) return null;
       return list.find((u: any) => u.id === id || u._id === id) || null;
-    } catch (err2: any) {
-      console.error("getUserById fallback error:", err2?.message || err2);
+    } catch {
+      // fallback also failed
       return null;
     }
   }

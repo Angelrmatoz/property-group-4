@@ -33,7 +33,6 @@ export default function UserDetailPage() {
           // Defensive: Next sometimes gives 'undefined' as a param during
           // client navigation/hydration; treat that as missing and avoid
           // issuing requests which would hit /api/users/undefined.
-          console.warn("UserDetailPage: missing or 'undefined' id param", id);
           setUser(null);
           return;
         }
@@ -57,8 +56,7 @@ export default function UserDetailPage() {
         setUser(u);
         setMeId(meResp.user?.id || null);
         setIsAdmin(Boolean(meResp.user?.admin));
-      } catch (err) {
-        console.error(err);
+      } catch {
         setUser(null);
       } finally {
         if (mounted) setLoading(false);
@@ -97,7 +95,6 @@ export default function UserDetailPage() {
         });
       }
     } catch (err) {
-      console.error(err);
       const errorMsg =
         (err as any)?.response?.data?.error ||
         (err as any)?.message ||

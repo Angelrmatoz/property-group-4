@@ -55,19 +55,13 @@ export async function me(): Promise<LoginResult> {
     });
 
     if (!res.ok) {
-      console.error("[auth.me] HTTP error:", res.status);
       return { ok: false };
     }
 
     const data = await res.json();
-    console.log("[auth.me] fetch response data:", data);
-    console.log("[auth.me] data type:", typeof data);
-
     const result = { ok: true, ...data } as LoginResult;
-    console.log("[auth.me] returning:", result);
     return result;
-  } catch (err) {
-    console.error("[auth.me] error:", err);
+  } catch {
     return { ok: false };
   }
 }

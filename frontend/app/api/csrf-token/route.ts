@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { parseSetCookie } from "@/lib/proxy-helper";
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   const backend = process.env.BACKEND_URL;
   if (!backend) {
     return NextResponse.json(
@@ -11,29 +11,8 @@ export async function GET(req: Request) {
   }
 
   // DEV DEBUG: log if incoming request contained any forwarded headers
-  if (process.env.NODE_ENV === "development") {
-    try {
-      const incomingForwarded = [
-        "x-forwarded-for",
-        "forwarded",
-        "x-real-ip",
-        "x-forwarded-host",
-        "x-forwarded-proto",
-      ].filter((h) => req.headers.has(h));
-      if (incomingForwarded.length) {
-        console.log(
-          "[csrf-token proxy] Incoming request had forwarded headers:",
-          incomingForwarded.join(", ")
-        );
-        // log values for debugging
-        for (const h of incomingForwarded) {
-          console.log(`[csrf-token proxy] ${h}:`, req.headers.get(h));
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }
+  // During development we previously printed forwarded header values for debugging.
+  // Those debug logs are no longer necessary.
 
   try {
     // Request CSRF token from backend using fetch
@@ -41,7 +20,7 @@ export async function GET(req: Request) {
       credentials: "include",
     });
 
-    console.log("[csrf-token proxy] Backend response status:", res.status);
+    // no debug logging
 
     const contentType = res.headers.get("content-type") || "";
 
@@ -72,7 +51,7 @@ export async function GET(req: Request) {
     if (contentType.includes("application/json")) {
       try {
         const json = await res.json();
-        console.log("[csrf-token proxy] Backend response data:", json);
+        // backend response parsed
 
         const nextRes = NextResponse.json(json, {
           status: res.status,

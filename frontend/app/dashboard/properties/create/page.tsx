@@ -93,7 +93,6 @@ export default function CreatePropertyPage() {
       router.push("/dashboard/properties");
     } catch (err) {
       setLoading(false);
-      console.error(err);
       // Prefer backend-provided message when available
       const backendMsg =
         (err as any)?.response?.data?.error || (err as any)?.message;

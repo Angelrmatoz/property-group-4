@@ -35,28 +35,7 @@ export async function POST(req: Request) {
   if (backend) {
     try {
       // DEV DEBUG: check if incoming request contains forwarded headers
-      if (process.env.NODE_ENV === "development") {
-        try {
-          const incomingForwarded = [
-            "x-forwarded-for",
-            "forwarded",
-            "x-real-ip",
-            "x-forwarded-host",
-            "x-forwarded-proto",
-          ].filter((h) => req.headers.has(h));
-          if (incomingForwarded.length) {
-            console.log(
-              "[login POST proxy] Incoming request had forwarded headers:",
-              incomingForwarded.join(", ")
-            );
-            for (const h of incomingForwarded) {
-              console.log(`[login POST proxy] ${h}:`, req.headers.get(h));
-            }
-          }
-        } catch  {
-          // ignore
-        }
-      }
+      // In development we may receive forwarded headers; do not log them here to avoid leaking IPs.
 
       // First fetch CSRF token from backend so we can include it in the login request.
       // We must include credentials so the backend can set/read the csurf secret cookie.
@@ -107,10 +86,7 @@ export async function POST(req: Request) {
         credentials: "include",
       });
 
-      console.log(
-        "[login POST proxy] Backend /api/auth/login response status:",
-        res.status
-      );
+      // response status intentionally not logged
 
       // Extract headers to forward
       const forwarded: Record<string, string> = {};
@@ -144,10 +120,7 @@ export async function POST(req: Request) {
       if (contentType.includes("application/json")) {
         try {
           const data = await res.json();
-          console.log(
-            "[login POST proxy] Backend /api/auth/login response data:",
-            data
-          );
+          // response data intentionally not logged
           nextRes = NextResponse.json(data, {
             status: res.status,
             headers: forwarded,
@@ -184,12 +157,7 @@ export async function POST(req: Request) {
         }
       }
 
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          "[login POST proxy] Forwarded cookies to client:",
-          forwardedNames
-        );
-      }
+      // forwarded cookies intentionally not logged
 
       return nextRes;
     } catch {

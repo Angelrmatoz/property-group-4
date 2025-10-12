@@ -185,7 +185,6 @@ export default function EditPropertyPage({ params }: { params: any }) {
       router.push("/dashboard/properties");
     } catch (err) {
       setLoading(false);
-      console.error(err);
       const backendMsg =
         (err as any)?.response?.data?.error || (err as any)?.message;
       notify({

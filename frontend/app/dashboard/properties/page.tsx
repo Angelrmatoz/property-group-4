@@ -20,14 +20,9 @@ async function getProperties(): Promise<Property[]> {
   try {
     const data = await getPropertiesService();
     if (Array.isArray(data) && data.length > 0) return data;
-  } catch (err) {
+  } catch {
     // swallow - we'll use fallback below
-    // Mantener la advertencia en console puede ayudar en dev.
-    // eslint-disable-next-line no-console
-    console.warn(
-      "Could not fetch properties via service, using local sample data",
-      err
-    );
+    // fallback to empty list when service fails
   }
 
   // If the API call failed or returned nothing, return an empty list.

@@ -170,15 +170,11 @@ export default function ProjectsPage() {
         })
         .catch((err) => {
           if (!mounted) return;
-          // Use warn instead of error to avoid Next dev overlay treating this
-          // as an application crash while still keeping the log visible.
-          console.warn("Error loading properties:", err);
 
           const msg = (err && err.message) || String(err);
 
           // If it's a simple network failure from the browser, treat it as an
-          // empty-state for now (renders the "no properties" message). Keep
-          // explicit server-starting message for 502/back-end responses only.
+          // empty-state for now (renders the "no properties" message).
           if (
             msg.includes("Failed to fetch") ||
             msg.toLowerCase().includes("network")

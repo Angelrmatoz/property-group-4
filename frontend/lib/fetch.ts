@@ -13,10 +13,6 @@ async function fetchCsrfToken(): Promise<string> {
     });
 
     if (!res.ok) {
-      console.error(
-        "[fetch wrapper] Failed to fetch CSRF token. Status:",
-        res.status
-      );
       return "";
     }
 
@@ -25,24 +21,10 @@ async function fetchCsrfToken(): Promise<string> {
 
     if (token) {
       csrfToken = token;
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          "[fetch wrapper] Successfully fetched CSRF token. Token starts with:",
-          token.substring(0, 10) + "..."
-        );
-      }
-    } else {
-      console.error(
-        "[fetch wrapper] CSRF token is missing in response data:",
-        data
-      );
     }
 
     return token;
-  } catch (err) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("[fetch wrapper] Failed to fetch CSRF token:", err);
-    }
+  } catch {
     return "";
   }
 }
@@ -94,10 +76,6 @@ export async function apiFetch<T = any>(
       // Use a single canonical header name (lowercase) to avoid duplicate
       // comma-separated values when proxies forward both forms.
       headers.set("x-csrf-token", token);
-
-      if (process.env.NODE_ENV === "development") {
-        console.log(`[fetch wrapper] Attached CSRF token to ${method} ${url}`);
-      }
     }
   }
 
