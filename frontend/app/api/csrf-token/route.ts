@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { parseSetCookie } from "@/lib/proxy-helper";
 
-export async function GET() {
+export async function GET(req: Request) {
   const backend = process.env.BACKEND_URL;
   if (!backend) {
     return NextResponse.json(
@@ -10,56 +10,86 @@ export async function GET() {
     );
   }
 
+  // DEV DEBUG: log if incoming request contained any forwarded headers
+  if (process.env.NODE_ENV === "development") {
+    try {
+      const incomingForwarded = [
+        "x-forwarded-for",
+        "forwarded",
+        "x-real-ip",
+        "x-forwarded-host",
+        "x-forwarded-proto",
+      ].filter((h) => req.headers.has(h));
+      if (incomingForwarded.length) {
+        console.log(
+          "[csrf-token proxy] Incoming request had forwarded headers:",
+          incomingForwarded.join(", ")
+        );
+        // log values for debugging
+        for (const h of incomingForwarded) {
+          console.log(`[csrf-token proxy] ${h}:`, req.headers.get(h));
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   try {
-    // Request CSRF token from backend using axios so we can access headers
-    const res = await axios.get(`${backend}/api/csrf-token`, {
-      // In Node, axios exposes Set-Cookie headers in res.headers['set-cookie']
-      withCredentials: true,
-      validateStatus: () => true, // handle non-2xx manually
+    // Request CSRF token from backend using fetch
+    const res = await fetch(`${backend}/api/csrf-token`, {
+      credentials: "include",
     });
 
     console.log("[csrf-token proxy] Backend response status:", res.status);
-    console.log("[csrf-token proxy] Backend response data:", res.data);
 
-    const contentType = (res.headers &&
-      (res.headers["content-type"] || "")) as string;
+    const contentType = res.headers.get("content-type") || "";
 
     const forwarded: Record<string, string> = {};
     const setCookies: string[] = [];
 
-    for (const [key, value] of Object.entries(res.headers || {})) {
+    // Extract headers
+    res.headers.forEach((value, key) => {
       const k = key.toLowerCase();
       if (k === "set-cookie") {
-        if (Array.isArray(value)) setCookies.push(...(value as string[]));
-        else if (value) setCookies.push(String(value));
-        continue;
+        setCookies.push(value);
+        return;
       }
       if (
-        ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(k)
+        [
+          "transfer-encoding",
+          "connection",
+          "keep-alive",
+          "upgrade",
+          "content-encoding",
+          "content-length",
+        ].includes(k)
       )
-        continue;
-      if (value !== undefined && value !== null) forwarded[key] = String(value);
-    }
+        return;
+      forwarded[key] = value;
+    });
 
     if (contentType.includes("application/json")) {
       try {
-        // res.data is already parsed JSON when we don't specify responseType: "text"
-        const json =
-          typeof res.data === "object" ? res.data : JSON.parse(res.data);
+        const json = await res.json();
+        console.log("[csrf-token proxy] Backend response data:", json);
+
         const nextRes = NextResponse.json(json, {
           status: res.status,
           headers: forwarded,
         });
+
         for (const sc of setCookies) {
-          const first = sc.split(";")[0];
-          const idx = first.indexOf("=");
-          if (idx > 0) {
-            const name = first.slice(0, idx);
-            const value = first.slice(idx + 1);
-            try {
-              nextRes.cookies.set(name, value);
-            } catch {}
-          }
+          try {
+            const parsed = parseSetCookie(sc);
+            if (parsed) {
+              nextRes.cookies.set(
+                parsed.name,
+                parsed.value,
+                parsed.options as any
+              );
+            }
+          } catch {}
         }
         return nextRes;
       } catch {
@@ -71,25 +101,22 @@ export async function GET() {
     }
 
     // Non-JSON response
-    const text =
-      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+    const text = await res.text();
     const nextRes = new NextResponse(text, {
       status: res.status,
       headers: forwarded,
     });
+
     for (const sc of setCookies) {
-      const first = sc.split(";")[0];
-      const idx = first.indexOf("=");
-      if (idx > 0) {
-        const name = first.slice(0, idx);
-        const value = first.slice(idx + 1);
-        try {
-          nextRes.cookies.set(name, value);
-        } catch {}
-      }
+      try {
+        const parsed = parseSetCookie(sc);
+        if (parsed) {
+          nextRes.cookies.set(parsed.name, parsed.value, parsed.options as any);
+        }
+      } catch {}
     }
     return nextRes;
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Backend unavailable" }, { status: 502 });
   }
 }

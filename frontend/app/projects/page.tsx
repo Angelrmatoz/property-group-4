@@ -73,6 +73,7 @@ export default function ProjectsPage() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
@@ -104,11 +105,21 @@ export default function ProjectsPage() {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setError(null);
+
     // lazy-load properties from service
     import("@/services/properties").then((m) => {
       m.getProperties()
         .then((data: any) => {
           if (!mounted) return;
+
+          // Check if backend returned an error
+          if (data?.error) {
+            setError(data.message || "Error al cargar las propiedades");
+            setProjects([]);
+            return;
+          }
+
           // Map backend properties to project format
           const mappedProjects = (Array.isArray(data) ? data : []).map(
             (prop: any) => {
@@ -157,9 +168,29 @@ export default function ProjectsPage() {
           );
           setProjects(mappedProjects);
         })
-        .catch(() => {
+        .catch((err) => {
           if (!mounted) return;
-          setProjects([]);
+          // Use warn instead of error to avoid Next dev overlay treating this
+          // as an application crash while still keeping the log visible.
+          console.warn("Error loading properties:", err);
+
+          const msg = (err && err.message) || String(err);
+
+          // If it's a simple network failure from the browser, treat it as an
+          // empty-state for now (renders the "no properties" message). Keep
+          // explicit server-starting message for 502/back-end responses only.
+          if (
+            msg.includes("Failed to fetch") ||
+            msg.toLowerCase().includes("network")
+          ) {
+            setError(null);
+            setProjects([]);
+          } else {
+            setError(
+              "El servidor está iniciando. Por favor, espera unos segundos y recarga la página."
+            );
+            setProjects([]);
+          }
         })
         .finally(() => {
           if (!mounted) return;
@@ -252,7 +283,32 @@ export default function ProjectsPage() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {loading ? (
-              <div className="col-span-full text-center py-12">Cargando...</div>
+              <div className="col-span-full text-center py-12">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Cargando propiedades...
+                  </p>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="col-span-full text-center py-16">
+                <div className="max-w-md mx-auto">
+                  <Building2 className="w-16 h-16 mx-auto mb-4 text-yellow-500" />
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+                    Servidor Iniciando
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    {error}
+                  </p>
+                  <Button
+                    onClick={() => window.location.reload()}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                  >
+                    Recargar Página
+                  </Button>
+                </div>
+              </div>
             ) : (
               filteredProjects.map((project) => (
                 <Card
@@ -340,15 +396,27 @@ export default function ProjectsPage() {
             )}
           </div>
 
-          {filteredProjects.length === 0 && (
-            <div className="text-center py-16">
+          {filteredProjects.length === 0 && !loading && !error && (
+            <div className="col-span-full text-center py-16">
               <Building2 className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
               <h3 className="text-2xl font-bold mb-2 text-gray-600 dark:text-gray-400">
-                No se encontraron proyectos
+                No hay propiedades disponibles
               </h3>
-              <p className="text-gray-500">
-                Intenta ajustar tus filtros de búsqueda
+              <p className="text-gray-500 mb-6">
+                En este momento no hay propiedades publicadas. Puedes recargar
+                la página o intentarlo de nuevo más tarde.
               </p>
+              <div className="flex justify-center gap-4">
+                <Button
+                  onClick={() => window.location.reload()}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                >
+                  Recargar
+                </Button>
+                <Link href="/#contacto">
+                  <Button variant="outline">Contactar Asesor</Button>
+                </Link>
+              </div>
             </div>
           )}
         </div>

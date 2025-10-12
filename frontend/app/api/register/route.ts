@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import axios from "axios";
+import { parseSetCookie } from "@/lib/proxy-helper";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
@@ -8,51 +8,58 @@ export async function POST(req: Request) {
   const backend = process.env.BACKEND_URL;
   if (backend) {
     try {
-      const res = await axios.post(`${backend}/api/register`, body, {
+      const res = await fetch(`${backend}/api/register`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        validateStatus: () => true,
-        responseType: "text",
+        body: JSON.stringify(body),
+        credentials: "include",
       });
-      const data =
-        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
 
       const forwarded: Record<string, string> = {};
       const setCookies: string[] = [];
-      for (const [key, value] of Object.entries(res.headers || {})) {
+
+      res.headers.forEach((value, key) => {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
-          if (Array.isArray(value)) setCookies.push(...(value as string[]));
-          else if (value) setCookies.push(String(value));
-          continue;
+          setCookies.push(value);
+          return;
         }
-        if (k === "location" || k === "content-location") continue;
+        if (k === "location" || k === "content-location") return;
         if (
-          ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
-            k
-          )
+          [
+            "transfer-encoding",
+            "connection",
+            "keep-alive",
+            "upgrade",
+            "content-encoding",
+            "content-length",
+          ].includes(k)
         )
-          continue;
-        if (value !== undefined && value !== null)
-          forwarded[key] = String(value);
-      }
+          return;
+        forwarded[key] = value;
+      });
 
+      const data = await res.text();
       const nextRes = new NextResponse(data, {
         status: res.status,
         headers: forwarded,
       });
+
       for (const sc of setCookies) {
-        const first = sc.split(";")[0];
-        const idx = first.indexOf("=");
-        if (idx > 0) {
-          const name = first.slice(0, idx);
-          const value = first.slice(idx + 1);
-          try {
-            nextRes.cookies.set(name, value);
-          } catch {
-            // ignore
+        try {
+          const parsed = parseSetCookie(sc);
+          if (parsed) {
+            nextRes.cookies.set(
+              parsed.name,
+              parsed.value,
+              parsed.options as any
+            );
           }
+        } catch {
+          // ignore
         }
       }
+
       return nextRes;
     } catch {
       return NextResponse.json(

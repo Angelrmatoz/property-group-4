@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import axios from "axios";
 
 export async function DELETE(
   _req: Request,
@@ -47,21 +46,22 @@ export async function DELETE(
       console.error("/api/users/[id] proxy called without id (DELETE)");
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
-    const res = await axios.delete(`${backend}/api/users/${id}`, {
-      withCredentials: true,
+
+    const res = await fetch(`${backend}/api/users/${id}`, {
+      method: "DELETE",
       headers,
-      validateStatus: () => true,
-      responseType: "text",
+      credentials: "include",
     });
 
     if (res.status === 204) return new NextResponse(null, { status: 204 });
-    const text =
-      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-    const contentType = (res.headers &&
-      (res.headers["content-type"] || "")) as string;
+
+    const contentType = res.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
-      return NextResponse.json(JSON.parse(text), { status: res.status });
+      const json = await res.json();
+      return NextResponse.json(json, { status: res.status });
     }
+
+    const text = await res.text();
     return new NextResponse(text, { status: res.status });
   } catch {
     return NextResponse.json({ error: "Backend unavailable" }, { status: 502 });
@@ -109,20 +109,20 @@ export async function GET(
       console.error("/api/users/[id] proxy called without id (GET)");
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
-    const res = await axios.get(`${backend}/api/users/${id}`, {
-      withCredentials: true,
+
+    const res = await fetch(`${backend}/api/users/${id}`, {
+      method: "GET",
       headers,
-      validateStatus: () => true,
-      responseType: "text",
+      credentials: "include",
     });
 
-    const text =
-      typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-    const contentType = (res.headers &&
-      (res.headers["content-type"] || "")) as string;
+    const contentType = res.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
-      return NextResponse.json(JSON.parse(text), { status: res.status });
+      const json = await res.json();
+      return NextResponse.json(json, { status: res.status });
     }
+
+    const text = await res.text();
     return new NextResponse(text, { status: res.status });
   } catch (err) {
     console.error("/api/users/[id] proxy GET error:", err);

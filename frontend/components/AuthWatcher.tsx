@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/Notification";
-import { startAuthHeartbeat } from "@/lib/axios";
+import { startAuthHeartbeat } from "@/lib/fetch";
 
 export default function AuthWatcher() {
   const { notify } = useNotification();

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import axios from "axios";
+import { proxyToBackend, parseSetCookie } from "@/lib/proxy-helper";
 
 export async function GET() {
   const backend = process.env.BACKEND_URL;
@@ -8,107 +8,14 @@ export async function GET() {
   // structured user object (including admin flag). This requires
   // credentials so the backend can read the httpOnly token cookie.
   if (backend) {
-    try {
-      // forward any cookies from the incoming request so backend receives
-      // the httpOnly token cookie used by authenticate middleware
-      const cookieStore = await cookies();
-      const cookiePairs: string[] = [];
+    const cookieStore = await cookies();
+    return await proxyToBackend(
+      `${backend}/api/auth/me`,
+      {
+        method: "GET",
+      },
       cookieStore
-        .getAll()
-        .forEach((c) => cookiePairs.push(`${c.name}=${c.value}`));
-
-      const res = await axios.get(`${backend}/api/auth/me`, {
-        withCredentials: true,
-        headers: cookiePairs.length
-          ? { Cookie: cookiePairs.join("; ") }
-          : undefined,
-        validateStatus: () => true,
-      });
-
-      console.log(
-        "[login GET proxy] Backend /api/auth/me response status:",
-        res.status
-      );
-      console.log(
-        "[login GET proxy] Backend /api/auth/me response data:",
-        res.data
-      );
-
-      const text =
-        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-      const contentType = (res.headers &&
-        (res.headers["content-type"] || "")) as string;
-
-      const forwarded: Record<string, string> = {};
-      const setCookies: string[] = [];
-      for (const [key, value] of Object.entries(res.headers || {})) {
-        const k = key.toLowerCase();
-        if (k === "set-cookie") {
-          if (Array.isArray(value)) setCookies.push(...(value as string[]));
-          else if (value) setCookies.push(String(value));
-          continue;
-        }
-        if (
-          ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
-            k
-          )
-        )
-          continue;
-        if (value !== undefined && value !== null)
-          forwarded[key] = String(value);
-      }
-
-      if (contentType.includes("application/json")) {
-        try {
-          const json = JSON.parse(text);
-          const nextRes = NextResponse.json(json, {
-            status: res.status,
-            headers: forwarded,
-          });
-          for (const sc of setCookies) {
-            const first = sc.split(";")[0];
-            const idx = first.indexOf("=");
-            if (idx > 0) {
-              const name = first.slice(0, idx);
-              const value = first.slice(idx + 1);
-              try {
-                nextRes.cookies.set(name, value);
-              } catch {
-                // ignore
-              }
-            }
-          }
-          return nextRes;
-        } catch {
-          return NextResponse.json(
-            { error: "Invalid JSON from backend" },
-            { status: 502 }
-          );
-        }
-      }
-
-      const nextRes = new NextResponse(text, {
-        status: res.status,
-        headers: forwarded,
-      });
-      for (const sc of setCookies) {
-        const first = sc.split(";")[0];
-        const idx = first.indexOf("=");
-        if (idx > 0) {
-          const name = first.slice(0, idx);
-          const value = first.slice(idx + 1);
-          try {
-            nextRes.cookies.set(name, value);
-          } catch {}
-        }
-      }
-      return nextRes;
-    } catch {
-      return NextResponse.json(
-        { error: "Backend unavailable" },
-        { status: 502 }
-      );
-    }
+    );
   }
 
   // No backend configured: fallback to reading token from cookie (dev/demo)
@@ -127,31 +34,57 @@ export async function POST(req: Request) {
   const backend = process.env.BACKEND_URL;
   if (backend) {
     try {
+      // DEV DEBUG: check if incoming request contains forwarded headers
+      if (process.env.NODE_ENV === "development") {
+        try {
+          const incomingForwarded = [
+            "x-forwarded-for",
+            "forwarded",
+            "x-real-ip",
+            "x-forwarded-host",
+            "x-forwarded-proto",
+          ].filter((h) => req.headers.has(h));
+          if (incomingForwarded.length) {
+            console.log(
+              "[login POST proxy] Incoming request had forwarded headers:",
+              incomingForwarded.join(", ")
+            );
+            for (const h of incomingForwarded) {
+              console.log(`[login POST proxy] ${h}:`, req.headers.get(h));
+            }
+          }
+        } catch  {
+          // ignore
+        }
+      }
+
       // First fetch CSRF token from backend so we can include it in the login request.
       // We must include credentials so the backend can set/read the csurf secret cookie.
-      const csrfRes = await axios.get(`${backend}/api/csrf-token`, {
-        withCredentials: true,
-        validateStatus: () => true,
+      const csrfRes = await fetch(`${backend}/api/csrf-token`, {
+        credentials: "include",
       });
+
       let csrfToken: string | undefined = undefined;
       // Capture any Set-Cookie headers the backend sent so we can forward the
       // csurf secret cookie in the subsequent login request.
       const csrfSetCookies: string[] = [];
-      if (csrfRes && csrfRes.data) {
+
+      if (csrfRes.ok) {
         try {
-          csrfToken = csrfRes.data.csrfToken;
+          const csrfData = await csrfRes.json();
+          csrfToken = csrfData.csrfToken;
         } catch {
           // ignore
         }
-        try {
-          // Axios exposes set-cookie in headers['set-cookie']
-          const sc = csrfRes.headers["set-cookie"];
-          if (Array.isArray(sc)) csrfSetCookies.push(...sc);
-          else if (sc) csrfSetCookies.push(String(sc));
-        } catch {
-          // ignore
-        }
+
+        // Extract Set-Cookie headers
+        csrfRes.headers.forEach((value, key) => {
+          if (key.toLowerCase() === "set-cookie") {
+            csrfSetCookies.push(value);
+          }
+        });
       }
+
       // backend auth routes are mounted under /api/auth
       const loginHeaders: Record<string, string> = {
         "Content-Type": "application/json",
@@ -167,64 +100,95 @@ export async function POST(req: Request) {
         loginHeaders["Cookie"] = cookiePairs;
       }
 
-      const res = await axios.post(
-        `${backend}/api/auth/login`,
-        { email, password },
-        {
-          headers: loginHeaders,
-          withCredentials: true,
-          validateStatus: () => true,
-        }
-      );
+      const res = await fetch(`${backend}/api/auth/login`, {
+        method: "POST",
+        headers: loginHeaders,
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
 
       console.log(
         "[login POST proxy] Backend /api/auth/login response status:",
         res.status
       );
-      console.log(
-        "[login POST proxy] Backend /api/auth/login response data:",
-        res.data
-      );
 
-      const data =
-        typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-
+      // Extract headers to forward
       const forwarded: Record<string, string> = {};
       const setCookies: string[] = [];
-      for (const [key, value] of Object.entries(res.headers || {})) {
+
+      res.headers.forEach((value, key) => {
         const k = key.toLowerCase();
         if (k === "set-cookie") {
-          if (Array.isArray(value)) setCookies.push(...(value as string[]));
-          else if (value) setCookies.push(String(value));
-          continue;
+          setCookies.push(value);
+          return;
         }
-        if (k === "location" || k === "content-location") continue;
+        if (k === "location" || k === "content-location") return;
         if (
-          ["transfer-encoding", "connection", "keep-alive", "upgrade"].includes(
-            k
-          )
+          [
+            "transfer-encoding",
+            "connection",
+            "keep-alive",
+            "upgrade",
+            "content-encoding",
+            "content-length",
+          ].includes(k)
         )
-          continue;
-        if (value !== undefined && value !== null)
-          forwarded[key] = String(value);
+          return;
+        forwarded[key] = value;
+      });
+
+      // Handle JSON responses
+      const contentType = res.headers.get("content-type") || "";
+      let nextRes: NextResponse;
+
+      if (contentType.includes("application/json")) {
+        try {
+          const data = await res.json();
+          console.log(
+            "[login POST proxy] Backend /api/auth/login response data:",
+            data
+          );
+          nextRes = NextResponse.json(data, {
+            status: res.status,
+            headers: forwarded,
+          });
+        } catch {
+          return NextResponse.json(
+            { error: "Invalid JSON from backend" },
+            { status: 502 }
+          );
+        }
+      } else {
+        const text = await res.text();
+        nextRes = new NextResponse(text, {
+          status: res.status,
+          headers: forwarded,
+        });
       }
 
-      const nextRes = new NextResponse(data, {
-        status: res.status,
-        headers: forwarded,
-      });
+      // Forward Set-Cookie headers (preserve attributes)
+      const forwardedNames: string[] = [];
       for (const sc of setCookies) {
-        const first = sc.split(";")[0];
-        const idx = first.indexOf("=");
-        if (idx > 0) {
-          const name = first.slice(0, idx);
-          const value = first.slice(idx + 1);
-          try {
-            nextRes.cookies.set(name, value);
-          } catch {
-            // ignore
+        try {
+          const parsed = parseSetCookie(sc);
+          if (parsed) {
+            nextRes.cookies.set(
+              parsed.name,
+              parsed.value,
+              parsed.options as any
+            );
+            forwardedNames.push(parsed.name);
           }
+        } catch {
+          // ignore
         }
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[login POST proxy] Forwarded cookies to client:",
+          forwardedNames
+        );
       }
 
       return nextRes;

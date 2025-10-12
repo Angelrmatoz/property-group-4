@@ -11,41 +11,63 @@ export type LoginResult = {
   message?: string;
 };
 
-import api from "@/lib/axios";
-
 export async function login(
   email: string,
   password: string
 ): Promise<LoginResult> {
   try {
-    const res = await api.post("/api/login", { email, password });
-    return { ok: true, ...res.data } as LoginResult;
-  } catch (err: any) {
-    // If backend returns a 401, return a friendly message instead of exposing status
-    const status = err?.response?.status || err?.status;
-    if (status === 401) {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        return {
+          ok: false,
+          message: "Usuario o contraseña incorrecto",
+        };
+      }
       return {
         ok: false,
-        message: "Usuario o contraseña incorrecto",
+        message: data?.message || "Login failed",
       };
     }
 
+    return { ok: true, ...data } as LoginResult;
+  } catch (err: any) {
     return {
       ok: false,
-      message:
-        err?.response?.data?.message ||
-        err?.data?.message ||
-        err?.message ||
-        "Login failed",
+      message: err?.message || "Login failed",
     };
   }
 }
 
 export async function me(): Promise<LoginResult> {
   try {
-    const res = await api.get("/api/login", { params: { _: Date.now() } });
-    return { ok: true, ...res.data } as LoginResult;
-  } catch {
+    const res = await fetch(`/api/login?_=${Date.now()}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      console.error("[auth.me] HTTP error:", res.status);
+      return { ok: false };
+    }
+
+    const data = await res.json();
+    console.log("[auth.me] fetch response data:", data);
+    console.log("[auth.me] data type:", typeof data);
+
+    const result = { ok: true, ...data } as LoginResult;
+    console.log("[auth.me] returning:", result);
+    return result;
+  } catch (err) {
+    console.error("[auth.me] error:", err);
     return { ok: false };
   }
 }

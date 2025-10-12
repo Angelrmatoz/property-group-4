@@ -16,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="./images/icons/PG-icon-dorado.png" />
+        {/* Use absolute path so the favicon is requested from the site root
+            instead of being resolved relative to the current URL path. */}
+        <link rel="icon" href="/images/icons/PG-icon-dorado.png" />
         {/* Meta Pixel handled by FbPixel component */}
       </head>
       <body>

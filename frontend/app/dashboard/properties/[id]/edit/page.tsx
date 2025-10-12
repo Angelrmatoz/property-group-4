@@ -5,11 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateProperty } from "@/services/properties";
 import { useNotification } from "@/components/Notification";
 
-export default function EditPropertyPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function EditPropertyPage({ params }: { params: any }) {
   const router = useRouter();
   const { notify } = useNotification();
   const [title, setTitle] = useState("");

@@ -41,9 +41,17 @@ export default function Sidebar() {
     async function loadUser() {
       try {
         const auth = await import("@/services/auth").then((m) => m.me());
+        console.log("[Sidebar] auth.me() response:", auth);
+        console.log("[Sidebar] auth.user?.admin:", (auth as any)?.user?.admin);
+        console.log("[Sidebar] auth.admin:", (auth as any)?.admin);
         if (!mounted) return;
         setIsAdmin(Boolean((auth as any)?.user?.admin || (auth as any)?.admin));
+        console.log(
+          "[Sidebar] isAdmin set to:",
+          Boolean((auth as any)?.user?.admin || (auth as any)?.admin)
+        );
       } catch (err) {
+        console.error("[Sidebar] Error loading user:", err);
         if ((err as any)?.name === "AbortError") return;
         setIsAdmin(false);
       }
