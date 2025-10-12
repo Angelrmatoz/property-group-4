@@ -395,7 +395,18 @@ export default function CreatePropertyPage() {
                   const toProcess = files.slice(0, remainingSlots);
 
                   for (const f of toProcess) {
-                    if (!f.type || !f.type.startsWith("image/")) {
+                    // Allow files that either have an image/* mimetype or
+                    // have a known image extension (covers cases where some
+                    // browsers/devices send an empty or generic mimetype).
+                    const nameLower = (f.name || "").toLowerCase();
+                    const hasImageMime = Boolean(
+                      f.type && f.type.startsWith("image/")
+                    );
+                    const hasImageExt =
+                      /\.(jpg|jpeg|png|gif|webp|avif|heic|heif|tiff|tif|bmp|svg|ico)$/i.test(
+                        nameLower
+                      );
+                    if (!hasImageMime && !hasImageExt) {
                       try {
                         notify({
                           type: "error",
@@ -458,7 +469,7 @@ export default function CreatePropertyPage() {
                         notify({
                           type: "error",
                           title: "Error de conversión",
-                          message: `No se pudo convertir ${f.name}. Inténtalo con formato JPEG o PNG.`,
+                          message: `No se pudo convertir ${f.name}. Por favor intenta con otra imagen.`,
                           duration: 5000,
                         });
                         continue;
