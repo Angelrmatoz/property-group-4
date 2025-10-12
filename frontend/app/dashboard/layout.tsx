@@ -29,10 +29,7 @@ export default async function DashboardLayout({
       {/* On mobile, add left padding equal to sidebar width (CSS var) so content 
           doesn't hide behind the fixed sidebar. On desktop (md+), the flex layout 
           handles spacing automatically. */}
-      <main
-        className="flex-1 p-6 md:pl-6"
-        style={{ paddingLeft: "calc(var(--sidebar-width, 64px) + 1.5rem)" }}
-      >
+      <main className="flex-1 p-6 pl-[calc(var(--sidebar-width,64px)+1.5rem)] md:pl-6">
         <DashboardClientWrapper>{children}</DashboardClientWrapper>
       </main>
     </div>

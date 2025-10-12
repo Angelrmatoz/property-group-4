@@ -320,6 +320,8 @@ export default function ProjectsPage() {
                       src={(project.image as string) || "/placeholder.svg"}
                       alt={(project.name as string) || "Proyecto"}
                       fill
+                      priority
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                     <div className="absolute top-4 left-4">
@@ -458,6 +460,9 @@ export default function ProjectsPage() {
                       src={images[currentImageIndex] || "/placeholder.svg"}
                       alt={selectedProject.name || "Propiedad"}
                       fill
+                      // Use priority for the first image in the modal when it's likely above the fold
+                      priority={currentImageIndex === 0}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 800px"
                       className="object-contain bg-gray-100 dark:bg-gray-800"
                     />
 
