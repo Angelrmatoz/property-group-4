@@ -139,11 +139,28 @@ export default function CreatePropertyPage() {
           <label className="block text-sm mb-1">Descripción</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val.length > 2000) {
+                try {
+                  notify({
+                    type: "error",
+                    title: "Descripción demasiado larga",
+                    message:
+                      "La descripción no puede superar los 2,000 caracteres.",
+                  });
+                } catch {}
+                return;
+              }
+              setDescription(val);
+            }}
             className="w-full rounded border px-3 py-2 bg-transparent"
             rows={4}
             required
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Máx 2,000 caracteres. {description.length}/2000
+          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -340,12 +357,56 @@ export default function CreatePropertyPage() {
                 multiple
                 onChange={(e) => {
                   const files = Array.from(e.target.files || []);
-                  const newItems = files.map((f) => ({
-                    file: f,
-                    preview: URL.createObjectURL(f),
-                  }));
-                  // Append but cap at 10
-                  const combined = [...images, ...newItems].slice(0, 10);
+                  const accepted: { file: File; preview: string }[] = [];
+                  const maxBytes = 10 * 1024 * 1024; // 10 MB
+                  const maxImages = 10;
+                  const remainingSlots = Math.max(0, maxImages - images.length);
+
+                  if (files.length > remainingSlots) {
+                    try {
+                      notify({
+                        type: "error",
+                        title: "Límite de imágenes",
+                        message: `Solo se permiten hasta ${maxImages} imágenes. Se rechazaron ${
+                          files.length - remainingSlots
+                        } imagen(es) extra.`,
+                      });
+                    } catch {}
+                  }
+
+                  // Only process up to the remaining slots
+                  const toProcess = files.slice(0, remainingSlots);
+
+                  for (const f of toProcess) {
+                    if (!f.type || !f.type.startsWith("image/")) {
+                      try {
+                        notify({
+                          type: "error",
+                          title: "Formato no permitido",
+                          message: `El archivo ${f.name} no es una imagen y ha sido rechazado.`,
+                        });
+                      } catch {}
+                      continue;
+                    }
+
+                    if (f.size > maxBytes) {
+                      try {
+                        notify({
+                          type: "error",
+                          title: "Imagen demasiado grande",
+                          message: `El archivo ${f.name} supera los 10 MB y ha sido rechazado.`,
+                        });
+                      } catch {}
+                      continue;
+                    }
+
+                    accepted.push({ file: f, preview: URL.createObjectURL(f) });
+                  }
+
+                  if (accepted.length === 0) return;
+
+                  // Append accepted files but cap at maxImages total
+                  const combined = [...images, ...accepted].slice(0, maxImages);
                   setImages(combined);
                 }}
                 className="w-full"

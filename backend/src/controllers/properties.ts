@@ -15,15 +15,16 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) => {
-  const allowed = ["image/jpeg", "image/png"];
-  if (allowed.includes(file.mimetype)) cb(null, true);
-  else cb(new Error("Invalid file type. Only JPEG and PNG are allowed."));
+  // Accept any image/* MIME type (reject videos and other types)
+  if (file && file.mimetype && file.mimetype.startsWith("image/"))
+    cb(null, true);
+  else cb(new Error("Tipo de archivo no válido. Solo se permiten imágenes."));
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024, files: 10 }, // 5 MB, max 10 files
+  limits: { fileSize: 10 * 1024 * 1024, files: 10 }, // 10 MB, max 10 files
 });
 
 function firstDefined<T = any>(obj: any, keys: string[]): T | undefined {
@@ -191,6 +192,16 @@ propertiesRouter.post(
       }
       const body = req.body as any;
 
+      // Server-side validation: description max length (2000 chars)
+      const rawDescription = firstDefined(body, ["description", "descripcion"]);
+      if (typeof rawDescription === "string" && rawDescription.length > 2000) {
+        return res
+          .status(400)
+          .json({
+            error: "La descripción no puede superar los 2,000 caracteres.",
+          });
+      }
+
       // if there are files, upload each to Cloudinary and collect URLs
       const imagesPaths: string[] = [];
       const files = (req as any).files as
@@ -198,8 +209,28 @@ propertiesRouter.post(
         | undefined;
 
       if (files && files.length) {
+        const maxBytes = 10 * 1024 * 1024; // 10 MB
         for (const file of files.slice(0, 10)) {
           if (!file.buffer) continue;
+
+          // Validate MIME type server-side again
+          if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+            return res
+              .status(400)
+              .json({
+                error: `El archivo ${file.originalname} no es una imagen válida.`,
+              });
+          }
+
+          // Validate file size
+          if (file.size > maxBytes) {
+            return res
+              .status(400)
+              .json({
+                error: `El archivo ${file.originalname} supera los 10 MB.`,
+              });
+          }
+
           try {
             const result = await uploadBufferToCloudinary(
               file.buffer,
@@ -388,6 +419,16 @@ propertiesRouter.put(
       const { id } = req.params;
       const body = req.body as any;
 
+      // Server-side validation: description max length (2000 chars)
+      const rawDescription = firstDefined(body, ["description", "descripcion"]);
+      if (typeof rawDescription === "string" && rawDescription.length > 2000) {
+        return res
+          .status(400)
+          .json({
+            error: "La descripción no puede superar los 2,000 caracteres.",
+          });
+      }
+
       // If there are files, upload each to Cloudinary and collect URLs
       const imagesPaths: string[] = [];
       const files = (req as any).files as
@@ -395,8 +436,28 @@ propertiesRouter.put(
         | undefined;
 
       if (files && files.length) {
+        const maxBytes = 10 * 1024 * 1024; // 10 MB
         for (const file of files.slice(0, 10)) {
           if (!file.buffer) continue;
+
+          // Validate MIME type server-side
+          if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+            return res
+              .status(400)
+              .json({
+                error: `El archivo ${file.originalname} no es una imagen válida.`,
+              });
+          }
+
+          // Validate file size
+          if (file.size > maxBytes) {
+            return res
+              .status(400)
+              .json({
+                error: `El archivo ${file.originalname} supera los 10 MB.`,
+              });
+          }
+
           try {
             const result = await uploadBufferToCloudinary(
               file.buffer,
