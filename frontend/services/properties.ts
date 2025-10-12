@@ -122,7 +122,11 @@ export async function getPropertyById(id: string) {
     const base = `http://localhost:${process.env.PORT || 3000}`;
     const url = new URL(`/api/properties/${id}`, base).toString();
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch property");
+    if (!res.ok) {
+      // Return null for server-side rendering when backend fails so React Server
+      // Components can render a friendly fallback instead of throwing.
+      return null as any;
+    }
     return res.json();
   }
 

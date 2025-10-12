@@ -193,13 +193,18 @@ propertiesRouter.post(
       const body = req.body as any;
 
       // Server-side validation: description max length (2000 chars)
-      const rawDescription = firstDefined(body, ["description", "descripcion"]);
-      if (typeof rawDescription === "string" && rawDescription.length > 2000) {
-        return res
-          .status(400)
-          .json({
-            error: "La descripción no puede superar los 2,000 caracteres.",
-          });
+      // Coerce description to a string safely (handle arrays or non-string values)
+      let rawDescription = firstDefined(body, ["description", "descripcion"]);
+      if (Array.isArray(rawDescription)) rawDescription = rawDescription[0];
+      const descString =
+        rawDescription === undefined || rawDescription === null
+          ? ""
+          : String(rawDescription);
+      if (descString.length > 2000) {
+        // Return a clear validation error
+        return res.status(400).json({
+          error: "La descripción no puede superar los 2,000 caracteres.",
+        });
       }
 
       // if there are files, upload each to Cloudinary and collect URLs
@@ -215,20 +220,16 @@ propertiesRouter.post(
 
           // Validate MIME type server-side again
           if (!file.mimetype || !file.mimetype.startsWith("image/")) {
-            return res
-              .status(400)
-              .json({
-                error: `El archivo ${file.originalname} no es una imagen válida.`,
-              });
+            return res.status(400).json({
+              error: `El archivo ${file.originalname} no es una imagen válida.`,
+            });
           }
 
           // Validate file size
           if (file.size > maxBytes) {
-            return res
-              .status(400)
-              .json({
-                error: `El archivo ${file.originalname} supera los 10 MB.`,
-              });
+            return res.status(400).json({
+              error: `El archivo ${file.originalname} supera los 10 MB.`,
+            });
           }
 
           try {
@@ -420,13 +421,17 @@ propertiesRouter.put(
       const body = req.body as any;
 
       // Server-side validation: description max length (2000 chars)
-      const rawDescription = firstDefined(body, ["description", "descripcion"]);
-      if (typeof rawDescription === "string" && rawDescription.length > 2000) {
-        return res
-          .status(400)
-          .json({
-            error: "La descripción no puede superar los 2,000 caracteres.",
-          });
+      // Coerce description to string safely (handle arrays or non-string values)
+      let rawDescription = firstDefined(body, ["description", "descripcion"]);
+      if (Array.isArray(rawDescription)) rawDescription = rawDescription[0];
+      const descString =
+        rawDescription === undefined || rawDescription === null
+          ? ""
+          : String(rawDescription);
+      if (descString.length > 2000) {
+        return res.status(400).json({
+          error: "La descripción no puede superar los 2,000 caracteres.",
+        });
       }
 
       // If there are files, upload each to Cloudinary and collect URLs
@@ -442,20 +447,16 @@ propertiesRouter.put(
 
           // Validate MIME type server-side
           if (!file.mimetype || !file.mimetype.startsWith("image/")) {
-            return res
-              .status(400)
-              .json({
-                error: `El archivo ${file.originalname} no es una imagen válida.`,
-              });
+            return res.status(400).json({
+              error: `El archivo ${file.originalname} no es una imagen válida.`,
+            });
           }
 
           // Validate file size
           if (file.size > maxBytes) {
-            return res
-              .status(400)
-              .json({
-                error: `El archivo ${file.originalname} supera los 10 MB.`,
-              });
+            return res.status(400).json({
+              error: `El archivo ${file.originalname} supera los 10 MB.`,
+            });
           }
 
           try {
