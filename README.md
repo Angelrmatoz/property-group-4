@@ -5,12 +5,6 @@
 [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TailwindCSS](https://img.shields.io/badge/Styled%20with-TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
 
-# Property Group - Real Estate Landing Page
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page)
-[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![TailwindCSS](https://img.shields.io/badge/Styled%20with-TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
-
 ## Descripción
 
 Landing page profesional y responsiva para Property Group, empresa de bienes raíces. Este repositorio incluye el frontend (Next.js) y un backend (Express) usado para autenticación, APIs privadas y gestión de propiedades. El proyecto combina una landing pública con un panel de administración (dashboard) protegido por autenticación y CSRF.
