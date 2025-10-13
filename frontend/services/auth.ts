@@ -87,6 +87,8 @@ export async function logout() {
   try {
     // expire cookie (best-effort; httpOnly cookie can't be removed from client JS)
     document.cookie = "token=; Path=/; Max-Age=0; Secure";
+    // Also clear sessionStorage token
+    sessionStorage.removeItem("authToken");
   } catch {}
 }
 

@@ -24,23 +24,91 @@ export async function createProperty(payload: CreatePropertyPayload) {
 
 // Create property with files (multipart/form-data). `files` should be an array
 // of File objects (images). Backend should accept files under the key `images`.
+// When files are present, this function bypasses the Next.js proxy and sends
+// directly to the backend to avoid Vercel's 4.5MB function payload limit.
 export async function createPropertyFormData(
   payload: CreatePropertyPayload,
   files?: File[]
 ) {
   const fd = new FormData();
+
   // Append scalar fields
   Object.entries(payload).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
     // Arrays / objects should be stringified if needed
-    fd.append(key, String(value));
+    const strValue = String(value);
+    fd.append(key, strValue);
   });
 
   // Append files using the 'images' key multiple times
   if (files && files.length) {
-    files.forEach((f) => fd.append("images", f));
+    files.forEach((f) => {
+      fd.append("images", f);
+    });
   }
 
+  // When uploading files, bypass the Next.js proxy to avoid Vercel's 4.5MB limit
+  // and send directly to the backend Express server
+  const directBackendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const useDirectUpload = files && files.length > 0 && directBackendUrl;
+
+  if (useDirectUpload) {
+    // Get JWT token from sessionStorage (stored during login)
+    // We need this because HttpOnly cookies can't be read by JavaScript
+    // and don't work for cross-domain requests anyway
+    const jwtToken = sessionStorage.getItem("authToken");
+
+    if (!jwtToken) {
+      throw new Error(
+        "No se encontró el token de autenticación. Por favor, inicia sesión nuevamente."
+      );
+    }
+
+    // When doing direct upload, get CSRF token directly from backend
+    // (not from Next.js proxy) so the token matches the backend's _csrf cookie
+    const csrfRes = await fetch(`${directBackendUrl}/api/csrf-token`, {
+      credentials: "include", // Important: receive and store _csrf cookie
+    });
+    let csrfToken = "";
+    if (csrfRes.ok) {
+      const csrfData = await csrfRes.json();
+      csrfToken = csrfData.csrfToken || "";
+    }
+
+    // Send directly to backend with credentials and Authorization header
+    const response = await fetch(`${directBackendUrl}/api/properties`, {
+      method: "POST",
+      body: fd,
+      credentials: "include", // Important: send cookies with the request
+      headers: {
+        ...(csrfToken && { "x-csrf-token": csrfToken }),
+        // Send JWT token in Authorization header for cross-domain auth
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || `HTTP Error: ${response.status}` };
+      }
+
+      const error: any = new Error(
+        errorData.error || `HTTP Error: ${response.status}`
+      );
+      error.response = { status: response.status, data: errorData };
+      throw error;
+    }
+
+    const data = await response.json();
+    return data;
+  }
+
+  // Fallback to Next.js proxy for requests without files
   const { data } = await api.post("/api/properties", fd, {
     // Let the browser set Content-Type (including boundary). Do NOT set
     // Content-Type manually or fetch will omit the boundary which breaks

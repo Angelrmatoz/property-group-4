@@ -56,7 +56,11 @@ const fileFilter = (
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024, files: 10 }, // 10 MB, max 10 files
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB per file
+    files: 10, // max 10 files
+    fieldSize: 10 * 1024 * 1024, // 10 MB for non-file fields
+  },
 });
 
 function firstDefined<T = any>(obj: any, keys: string[]): T | undefined {
@@ -203,25 +207,6 @@ propertiesRouter.post(
   upload.array("images", 10),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Debug logs to help diagnose CSRF issues during development
-      if (process.env.NODE_ENV === "development") {
-        try {
-          console.log(
-            "[PUT /api/properties/:id] Incoming headers:",
-            req.headers
-          );
-          console.log(
-            "[PUT /api/properties/:id] Cookies:",
-            (req as any).cookies || req.headers.cookie
-          );
-          console.log(
-            "[PUT /api/properties/:id] X-CSRF-Token header:",
-            req.headers["x-csrf-token"] || req.headers["X-CSRF-Token"]
-          );
-        } catch {
-          // ignore logging errors
-        }
-      }
       const body = req.body as any;
 
       // Server-side validation: description max length (2000 chars)
@@ -259,10 +244,15 @@ propertiesRouter.post(
       if (files && files.length) {
         const maxBytes = 10 * 1024 * 1024; // 10 MB
         for (const file of files.slice(0, 10)) {
-          if (!file.buffer) continue;
+          if (!file.buffer) {
+            continue;
+          }
 
           // Validate MIME type / extension server-side again using centralized check
           if (!isAcceptedImage(file)) {
+            console.error(
+              `❌ [BACKEND] Imagen no válida: ${file.originalname}`
+            );
             return res.status(400).json({
               error: `El archivo ${file.originalname} no es una imagen válida.`,
             });
@@ -270,6 +260,9 @@ propertiesRouter.post(
 
           // Validate file size
           if (file.size > maxBytes) {
+            console.error(
+              `❌ [BACKEND] Archivo muy grande: ${file.originalname} (${file.size} bytes)`
+            );
             return res.status(400).json({
               error: `El archivo ${file.originalname} supera los 10 MB.`,
             });
@@ -280,9 +273,15 @@ propertiesRouter.post(
               file.buffer,
               "properties"
             );
+
             const url = result?.secure_url || result?.url;
+
             if (url) imagesPaths.push(url);
           } catch (e) {
+            console.error(
+              `❌ [BACKEND] Error subiendo ${file.originalname} a Cloudinary:`,
+              e
+            );
             return next(e as any);
           }
         }
@@ -383,6 +382,7 @@ propertiesRouter.post(
       });
 
       await created.save();
+
       res.status(201).json(toDTO(created));
     } catch (err) {
       next(err as any);

@@ -23,6 +23,11 @@ const Login: React.FC = () => {
       try {
         const result = await auth.login(email, password);
         if (result.ok) {
+          // Store token in sessionStorage for cross-domain uploads
+          // (HttpOnly cookies can't be accessed by JavaScript)
+          if (result.token) {
+            sessionStorage.setItem("authToken", result.token);
+          }
           router.push("/dashboard");
           return;
         }
