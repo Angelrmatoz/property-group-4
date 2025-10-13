@@ -26,7 +26,9 @@ export default async function PropertyPage({ params }: { params: any }) {
   try {
     prop = (await getPropertyById(id)) as Property | null;
   } catch (error) {
-    console.error("Error fetching property:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error fetching property:", error);
+    }
     prop = null;
   }
 

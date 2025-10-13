@@ -97,14 +97,7 @@ export default function DashboardPage() {
           .then((data: any) => {
             if (!mounted) return;
 
-            // Debug: log a sample property to see data structure
-            if (Array.isArray(data) && data.length > 0) {
-              console.log("Sample property data:", data[0]);
-              console.log(
-                "Images field:",
-                data[0].images || data[0].imagenes || data[0].imagen
-              );
-            }
+            // Removed debug logs: previously logged sample property for debugging
 
             // Normalize properties data
             const normalizedProperties = Array.isArray(data)

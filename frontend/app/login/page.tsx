@@ -41,7 +41,9 @@ const Login: React.FC = () => {
           duration: 5000,
         });
       } catch (error) {
-        console.error("Login error:", error);
+        if (process.env.NODE_ENV === "development") {
+          console.error("Login error:", error);
+        }
         notify({
           type: "error",
           title: "Error de conexión",
