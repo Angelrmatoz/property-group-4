@@ -54,12 +54,16 @@ export default async function PropertiesPage() {
         {properties.map((p, idx) => {
           const id = p._id ?? (p as any).id ?? idx;
           return (
-            <article key={id} className="p-4 border rounded">
-              <h3 className="font-medium truncate pr-2">{p.title}</h3>
-              <p className="text-sm text-muted-foreground">
+            <article key={id} className="p-4 border rounded min-w-0">
+              <div className="min-w-0 mb-2">
+                <h3 className="font-medium truncate text-sm sm:text-base break-words overflow-hidden">
+                  {p.title}
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">
                 Precio: {p.price ?? "—"}
               </p>
-              <div className="mt-2 flex gap-2 items-center">
+              <div className="flex flex-wrap gap-2 items-center">
                 <Link
                   href={`/dashboard/properties/${id}`}
                   className="text-amber-600"

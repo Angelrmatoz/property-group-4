@@ -91,6 +91,12 @@ export async function DELETE(req: Request, context: any) {
       headers,
     });
 
+    // Handle 204 No Content responses (successful deletion)
+    if (res.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
+
+    // For other status codes, try to parse JSON response
     const data = await res.json().catch(() => ({}));
     return NextResponse.json(data, { status: res.status });
   }
