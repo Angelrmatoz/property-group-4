@@ -75,8 +75,11 @@ if (ENABLE_CSRF) {
         if (req.headers.authorization?.startsWith("Bearer ")) {
           return "skip-csrf";
         }
-        // Otherwise use normal CSRF token from header or body
-        return req.headers["x-csrf-token"] || req.body._csrf;
+        // Otherwise use normal CSRF token from header only (body may be undefined at this point)
+        const csrfHeader = req.headers["x-csrf-token"];
+        return Array.isArray(csrfHeader)
+          ? csrfHeader[0] || ""
+          : csrfHeader || "";
       },
     })
   );
