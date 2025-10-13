@@ -674,7 +674,14 @@ propertiesRouter.delete(
         property.images.length > 0
       ) {
         try {
+          console.info(
+            `[properties] Deleting ${property.images.length} image(s) from Cloudinary for property ${id}:`,
+            property.images
+          );
           await deleteMultipleFromCloudinary(property.images);
+          console.info(
+            `[properties] Successfully deleted ${property.images.length} image(s) from Cloudinary for property ${id}`
+          );
         } catch (cloudinaryError) {
           // Log the error but don't fail the deletion
           console.error(
@@ -682,6 +689,10 @@ propertiesRouter.delete(
             cloudinaryError
           );
         }
+      } else {
+        console.info(
+          `[properties] No images to delete from Cloudinary for property ${id}`
+        );
       }
 
       // Now delete the property from the database
