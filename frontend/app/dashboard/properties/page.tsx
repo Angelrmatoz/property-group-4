@@ -55,7 +55,7 @@ export default async function PropertiesPage() {
           const id = p._id ?? (p as any).id ?? idx;
           return (
             <article key={id} className="p-4 border rounded">
-              <h3 className="font-medium">{p.title}</h3>
+              <h3 className="font-medium truncate pr-2">{p.title}</h3>
               <p className="text-sm text-muted-foreground">
                 Precio: {p.price ?? "—"}
               </p>
