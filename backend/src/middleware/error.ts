@@ -43,6 +43,14 @@ const errorHandler = (
             "[ERROR HANDLER] EBADCSRFTOKEN - raw Cookie header:",
             _req.headers["cookie"] || _req.get?.("Cookie")
           );
+          console.error(
+            "[ERROR HANDLER] EBADCSRFTOKEN - request origin:",
+            _req.headers["origin"]
+          );
+          console.error(
+            "[ERROR HANDLER] EBADCSRFTOKEN - all request headers:",
+            JSON.stringify(_req.headers, null, 2)
+          );
         } catch {
           // ignore logging failures
         }
