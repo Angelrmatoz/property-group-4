@@ -30,25 +30,19 @@ export async function createPropertyFormData(
   payload: CreatePropertyPayload,
   files?: File[]
 ) {
-  console.log("📦 [SERVICE] Creando FormData...");
   const fd = new FormData();
 
   // Append scalar fields
-  console.log("📝 [SERVICE] Agregando campos al FormData:");
   Object.entries(payload).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
     // Arrays / objects should be stringified if needed
     const strValue = String(value);
-    console.log(`  - ${key}: ${strValue}`);
     fd.append(key, strValue);
   });
 
   // Append files using the 'images' key multiple times
   if (files && files.length) {
-    console.log(`📸 [SERVICE] Agregando ${files.length} archivos al FormData:`);
-    files.forEach((f, idx) => {
-      const sizeMB = (f.size / (1024 * 1024)).toFixed(2);
-      console.log(`  [${idx + 1}] ${f.name} - ${sizeMB} MB - ${f.type}`);
+    files.forEach((f) => {
       fd.append("images", f);
     });
   }
@@ -59,117 +53,70 @@ export async function createPropertyFormData(
   const useDirectUpload = files && files.length > 0 && directBackendUrl;
 
   if (useDirectUpload) {
-    console.log(
-      `🚀 [SERVICE] Usando upload directo al backend: ${directBackendUrl}`
-    );
-    console.log(
-      `   (Bypass del proxy de Next.js para evitar límite de Vercel)`
-    );
+    // Get JWT token from sessionStorage (stored during login)
+    // We need this because HttpOnly cookies can't be read by JavaScript
+    // and don't work for cross-domain requests anyway
+    const jwtToken = sessionStorage.getItem("authToken");
 
-    const startTime = Date.now();
-
-    try {
-      // Get JWT token from sessionStorage (stored during login)
-      // We need this because HttpOnly cookies can't be read by JavaScript
-      // and don't work for cross-domain requests anyway
-      const jwtToken = sessionStorage.getItem("authToken");
-
-      if (!jwtToken) {
-        console.error("❌ [SERVICE] No se encontró token en sessionStorage");
-        throw new Error(
-          "No se encontró el token de autenticación. Por favor, inicia sesión nuevamente."
-        );
-      }
-      console.log("🔑 [SERVICE] JWT token encontrado en sessionStorage");
-
-      // When doing direct upload, get CSRF token directly from backend
-      // (not from Next.js proxy) so the token matches the backend's _csrf cookie
-      console.log("🔐 [SERVICE] Obteniendo CSRF token del backend directo...");
-      console.log(
-        `📍 [SERVICE] URL del token: ${directBackendUrl}/api/csrf-token`
+    if (!jwtToken) {
+      throw new Error(
+        "No se encontró el token de autenticación. Por favor, inicia sesión nuevamente."
       );
+    }
 
-      const csrfRes = await fetch(`${directBackendUrl}/api/csrf-token`, {
-        credentials: "include", // Important: receive and store _csrf cookie
-      });
-      let csrfToken = "";
-      if (csrfRes.ok) {
-        const csrfData = await csrfRes.json();
-        csrfToken = csrfData.csrfToken || "";
-        console.log("✅ [SERVICE] CSRF token obtenido del backend");
-      } else {
-        console.warn("⚠️ [SERVICE] No se pudo obtener CSRF token");
+    // When doing direct upload, get CSRF token directly from backend
+    // (not from Next.js proxy) so the token matches the backend's _csrf cookie
+    const csrfRes = await fetch(`${directBackendUrl}/api/csrf-token`, {
+      credentials: "include", // Important: receive and store _csrf cookie
+    });
+    let csrfToken = "";
+    if (csrfRes.ok) {
+      const csrfData = await csrfRes.json();
+      csrfToken = csrfData.csrfToken || "";
+    }
+
+    // Send directly to backend with credentials and Authorization header
+    const response = await fetch(`${directBackendUrl}/api/properties`, {
+      method: "POST",
+      body: fd,
+      credentials: "include", // Important: send cookies with the request
+      headers: {
+        ...(csrfToken && { "x-csrf-token": csrfToken }),
+        // Send JWT token in Authorization header for cross-domain auth
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || `HTTP Error: ${response.status}` };
       }
 
-      // Send directly to backend with credentials and Authorization header
-      console.log("🌐 [SERVICE] Enviando POST directo a backend...");
-      const response = await fetch(`${directBackendUrl}/api/properties`, {
-        method: "POST",
-        body: fd,
-        credentials: "include", // Important: send cookies with the request
-        headers: {
-          ...(csrfToken && { "x-csrf-token": csrfToken }),
-          // Send JWT token in Authorization header for cross-domain auth
-          Authorization: `Bearer ${jwtToken}`,
-        },
-      });
-
-      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-
-      if (!response.ok) {
-        console.error(
-          `❌ [SERVICE] Error ${response.status} después de ${duration}s`
-        );
-        const errorText = await response.text();
-        console.error(`❌ [SERVICE] Error body:`, errorText);
-
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: errorText || `HTTP Error: ${response.status}` };
-        }
-
-        const error: any = new Error(
-          errorData.error || `HTTP Error: ${response.status}`
-        );
-        error.response = { status: response.status, data: errorData };
-        throw error;
-      }
-
-      const data = await response.json();
-      console.log(`✅ [SERVICE] Respuesta recibida en ${duration}s:`, data);
-      return data;
-    } catch (error) {
-      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-      console.error(`❌ [SERVICE] Error después de ${duration}s:`, error);
+      const error: any = new Error(
+        errorData.error || `HTTP Error: ${response.status}`
+      );
+      error.response = { status: response.status, data: errorData };
       throw error;
     }
+
+    const data = await response.json();
+    return data;
   }
 
   // Fallback to Next.js proxy for requests without files
-  console.log(
-    "🌐 [SERVICE] Enviando POST a /api/properties (via proxy Next.js)..."
-  );
-  const startTime = Date.now();
+  const { data } = await api.post("/api/properties", fd, {
+    // Let the browser set Content-Type (including boundary). Do NOT set
+    // Content-Type manually or fetch will omit the boundary which breaks
+    // multipart requests.
+    // headers: { "Content-Type": "multipart/form-data" },
+  });
 
-  try {
-    const { data } = await api.post("/api/properties", fd, {
-      // Let the browser set Content-Type (including boundary). Do NOT set
-      // Content-Type manually or fetch will omit the boundary which breaks
-      // multipart requests.
-      // headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`✅ [SERVICE] Respuesta recibida en ${duration}s:`, data);
-
-    return data;
-  } catch (error) {
-    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.error(`❌ [SERVICE] Error después de ${duration}s:`, error);
-    throw error;
-  }
+  return data;
 }
 
 // Update property with files (multipart/form-data). Similar to createPropertyFormData

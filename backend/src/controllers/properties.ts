@@ -206,27 +206,7 @@ propertiesRouter.post(
   // accept up to 10 images with the field name 'images'
   upload.array("images", 10),
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log("🚀 [BACKEND POST] Request recibida en /api/properties");
-    console.log(`   - Content-Type: ${req.headers["content-type"]}`);
-    console.log(`   - User: ${(req as any).user?.username || "desconocido"}`);
-
     try {
-      // Debug logs to help diagnose CSRF issues during development
-      if (process.env.NODE_ENV === "development") {
-        try {
-          console.log("[POST /api/properties] Incoming headers:", req.headers);
-          console.log(
-            "[POST /api/properties] Cookies:",
-            (req as any).cookies || req.headers.cookie
-          );
-          console.log(
-            "[POST /api/properties] X-CSRF-Token header:",
-            req.headers["x-csrf-token"] || req.headers["X-CSRF-Token"]
-          );
-        } catch {
-          // ignore logging errors
-        }
-      }
       const body = req.body as any;
 
       // Server-side validation: description max length (2000 chars)
@@ -261,29 +241,10 @@ propertiesRouter.post(
         | (Express.Multer.File & { buffer?: Buffer })[]
         | undefined;
 
-      console.log(
-        `📦 [BACKEND POST] Archivos recibidos: ${files?.length || 0}`
-      );
-
       if (files && files.length) {
-        console.log(`📸 [BACKEND] Procesando ${files.length} archivos:`);
-        files.forEach((f, idx) => {
-          const sizeMB = (f.size / (1024 * 1024)).toFixed(2);
-          console.log(`  [${idx + 1}/${files.length}] ${f.originalname}`);
-          console.log(`    - MIME: ${f.mimetype}`);
-          console.log(`    - Tamaño: ${sizeMB} MB (${f.size} bytes)`);
-          console.log(`    - Buffer presente: ${!!f.buffer}`);
-          console.log(`    - Buffer length: ${f.buffer?.length || 0} bytes`);
-        });
-
         const maxBytes = 10 * 1024 * 1024; // 10 MB
         for (const file of files.slice(0, 10)) {
-          console.log(`🔄 [BACKEND] Procesando: ${file.originalname}`);
-
           if (!file.buffer) {
-            console.warn(
-              `⚠️ [BACKEND] Sin buffer para ${file.originalname}, saltando...`
-            );
             continue;
           }
 
@@ -308,25 +269,12 @@ propertiesRouter.post(
           }
 
           try {
-            console.log(
-              `☁️ [BACKEND] Subiendo a Cloudinary: ${file.originalname}`
-            );
-            const uploadStart = Date.now();
-
             const result = await uploadBufferToCloudinary(
               file.buffer,
               "properties"
             );
 
-            const uploadDuration = ((Date.now() - uploadStart) / 1000).toFixed(
-              2
-            );
-            console.log(
-              `✅ [BACKEND] Cloudinary upload exitoso en ${uploadDuration}s`
-            );
-
             const url = result?.secure_url || result?.url;
-            console.log(`🔗 [BACKEND] URL generada: ${url}`);
 
             if (url) imagesPaths.push(url);
           } catch (e) {
@@ -337,10 +285,6 @@ propertiesRouter.post(
             return next(e as any);
           }
         }
-
-        console.log(
-          `✅ [BACKEND] Total de imágenes subidas: ${imagesPaths.length}`
-        );
       }
 
       // Normalizar campos que pueden venir con o sin tildes
@@ -417,10 +361,6 @@ propertiesRouter.post(
           ? "yes"
           : "no";
 
-      console.log(`💾 [BACKEND] Creando documento de propiedad en MongoDB...`);
-      console.log(`   - Título: ${firstDefined(body, ["title", "titulo"])}`);
-      console.log(`   - Imágenes: ${imagesPaths.length}`);
-
       const created = new Property({
         title: firstDefined(body, ["title", "titulo"]),
         description: firstDefined(body, ["description", "descripcion"]),
@@ -441,12 +381,8 @@ propertiesRouter.post(
         createdBy: userId,
       });
 
-      console.log(`💾 [BACKEND] Guardando en base de datos...`);
       await created.save();
 
-      console.log(
-        `✅ [BACKEND] Propiedad creada exitosamente - ID: ${created._id}`
-      );
       res.status(201).json(toDTO(created));
     } catch (err) {
       next(err as any);

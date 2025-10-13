@@ -81,13 +81,6 @@ if (ENABLE_CSRF) {
     if (!token)
       return res.status(500).json({ error: "Could not generate CSRF token" });
 
-    // Debug: log cookie being set
-    console.log("[CSRF TOKEN] Generating token:", token);
-    console.log("[CSRF TOKEN] Request origin:", req.headers.origin);
-    console.log(
-      "[CSRF TOKEN] Set-Cookie will include _csrf with sameSite=none, secure=true"
-    );
-
     return res.json({ csrfToken: token });
   });
 }
