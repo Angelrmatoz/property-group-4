@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import auth from "@/services/auth";
 import { useNotification } from "@/components/Notification";
+import { storeAuthToken } from "@/lib/token-storage";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -23,10 +24,9 @@ const Login: React.FC = () => {
       try {
         const result = await auth.login(email, password);
         if (result.ok) {
-          // Store token in sessionStorage for cross-domain uploads
-          // (HttpOnly cookies can't be accessed by JavaScript)
+          // Store token in localStorage with 12-hour expiration
           if (result.token) {
-            sessionStorage.setItem("authToken", result.token);
+            storeAuthToken(result.token, 12);
           }
           router.push("/dashboard");
           return;

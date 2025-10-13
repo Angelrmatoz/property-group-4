@@ -201,6 +201,8 @@ export const api = {
     apiFetch<T>(url, { ...options, method: "DELETE" }),
 };
 
+import { getAuthToken, clearAuthToken } from "./token-storage";
+
 /**
  * Heartbeat function to periodically check auth status
  * Returns a cleanup function to stop the heartbeat
@@ -209,9 +211,23 @@ export function startAuthHeartbeat(intervalMs = 30_000) {
   // Use native fetch to avoid configuration issues
   const timer = setInterval(async () => {
     try {
-      const res = await fetch("/api/login", { credentials: "include" });
+      const jwtToken = getAuthToken(); // Automatically checks expiration
+      if (!jwtToken) {
+        // No valid token (expired or missing), broadcast logout
+        try {
+          localStorage.setItem("pg:auth:logout", String(Date.now()));
+        } catch {}
+        return;
+      }
+
+      const res = await fetch("/api/login", {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
       if (!res.ok) {
-        // broadcast logout event for cross-tab detection
+        // Token invalid on server, clear locally and broadcast logout
+        clearAuthToken();
         try {
           localStorage.setItem("pg:auth:logout", String(Date.now()));
         } catch {}

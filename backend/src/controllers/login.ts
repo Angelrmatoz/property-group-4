@@ -49,7 +49,7 @@ loginRouter.post(
       }
 
       const payload = { id: user._id.toString(), email: user.email };
-      const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+      const token = jwt.sign(payload, secret, { expiresIn: "12h" });
 
       const userDto: UserDTO = {
         id: user._id.toString(),

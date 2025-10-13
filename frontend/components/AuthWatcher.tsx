@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/Notification";
 import { startAuthHeartbeat } from "@/lib/fetch";
+import { getAuthToken, clearAuthToken } from "@/lib/token-storage";
 
 export default function AuthWatcher() {
   const { notify } = useNotification();
@@ -43,9 +44,23 @@ export default function AuthWatcher() {
     // Also do an immediate quick check (best-effort)
     (async () => {
       try {
-        const res = await fetch("/api/login", { credentials: "include" });
+        const jwtToken = getAuthToken(); // This automatically checks expiration
+        if (!jwtToken) {
+          // No valid token (expired or missing), broadcast logout
+          try {
+            localStorage.setItem("pg:auth:logout", String(Date.now()));
+          } catch {}
+          return;
+        }
+
+        const res = await fetch("/api/login", {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        });
         if (!res.ok) {
-          // broadcast and handle like storage event
+          // Token invalid on server, clear locally and broadcast
+          clearAuthToken();
           try {
             localStorage.setItem("pg:auth:logout", String(Date.now()));
           } catch {}
