@@ -19,7 +19,12 @@ export function cn(...inputs: ClassValue[]) {
  * @returns The transformed URL with format conversion applied (if applicable)
  */
 export function transformCloudinaryUrl(url: string): string {
-  if (!url) return url;
+  if (!url || typeof url !== "string") return url || "/placeholder.svg";
+
+  // Safety check: if URL contains commas, take only the first part
+  if (url.includes(",")) {
+    url = url.split(",")[0].trim();
+  }
 
   // Check if it's a Cloudinary URL
   if (!url.includes("res.cloudinary.com")) {

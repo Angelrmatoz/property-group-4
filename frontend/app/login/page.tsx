@@ -136,7 +136,7 @@ const Login: React.FC = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded border-gray-300 dark:border-gray-600"
                 />
-                Recuérdame (mantener sesión por 12 horas)
+                Recuérdame
               </label>
             </div>
 
