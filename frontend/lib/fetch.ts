@@ -2,61 +2,10 @@
  * Custom fetch wrapper that automatically handles CSRF tokens for mutating requests
  */
 
-let csrfToken: string | null = null;
-let csrfTokenPromise: Promise<string> | null = null;
-
-async function fetchCsrfToken(): Promise<string> {
-  try {
-    const res = await fetch("/api/csrf-token", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      return "";
-    }
-
-    const data = await res.json();
-    const token = data.csrfToken || "";
-
-    if (token) {
-      csrfToken = token;
-    }
-
-    return token;
-  } catch {
-    return "";
-  }
-}
-
-async function getCsrfToken(forceRefresh = false): Promise<string> {
-  // If force refresh is requested, clear the cached token
-  if (forceRefresh) {
-    csrfToken = null;
-    csrfTokenPromise = null;
-  }
-
-  // If we already have a token, return it
-  if (csrfToken) return csrfToken;
-
-  // If a fetch is already in progress, wait for it
-  if (csrfTokenPromise) return csrfTokenPromise;
-
-  // Start fetching the token
-  csrfTokenPromise = fetchCsrfToken();
-  const token = await csrfTokenPromise;
-  csrfTokenPromise = null;
-
-  return token;
-}
-
-/**
- * Invalidate the cached CSRF token, forcing a refresh on next request
- */
-export function invalidateCsrfToken(): void {
-  csrfToken = null;
-  csrfTokenPromise = null;
-}
+// CSRF token logic removed: this project no longer uses a separate
+// /api/csrf-token endpoint or the x-csrf-token header. Keeping the
+// apiFetch wrapper simple: it will only add Authorization and handle
+// JSON parsing/errors.
 
 interface FetchOptions extends RequestInit {
   // Allow custom error handling
@@ -76,7 +25,7 @@ export async function apiFetch<T = any>(
   url: string,
   options: FetchOptions = {}
 ): Promise<{ data: T; status: number; ok: boolean }> {
-  const { throwOnError = true, refreshCsrf = false, ...fetchOptions } = options;
+  const { throwOnError = true, ...fetchOptions } = options;
 
   // Always include credentials
   fetchOptions.credentials = fetchOptions.credentials || "include";
@@ -90,16 +39,8 @@ export async function apiFetch<T = any>(
     headers.set("Authorization", `Bearer ${jwtToken}`);
   }
 
-  // For mutating requests, fetch and attach CSRF token
-  const method = (fetchOptions.method || "GET").toUpperCase();
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    const token = await getCsrfToken(refreshCsrf);
-    if (token) {
-      // Use a single canonical header name (lowercase) to avoid duplicate
-      // comma-separated values when proxies forward both forms.
-      headers.set("x-csrf-token", token);
-    }
-  }
+  // No CSRF header handling anymore. Mutating requests will proceed
+  // with credentials included and Authorization header when present.
 
   // Set Content-Type for JSON if body is an object (not FormData)
   if (
@@ -124,19 +65,9 @@ export async function apiFetch<T = any>(
       data = await response.text();
     }
 
-    // If we get a 403 CSRF error and haven't already retried with fresh token, retry once
-    if (
-      response.status === 403 &&
-      !refreshCsrf &&
-      ["POST", "PUT", "PATCH", "DELETE"].includes(method) &&
-      (data?.error?.includes("csrf") ||
-        data?.error?.includes("CSRF") ||
-        data?.message?.includes("csrf"))
-    ) {
-      // Invalidate token and retry once with fresh token
-      invalidateCsrfToken();
-      return apiFetch<T>(url, { ...options, refreshCsrf: true });
-    }
+    // No CSRF retry logic: the app no longer uses a separate CSRF token
+    // endpoint. If the server returns 403 for other reasons, surface it
+    // as an error below.
 
     // If response is not ok and throwOnError is true, throw an error
     if (!response.ok && throwOnError) {

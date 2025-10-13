@@ -128,10 +128,49 @@ export async function updatePropertyFormData(
     files.forEach((f) => fd.append("images", f));
   }
 
+  // When uploading files, bypass the Next.js proxy to avoid Vercel's 4.5MB limit
+  // and send directly to the backend Express server
+  const directBackendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const useDirectUpload = files && files.length > 0 && directBackendUrl;
+
+  if (useDirectUpload) {
+    const jwtToken = sessionStorage.getItem("authToken");
+    if (!jwtToken) {
+      throw new Error(
+        "No se encontró el token de autenticación. Por favor, inicia sesión nuevamente."
+      );
+    }
+
+    const response = await fetch(`${directBackendUrl}/api/properties/${id}`, {
+      method: "PUT",
+      body: fd,
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || `HTTP Error: ${response.status}` };
+      }
+      const error: any = new Error(
+        errorData.error || `HTTP Error: ${response.status}`
+      );
+      error.response = { status: response.status, data: errorData };
+      throw error;
+    }
+
+    const data = await response.json();
+    return data;
+  }
+
   const { data } = await api.put(`/api/properties/${id}`, fd, {
     // Let the browser set the Content-Type header so the multipart boundary
     // is included. See note above in createPropertyFormData.
-    // headers: { "Content-Type": "multipart/form-data" },
   });
 
   return data;
@@ -155,12 +194,16 @@ export async function getProperties() {
       });
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        console.error("[SSR] Failed to fetch properties:", errorData);
+        if (process.env.NODE_ENV === "development") {
+          console.error("[SSR] Failed to fetch properties:", errorData);
+        }
         throw new Error(errorData.message || "Failed to fetch properties");
       }
       return res.json();
     } catch (error) {
-      console.error("[SSR] Error fetching properties:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("[SSR] Error fetching properties:", error);
+      }
       throw error;
     }
   }
@@ -185,7 +228,9 @@ export async function getPropertyById(id: string) {
   if (typeof window === "undefined") {
     const backendUrl = process.env.BACKEND_URL;
     if (!backendUrl) {
-      console.error("[SSR] BACKEND_URL is not configured");
+      if (process.env.NODE_ENV === "development") {
+        console.error("[SSR] BACKEND_URL is not configured");
+      }
       return null as any;
     }
 
@@ -197,14 +242,18 @@ export async function getPropertyById(id: string) {
         },
       });
       if (!res.ok) {
-        console.error(
-          `[SSR] Failed to fetch property ${id}: ${res.status} ${res.statusText}`
-        );
+        if (process.env.NODE_ENV === "development") {
+          console.error(
+            `[SSR] Failed to fetch property ${id}: ${res.status} ${res.statusText}`
+          );
+        }
         return null as any;
       }
       return res.json();
     } catch (error) {
-      console.error(`[SSR] Error fetching property ${id}:`, error);
+      if (process.env.NODE_ENV === "development") {
+        console.error(`[SSR] Error fetching property ${id}:`, error);
+      }
       return null as any;
     }
   }
