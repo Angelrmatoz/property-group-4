@@ -24,6 +24,8 @@ export async function createProperty(payload: CreatePropertyPayload) {
 
 // Create property with files (multipart/form-data). `files` should be an array
 // of File objects (images). Backend should accept files under the key `images`.
+// When files are present, this function bypasses the Next.js proxy and sends
+// directly to the backend to avoid Vercel's 4.5MB function payload limit.
 export async function createPropertyFormData(
   payload: CreatePropertyPayload,
   files?: File[]
@@ -51,7 +53,80 @@ export async function createPropertyFormData(
     });
   }
 
-  console.log("🌐 [SERVICE] Enviando POST a /api/properties...");
+  // When uploading files, bypass the Next.js proxy to avoid Vercel's 4.5MB limit
+  // and send directly to the backend Express server
+  const directBackendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const useDirectUpload = files && files.length > 0 && directBackendUrl;
+
+  if (useDirectUpload) {
+    console.log(
+      `🚀 [SERVICE] Usando upload directo al backend: ${directBackendUrl}`
+    );
+    console.log(
+      `   (Bypass del proxy de Next.js para evitar límite de Vercel)`
+    );
+
+    const startTime = Date.now();
+
+    try {
+      // Get CSRF token from our Next.js API (which proxies to backend)
+      console.log("🔐 [SERVICE] Obteniendo CSRF token...");
+      const csrfRes = await fetch("/api/csrf-token");
+      let csrfToken = "";
+      if (csrfRes.ok) {
+        const csrfData = await csrfRes.json();
+        csrfToken = csrfData.csrfToken || "";
+        console.log("✅ [SERVICE] CSRF token obtenido");
+      }
+
+      // Send directly to backend with credentials
+      console.log("🌐 [SERVICE] Enviando POST directo a backend...");
+      const response = await fetch(`${directBackendUrl}/api/properties`, {
+        method: "POST",
+        body: fd,
+        credentials: "include", // Important: send cookies with the request
+        headers: {
+          ...(csrfToken && { "x-csrf-token": csrfToken }),
+        },
+      });
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      if (!response.ok) {
+        console.error(
+          `❌ [SERVICE] Error ${response.status} después de ${duration}s`
+        );
+        const errorText = await response.text();
+        console.error(`❌ [SERVICE] Error body:`, errorText);
+
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || `HTTP Error: ${response.status}` };
+        }
+
+        const error: any = new Error(
+          errorData.error || `HTTP Error: ${response.status}`
+        );
+        error.response = { status: response.status, data: errorData };
+        throw error;
+      }
+
+      const data = await response.json();
+      console.log(`✅ [SERVICE] Respuesta recibida en ${duration}s:`, data);
+      return data;
+    } catch (error) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.error(`❌ [SERVICE] Error después de ${duration}s:`, error);
+      throw error;
+    }
+  }
+
+  // Fallback to Next.js proxy for requests without files
+  console.log(
+    "🌐 [SERVICE] Enviando POST a /api/properties (via proxy Next.js)..."
+  );
   const startTime = Date.now();
 
   try {
