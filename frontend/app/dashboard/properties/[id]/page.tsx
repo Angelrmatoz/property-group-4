@@ -70,6 +70,7 @@ export default async function PropertyPage({ params }: { params: any }) {
 
   return (
     <article>
+      <style>{`.hide-scrollbar::-webkit-scrollbar{display:none} .hide-scrollbar{ -ms-overflow-style: none; scrollbar-width: none; }`}</style>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <PropertyGallery images={propNorm.images} />
@@ -82,7 +83,7 @@ export default async function PropertyPage({ params }: { params: any }) {
           <p className="text-sm text-muted-foreground">
             Precio: {propNorm.price ?? "—"}
           </p>
-          <p className="mt-4 break-words whitespace-pre-wrap max-h-48 overflow-auto">
+          <p className="mt-4 break-words whitespace-pre-wrap max-h-48 overflow-auto hide-scrollbar">
             {propNorm.description}
           </p>
 
