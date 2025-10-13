@@ -36,7 +36,9 @@ export function storeAuthToken(
     // Store remember preference in localStorage to know which storage to check
     localStorage.setItem(REMEMBER_KEY, rememberMe.toString());
   } catch (error) {
-    console.warn("Failed to store auth token:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Failed to store auth token:", error);
+    }
   }
 }
 
@@ -70,7 +72,9 @@ export function getAuthToken(): string | null {
 
     return token;
   } catch (error) {
-    console.warn("Failed to get auth token:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Failed to get auth token:", error);
+    }
     return null;
   }
 }
@@ -95,7 +99,9 @@ export function clearAuthToken(): void {
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(EXPIRY_KEY);
   } catch (error) {
-    console.warn("Failed to clear auth token:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Failed to clear auth token:", error);
+    }
   }
 }
 

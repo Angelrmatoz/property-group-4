@@ -49,10 +49,14 @@ export default function PropertyGallery({ images = [] }: Props) {
                       target.src === transformedSrc &&
                       src.includes("res.cloudinary.com")
                     ) {
-                      console.warn(
-                        `⚠️ Failed to load image ${i + 1}, trying with f_jpg:`,
-                        transformedSrc
-                      );
+                      if (process.env.NODE_ENV === "development") {
+                        console.warn(
+                          `⚠️ Failed to load image ${
+                            i + 1
+                          }, trying with f_jpg:`,
+                          transformedSrc
+                        );
+                      }
                       const fallbackUrl = src.replace(
                         /\/upload\//,
                         "/upload/f_jpg,q_auto/"
