@@ -59,18 +59,6 @@ loginRouter.post(
         admin: user.admin,
       };
 
-      // Set cookie with token (httpOnly) so clients don't need to store it in localStorage
-      const isSecure =
-        process.env.NODE_ENV === "production" ||
-        process.env.TRUST_PROXY === "1";
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: isSecure,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 1000, // 1 hour
-        path: "/",
-      });
-
       return res.status(200).json({ token, user: userDto });
     } catch (err) {
       console.error(

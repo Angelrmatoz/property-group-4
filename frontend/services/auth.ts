@@ -49,9 +49,17 @@ export async function login(
 
 export async function me(): Promise<LoginResult> {
   try {
-    const res = await fetch(`/api/login?_=${Date.now()}`, {
+    // Get JWT token from sessionStorage
+    const jwtToken = sessionStorage.getItem("authToken");
+    if (!jwtToken) {
+      return { ok: false };
+    }
+
+    const res = await fetch(`/api/auth/me`, {
       method: "GET",
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
     });
 
     if (!res.ok) {

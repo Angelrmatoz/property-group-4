@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 export async function DELETE(
   _req: Request,
@@ -13,28 +12,13 @@ export async function DELETE(
     );
 
   try {
-    const cookieStore = await cookies();
-    const cookiePairs: string[] = [];
-    cookieStore
-      .getAll()
-      .forEach((c) => cookiePairs.push(`${c.name}=${c.value}`));
-
-    // Forward CSRF token and authorization if present in incoming request
-    // headers. We can read them from the incoming Request and pass them
-    // through to the backend fetch so csurf and auth work correctly.
+    // Forward Authorization header if present
     const headers: Record<string, string> = {};
-    if (cookiePairs.length) headers["Cookie"] = cookiePairs.join("; ");
     try {
-      // Next Request headers are a Headers-like object; use get to read
-      const incomingCsrf = (_req.headers as any)?.get
-        ? (_req.headers as any).get("x-csrf-token") ||
-          (_req.headers as any).get("X-CSRF-Token")
-        : undefined;
       const incomingAuth = (_req.headers as any)?.get
         ? (_req.headers as any).get("authorization") ||
           (_req.headers as any).get("Authorization")
         : undefined;
-      if (incomingCsrf) headers["X-CSRF-Token"] = incomingCsrf;
       if (incomingAuth) headers["Authorization"] = incomingAuth;
     } catch {
       // ignore header read errors
@@ -49,7 +33,6 @@ export async function DELETE(
     const res = await fetch(`${backend}/api/users/${id}`, {
       method: "DELETE",
       headers,
-      credentials: "include",
     });
 
     if (res.status === 204) return new NextResponse(null, { status: 204 });
@@ -79,24 +62,12 @@ export async function GET(
     );
 
   try {
-    const cookieStore = await cookies();
-    const cookiePairs: string[] = [];
-    cookieStore
-      .getAll()
-      .forEach((c) => cookiePairs.push(`${c.name}=${c.value}`));
-
     const headers: Record<string, string> = {};
-    if (cookiePairs.length) headers["Cookie"] = cookiePairs.join("; ");
     try {
-      const incomingCsrf = (_req.headers as any)?.get
-        ? (_req.headers as any).get("x-csrf-token") ||
-          (_req.headers as any).get("X-CSRF-Token")
-        : undefined;
       const incomingAuth = (_req.headers as any)?.get
         ? (_req.headers as any).get("authorization") ||
           (_req.headers as any).get("Authorization")
         : undefined;
-      if (incomingCsrf) headers["X-CSRF-Token"] = incomingCsrf;
       if (incomingAuth) headers["Authorization"] = incomingAuth;
     } catch {
       // ignore
@@ -111,7 +82,6 @@ export async function GET(
     const res = await fetch(`${backend}/api/users/${id}`, {
       method: "GET",
       headers,
-      credentials: "include",
     });
 
     const contentType = res.headers.get("content-type") || "";

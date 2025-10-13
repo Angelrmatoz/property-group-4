@@ -64,25 +64,11 @@ export async function createPropertyFormData(
       );
     }
 
-    // When doing direct upload, get CSRF token directly from backend
-    // (not from Next.js proxy) so the token matches the backend's _csrf cookie
-    const csrfRes = await fetch(`${directBackendUrl}/api/csrf-token`, {
-      credentials: "include", // Important: receive and store _csrf cookie
-    });
-    let csrfToken = "";
-    if (csrfRes.ok) {
-      const csrfData = await csrfRes.json();
-      csrfToken = csrfData.csrfToken || "";
-    }
-
-    // Send directly to backend with credentials and Authorization header
+    // Send directly to backend with JWT token in Authorization header
     const response = await fetch(`${directBackendUrl}/api/properties`, {
       method: "POST",
       body: fd,
-      credentials: "include", // Important: send cookies with the request
       headers: {
-        ...(csrfToken && { "x-csrf-token": csrfToken }),
-        // Send JWT token in Authorization header for cross-domain auth
         Authorization: `Bearer ${jwtToken}`,
       },
     });

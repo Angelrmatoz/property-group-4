@@ -15,7 +15,7 @@ export const authenticate = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  // Accept token in Authorization header (Bearer) or in cookie named 'token'
+  // Accept token only in Authorization header (Bearer)
   let token: string | undefined;
   const authHeader = req.headers.authorization || req.headers.Authorization;
   if (authHeader && typeof authHeader === "string") {
@@ -23,10 +23,6 @@ export const authenticate = async (
     if (parts.length === 2 && parts[0] === "Bearer") {
       token = parts[1];
     }
-  }
-
-  if (!token && req.cookies && req.cookies.token) {
-    token = req.cookies.token;
   }
 
   if (!token) {
