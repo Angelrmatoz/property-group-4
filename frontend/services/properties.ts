@@ -28,27 +28,49 @@ export async function createPropertyFormData(
   payload: CreatePropertyPayload,
   files?: File[]
 ) {
+  console.log("📦 [SERVICE] Creando FormData...");
   const fd = new FormData();
+  
   // Append scalar fields
+  console.log("📝 [SERVICE] Agregando campos al FormData:");
   Object.entries(payload).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
     // Arrays / objects should be stringified if needed
-    fd.append(key, String(value));
+    const strValue = String(value);
+    console.log(`  - ${key}: ${strValue}`);
+    fd.append(key, strValue);
   });
 
   // Append files using the 'images' key multiple times
   if (files && files.length) {
-    files.forEach((f) => fd.append("images", f));
+    console.log(`📸 [SERVICE] Agregando ${files.length} archivos al FormData:`);
+    files.forEach((f, idx) => {
+      const sizeMB = (f.size / (1024 * 1024)).toFixed(2);
+      console.log(`  [${idx + 1}] ${f.name} - ${sizeMB} MB - ${f.type}`);
+      fd.append("images", f);
+    });
   }
 
-  const { data } = await api.post("/api/properties", fd, {
-    // Let the browser set Content-Type (including boundary). Do NOT set
-    // Content-Type manually or fetch will omit the boundary which breaks
-    // multipart requests.
-    // headers: { "Content-Type": "multipart/form-data" },
-  });
-
-  return data;
+  console.log("🌐 [SERVICE] Enviando POST a /api/properties...");
+  const startTime = Date.now();
+  
+  try {
+    const { data } = await api.post("/api/properties", fd, {
+      // Let the browser set Content-Type (including boundary). Do NOT set
+      // Content-Type manually or fetch will omit the boundary which breaks
+      // multipart requests.
+      // headers: { "Content-Type": "multipart/form-data" },
+    });
+    
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`✅ [SERVICE] Respuesta recibida en ${duration}s:`, data);
+    
+    return data;
+  } catch (error) {
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.error(`❌ [SERVICE] Error después de ${duration}s:`, error);
+    throw error;
+  }
 }
 
 // Update property with files (multipart/form-data). Similar to createPropertyFormData
