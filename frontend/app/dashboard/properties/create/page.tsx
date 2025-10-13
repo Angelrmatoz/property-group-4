@@ -29,6 +29,41 @@ export default function CreatePropertyPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // Validate required fields (none should be empty except images)
+    const missing: string[] = [];
+    if (!title || title.trim() === "") missing.push("Título");
+    if (!description || description.trim() === "") missing.push("Descripción");
+    if (!price || String(price).trim() === "") missing.push("Precio");
+    if (!currency || String(currency).trim() === "") missing.push("Moneda");
+    if (!province || province.trim() === "") missing.push("Provincia");
+    if (!city || city.trim() === "") missing.push("Municipio");
+    if (!neighborhood || neighborhood.trim() === "") missing.push("Sector");
+    if (!type || String(type).trim() === "") missing.push("Tipo");
+    if (!category || String(category).trim() === "") missing.push("Categoría");
+    if (!bedrooms || String(bedrooms).trim() === "")
+      missing.push("Habitaciones");
+    if (!bathrooms || String(bathrooms).trim() === "") missing.push("Baños");
+    if (!halfBathrooms || String(halfBathrooms).trim() === "")
+      missing.push("Medios baños");
+    if (!parkingSpaces || String(parkingSpaces).trim() === "")
+      missing.push("Parqueos");
+    if (!builtArea || String(builtArea).trim() === "")
+      missing.push("Construcción (m²)");
+
+    if (missing.length > 0) {
+      try {
+        notify({
+          type: "error",
+          title: "Faltan campos",
+          message: `Por favor complete los siguientes campos antes de enviar: ${missing.join(
+            ", "
+          )}`,
+          duration: 6000,
+        });
+      } catch {}
+      return;
+    }
+
     setLoading(true);
 
     const payload = {
