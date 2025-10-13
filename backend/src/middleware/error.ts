@@ -7,6 +7,15 @@ const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
+  // Handle payload too large errors explicitly
+  if (err.status === 413 || (err as any).type === "entity.too.large") {
+    res.status(413).json({
+      error:
+        "El tamaño de los archivos excede el límite permitido. Intenta subir menos imágenes o archivos más pequeños.",
+    });
+    return;
+  }
+
   const status = err.status ?? 500;
   const response: any = { error: err.message || "Internal Server Error" };
 

@@ -43,7 +43,10 @@ app.use(
   })
 );
 app.use(morgan("tiny"));
-app.use(express.json());
+// Increase JSON body limit to 100MB for large property payloads with multiple HEIF images
+// (10 images × ~3MB each HEIF = ~30MB, but after base64 encoding or FormData overhead can be larger)
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
 // parse cookies so middleware can read httpOnly token cookies
 app.use(cookieParser());
 

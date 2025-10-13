@@ -56,7 +56,11 @@ const fileFilter = (
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024, files: 10 }, // 10 MB, max 10 files
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB per file
+    files: 10, // max 10 files
+    fieldSize: 10 * 1024 * 1024, // 10 MB for non-file fields
+  },
 });
 
 function firstDefined<T = any>(obj: any, keys: string[]): T | undefined {
