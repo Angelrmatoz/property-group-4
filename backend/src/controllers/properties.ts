@@ -209,15 +209,12 @@ propertiesRouter.post(
     console.log("🚀 [BACKEND POST] Request recibida en /api/properties");
     console.log(`   - Content-Type: ${req.headers["content-type"]}`);
     console.log(`   - User: ${(req as any).user?.username || "desconocido"}`);
-    
+
     try {
       // Debug logs to help diagnose CSRF issues during development
       if (process.env.NODE_ENV === "development") {
         try {
-          console.log(
-            "[POST /api/properties] Incoming headers:",
-            req.headers
-          );
+          console.log("[POST /api/properties] Incoming headers:", req.headers);
           console.log(
             "[POST /api/properties] Cookies:",
             (req as any).cookies || req.headers.cookie
@@ -264,7 +261,9 @@ propertiesRouter.post(
         | (Express.Multer.File & { buffer?: Buffer })[]
         | undefined;
 
-      console.log(`📦 [BACKEND POST] Archivos recibidos: ${files?.length || 0}`);
+      console.log(
+        `📦 [BACKEND POST] Archivos recibidos: ${files?.length || 0}`
+      );
 
       if (files && files.length) {
         console.log(`📸 [BACKEND] Procesando ${files.length} archivos:`);
@@ -280,15 +279,19 @@ propertiesRouter.post(
         const maxBytes = 10 * 1024 * 1024; // 10 MB
         for (const file of files.slice(0, 10)) {
           console.log(`🔄 [BACKEND] Procesando: ${file.originalname}`);
-          
+
           if (!file.buffer) {
-            console.warn(`⚠️ [BACKEND] Sin buffer para ${file.originalname}, saltando...`);
+            console.warn(
+              `⚠️ [BACKEND] Sin buffer para ${file.originalname}, saltando...`
+            );
             continue;
           }
 
           // Validate MIME type / extension server-side again using centralized check
           if (!isAcceptedImage(file)) {
-            console.error(`❌ [BACKEND] Imagen no válida: ${file.originalname}`);
+            console.error(
+              `❌ [BACKEND] Imagen no válida: ${file.originalname}`
+            );
             return res.status(400).json({
               error: `El archivo ${file.originalname} no es una imagen válida.`,
             });
@@ -296,35 +299,48 @@ propertiesRouter.post(
 
           // Validate file size
           if (file.size > maxBytes) {
-            console.error(`❌ [BACKEND] Archivo muy grande: ${file.originalname} (${file.size} bytes)`);
+            console.error(
+              `❌ [BACKEND] Archivo muy grande: ${file.originalname} (${file.size} bytes)`
+            );
             return res.status(400).json({
               error: `El archivo ${file.originalname} supera los 10 MB.`,
             });
           }
 
           try {
-            console.log(`☁️ [BACKEND] Subiendo a Cloudinary: ${file.originalname}`);
+            console.log(
+              `☁️ [BACKEND] Subiendo a Cloudinary: ${file.originalname}`
+            );
             const uploadStart = Date.now();
-            
+
             const result = await uploadBufferToCloudinary(
               file.buffer,
               "properties"
             );
-            
-            const uploadDuration = ((Date.now() - uploadStart) / 1000).toFixed(2);
-            console.log(`✅ [BACKEND] Cloudinary upload exitoso en ${uploadDuration}s`);
-            
+
+            const uploadDuration = ((Date.now() - uploadStart) / 1000).toFixed(
+              2
+            );
+            console.log(
+              `✅ [BACKEND] Cloudinary upload exitoso en ${uploadDuration}s`
+            );
+
             const url = result?.secure_url || result?.url;
             console.log(`🔗 [BACKEND] URL generada: ${url}`);
-            
+
             if (url) imagesPaths.push(url);
           } catch (e) {
-            console.error(`❌ [BACKEND] Error subiendo ${file.originalname} a Cloudinary:`, e);
+            console.error(
+              `❌ [BACKEND] Error subiendo ${file.originalname} a Cloudinary:`,
+              e
+            );
             return next(e as any);
           }
         }
-        
-        console.log(`✅ [BACKEND] Total de imágenes subidas: ${imagesPaths.length}`);
+
+        console.log(
+          `✅ [BACKEND] Total de imágenes subidas: ${imagesPaths.length}`
+        );
       }
 
       // Normalizar campos que pueden venir con o sin tildes
@@ -404,7 +420,7 @@ propertiesRouter.post(
       console.log(`💾 [BACKEND] Creando documento de propiedad en MongoDB...`);
       console.log(`   - Título: ${firstDefined(body, ["title", "titulo"])}`);
       console.log(`   - Imágenes: ${imagesPaths.length}`);
-      
+
       const created = new Property({
         title: firstDefined(body, ["title", "titulo"]),
         description: firstDefined(body, ["description", "descripcion"]),
@@ -427,8 +443,10 @@ propertiesRouter.post(
 
       console.log(`💾 [BACKEND] Guardando en base de datos...`);
       await created.save();
-      
-      console.log(`✅ [BACKEND] Propiedad creada exitosamente - ID: ${created._id}`);
+
+      console.log(
+        `✅ [BACKEND] Propiedad creada exitosamente - ID: ${created._id}`
+      );
       res.status(201).json(toDTO(created));
     } catch (err) {
       next(err as any);

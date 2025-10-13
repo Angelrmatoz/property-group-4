@@ -39,31 +39,36 @@ export function uploadBufferToCloudinary(
   buffer: Buffer,
   folder = "properties"
 ) {
-  console.log(`☁️ [CLOUDINARY] Iniciando upload - Buffer size: ${buffer.length} bytes, Folder: ${folder}`);
-  
+  console.log(
+    `☁️ [CLOUDINARY] Iniciando upload - Buffer size: ${buffer.length} bytes, Folder: ${folder}`
+  );
+
   return new Promise<any>((resolve, reject) => {
     const startTime = Date.now();
-    
+
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder },
       (error, result) => {
         const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-        
+
         if (error) {
-          console.error(`❌ [CLOUDINARY] Upload falló después de ${duration}s:`, error);
+          console.error(
+            `❌ [CLOUDINARY] Upload falló después de ${duration}s:`,
+            error
+          );
           return reject(error);
         }
-        
+
         console.log(`✅ [CLOUDINARY] Upload exitoso en ${duration}s`);
         console.log(`   - Public ID: ${result?.public_id}`);
         console.log(`   - Secure URL: ${result?.secure_url}`);
         console.log(`   - Format: ${result?.format}`);
         console.log(`   - Size: ${result?.bytes} bytes`);
-        
+
         resolve(result);
       }
     );
-    
+
     console.log(`📤 [CLOUDINARY] Creando stream y enviando buffer...`);
     streamifier.createReadStream(buffer).pipe(uploadStream);
   });

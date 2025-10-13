@@ -30,7 +30,7 @@ export async function createPropertyFormData(
 ) {
   console.log("📦 [SERVICE] Creando FormData...");
   const fd = new FormData();
-  
+
   // Append scalar fields
   console.log("📝 [SERVICE] Agregando campos al FormData:");
   Object.entries(payload).forEach(([key, value]) => {
@@ -53,7 +53,7 @@ export async function createPropertyFormData(
 
   console.log("🌐 [SERVICE] Enviando POST a /api/properties...");
   const startTime = Date.now();
-  
+
   try {
     const { data } = await api.post("/api/properties", fd, {
       // Let the browser set Content-Type (including boundary). Do NOT set
@@ -61,10 +61,10 @@ export async function createPropertyFormData(
       // multipart requests.
       // headers: { "Content-Type": "multipart/form-data" },
     });
-    
+
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`✅ [SERVICE] Respuesta recibida en ${duration}s:`, data);
-    
+
     return data;
   } catch (error) {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);

@@ -76,32 +76,40 @@ export default function CreatePropertyPage() {
     try {
       if (images && images.length > 0) {
         console.log(`📸 [IMAGES] Total de imágenes a subir: ${images.length}`);
-        
+
         // Log detailed info about each image
         images.forEach((img, idx) => {
           const sizeMB = (img.file.size / (1024 * 1024)).toFixed(2);
           console.log(`  [${idx + 1}/${images.length}] ${img.file.name}`);
-          console.log(`    - Tipo: ${img.file.type || 'desconocido'}`);
+          console.log(`    - Tipo: ${img.file.type || "desconocido"}`);
           console.log(`    - Tamaño: ${sizeMB} MB (${img.file.size} bytes)`);
-          console.log(`    - Última modificación: ${new Date(img.file.lastModified).toISOString()}`);
+          console.log(
+            `    - Última modificación: ${new Date(
+              img.file.lastModified
+            ).toISOString()}`
+          );
         });
 
         // Calculate total payload size
         const totalBytes = images.reduce((sum, img) => sum + img.file.size, 0);
         const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
-        console.log(`📦 [PAYLOAD SIZE] Tamaño total de imágenes: ${totalMB} MB (${totalBytes} bytes)`);
+        console.log(
+          `📦 [PAYLOAD SIZE] Tamaño total de imágenes: ${totalMB} MB (${totalBytes} bytes)`
+        );
 
         // use FormData upload
         const files = images.map((i) => i.file);
         console.log("⏳ [UPLOAD] Llamando a createPropertyFormData...");
-        
+
         const startTime = Date.now();
         // import createPropertyFormData dynamically to avoid circular issues
         const mod = await import("@/services/properties");
         await mod.createPropertyFormData(spanishPayload as any, files);
-        
+
         const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-        console.log(`✅ [SUCCESS] Propiedad creada exitosamente en ${duration}s`);
+        console.log(
+          `✅ [SUCCESS] Propiedad creada exitosamente en ${duration}s`
+        );
       } else {
         console.log("📝 [NO IMAGES] Creando propiedad sin imágenes");
         await createProperty(spanishPayload as any);
@@ -121,8 +129,14 @@ export default function CreatePropertyPage() {
       setLoading(false);
 
       console.error("❌ [ERROR] Error al crear propiedad:", err);
-      console.error("❌ [ERROR DETAILS] Status:", (err as any)?.response?.status);
-      console.error("❌ [ERROR DETAILS] Status Text:", (err as any)?.response?.statusText);
+      console.error(
+        "❌ [ERROR DETAILS] Status:",
+        (err as any)?.response?.status
+      );
+      console.error(
+        "❌ [ERROR DETAILS] Status Text:",
+        (err as any)?.response?.statusText
+      );
       console.error("❌ [ERROR DETAILS] Data:", (err as any)?.response?.data);
       console.error("❌ [ERROR DETAILS] Message:", (err as any)?.message);
 
