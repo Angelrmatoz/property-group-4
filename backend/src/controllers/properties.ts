@@ -441,25 +441,7 @@ propertiesRouter.put(
   upload.array("images", 10),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Development debug: log headers/cookies/X-CSRF-Token to diagnose CSRF failures
-      if (process.env.NODE_ENV === "development") {
-        try {
-          console.log(
-            "[PUT /api/properties/:id] Incoming headers:",
-            req.headers
-          );
-          console.log(
-            "[PUT /api/properties/:id] Cookies:",
-            (req as any).cookies || req.headers.cookie
-          );
-          console.log(
-            "[PUT /api/properties/:id] X-CSRF-Token header:",
-            req.headers["x-csrf-token"] || req.headers["X-CSRF-Token"]
-          );
-        } catch (e) {
-          console.error("[PUT debug] failed to print debug info", e);
-        }
-      }
+      // Development debug logs (headers/cookies) left intentionally minimal.
       const { id } = req.params;
       const body = req.body as any;
 
