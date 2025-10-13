@@ -63,8 +63,10 @@ if (ENABLE_CSRF) {
     csurf({
       cookie: {
         httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
+        // Use "none" for cross-origin requests (Vercel → Render)
+        // This requires secure: true (HTTPS only)
+        sameSite: "none",
+        secure: true,
       },
     })
   );
