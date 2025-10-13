@@ -189,24 +189,21 @@ export default function EditPropertyPage({ params }: { params: any }) {
       // Collect files from the per-slot imagesFiles array
       const filesToUpload = imagesFiles.filter(Boolean) as File[];
 
-      // Build final images array maintaining slot order:
-      // - If a slot has a new file, it will be uploaded and the server will handle placement
-      // - If a slot has an existing URL and no new file, keep that URL
-      // - Empty slots are ignored
-      const finalOrderedImages: string[] = [];
+      // Build array of existing images that should be kept (not replaced by new files)
+      const imagesToKeep: string[] = [];
       for (let i = 0; i < 10; i++) {
         const existingUrl = existingImages[i];
         const hasNewFile = imagesFiles[i] !== null;
 
-        // Only include existing URLs for slots that are NOT being replaced
+        // Only keep existing images for slots that are NOT being replaced
         if (existingUrl && !hasNewFile) {
-          finalOrderedImages.push(existingUrl);
+          imagesToKeep.push(existingUrl);
         }
       }
 
       const payloadWithImages = {
         ...spanishPayload,
-        images: finalOrderedImages,
+        images: imagesToKeep, // Send existing images that should be kept
       };
 
       if (filesToUpload.length > 0) {
@@ -546,7 +543,7 @@ export default function EditPropertyPage({ params }: { params: any }) {
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={getSafeImageUrl(url)}
-                              alt={`img-${idx}`}
+                              alt={`Imagen slot ${idx + 1}`}
                               className="w-full h-full object-contain bg-black/5"
                             />
                           ) : (
