@@ -69,14 +69,19 @@ export async function createPropertyFormData(
     const startTime = Date.now();
 
     try {
-      // Get CSRF token from our Next.js API (which proxies to backend)
-      console.log("🔐 [SERVICE] Obteniendo CSRF token...");
-      const csrfRes = await fetch("/api/csrf-token");
+      // When doing direct upload, get CSRF token directly from backend
+      // (not from Next.js proxy) so the token matches the backend's _csrf cookie
+      console.log("🔐 [SERVICE] Obteniendo CSRF token del backend directo...");
+      const csrfRes = await fetch(`${directBackendUrl}/api/csrf-token`, {
+        credentials: "include", // Important: receive and store _csrf cookie
+      });
       let csrfToken = "";
       if (csrfRes.ok) {
         const csrfData = await csrfRes.json();
         csrfToken = csrfData.csrfToken || "";
-        console.log("✅ [SERVICE] CSRF token obtenido");
+        console.log("✅ [SERVICE] CSRF token obtenido del backend");
+      } else {
+        console.warn("⚠️ [SERVICE] No se pudo obtener CSRF token");
       }
 
       // Send directly to backend with credentials
