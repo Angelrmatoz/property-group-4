@@ -84,7 +84,7 @@ export default function EditPropertyPage({ params }: { params: any }) {
   async function resizeImage(
     file: File,
     maxDim = 1600,
-    quality = 0.8
+    quality = 0.7
   ): Promise<File> {
     try {
       const bitmap = await createImageBitmap(file);
