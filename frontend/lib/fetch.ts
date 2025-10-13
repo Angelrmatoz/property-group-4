@@ -84,6 +84,12 @@ export async function apiFetch<T = any>(
   // Initialize headers
   const headers = new Headers(fetchOptions.headers);
 
+  // Add JWT Authorization header for all requests
+  const jwtToken = getAuthToken(); // Automatically checks expiration
+  if (jwtToken) {
+    headers.set("Authorization", `Bearer ${jwtToken}`);
+  }
+
   // For mutating requests, fetch and attach CSRF token
   const method = (fetchOptions.method || "GET").toUpperCase();
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
@@ -201,6 +207,12 @@ export const api = {
     apiFetch<T>(url, { ...options, method: "DELETE" }),
 };
 
+import {
+  getAuthToken,
+  clearAuthToken,
+  handleTokenExpiration,
+} from "./token-storage";
+
 /**
  * Heartbeat function to periodically check auth status
  * Returns a cleanup function to stop the heartbeat
@@ -209,12 +221,22 @@ export function startAuthHeartbeat(intervalMs = 30_000) {
   // Use native fetch to avoid configuration issues
   const timer = setInterval(async () => {
     try {
-      const res = await fetch("/api/login", { credentials: "include" });
+      const jwtToken = getAuthToken(); // Automatically checks expiration
+      if (!jwtToken) {
+        // No valid token (expired or missing), handle based on remember preference
+        handleTokenExpiration();
+        return;
+      }
+
+      const res = await fetch("/api/login", {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
       if (!res.ok) {
-        // broadcast logout event for cross-tab detection
-        try {
-          localStorage.setItem("pg:auth:logout", String(Date.now()));
-        } catch {}
+        // Token invalid on server, clear locally and handle expiration
+        clearAuthToken();
+        handleTokenExpiration();
       }
     } catch {
       // ignore network errors

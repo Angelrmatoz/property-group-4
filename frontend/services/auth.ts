@@ -1,3 +1,5 @@
+import { getAuthToken, clearAuthToken } from "@/lib/token-storage";
+
 export type LoginResult = {
   ok: boolean;
   user?: {
@@ -13,14 +15,15 @@ export type LoginResult = {
 
 export async function login(
   email: string,
-  password: string
+  password: string,
+  rememberMe: boolean = false
 ): Promise<LoginResult> {
   try {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, rememberMe }),
     });
 
     const data = await res.json();
@@ -49,12 +52,22 @@ export async function login(
 
 export async function me(): Promise<LoginResult> {
   try {
-    const res = await fetch(`/api/login?_=${Date.now()}`, {
+    // Get JWT token from localStorage with expiration check
+    const jwtToken = getAuthToken();
+    if (!jwtToken) {
+      return { ok: false };
+    }
+
+    const res = await fetch(`/api/login`, {
       method: "GET",
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
     });
 
     if (!res.ok) {
+      // If backend says token is invalid, clear it locally too
+      clearAuthToken();
       return { ok: false };
     }
 
@@ -72,10 +85,18 @@ export async function register(payload: {
   email: string;
   password: string;
 }) {
+  // Get JWT token from localStorage for admin operations
+  const jwtToken = getAuthToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (jwtToken) {
+    headers["Authorization"] = `Bearer ${jwtToken}`;
+  }
+
   const res = await fetch("/api/users", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers,
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
@@ -83,13 +104,8 @@ export async function register(payload: {
 }
 
 export async function logout() {
-  // If you implement a server logout route, call it here. For now clear client cookie as fallback.
-  try {
-    // expire cookie (best-effort; httpOnly cookie can't be removed from client JS)
-    document.cookie = "token=; Path=/; Max-Age=0; Secure";
-    // Also clear sessionStorage token
-    sessionStorage.removeItem("authToken");
-  } catch {}
+  // Clear auth token from localStorage
+  clearAuthToken();
 }
 
 export default { login, me, register, logout };

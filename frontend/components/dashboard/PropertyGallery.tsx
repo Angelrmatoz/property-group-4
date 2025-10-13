@@ -11,11 +11,18 @@ import {
 import { transformCloudinaryUrl } from "@/lib/utils";
 
 type Props = {
-  images?: string[];
+  images?: string[] | string;
 };
 
 export default function PropertyGallery({ images = [] }: Props) {
-  const imgs = images.filter(Boolean);
+  // Safety check: ensure images is an array and handle comma-separated strings
+  const normalizedImages = Array.isArray(images)
+    ? images
+    : typeof images === "string"
+    ? images.split(",").map((img: string) => img.trim())
+    : [];
+
+  const imgs = normalizedImages.filter(Boolean);
 
   if (!imgs.length) {
     return <div className="text-sm text-muted-foreground">Sin imágenes</div>;
@@ -25,7 +32,7 @@ export default function PropertyGallery({ images = [] }: Props) {
     <div className="relative">
       <Carousel>
         <CarouselContent className="items-stretch">
-          {imgs.map((src, i) => {
+          {imgs.map((src: string, i: number) => {
             // Transform Cloudinary URLs to ensure HEIF/HEIC are served as JPEG
             const transformedSrc = transformCloudinaryUrl(src);
 

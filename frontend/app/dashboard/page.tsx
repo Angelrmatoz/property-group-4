@@ -46,6 +46,29 @@ type Property = {
   images?: string[];
 };
 
+// Helper function to normalize image arrays
+function normalizeImageArray(images: any): string[] {
+  if (!images) return [];
+
+  // If it's already an array, return it (filtered for valid strings)
+  if (Array.isArray(images)) {
+    return images.filter((img) => img && typeof img === "string");
+  }
+
+  // If it's a string, check if it contains comma-separated URLs
+  if (typeof images === "string") {
+    if (images.includes(",")) {
+      return images
+        .split(",")
+        .map((img) => img.trim())
+        .filter(Boolean);
+    }
+    return [images];
+  }
+
+  return [];
+}
+
 export default function DashboardPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +96,30 @@ export default function DashboardPage() {
         m.getProperties()
           .then((data: any) => {
             if (!mounted) return;
-            setProperties(Array.isArray(data) ? data : []);
+
+            // Debug: log a sample property to see data structure
+            if (Array.isArray(data) && data.length > 0) {
+              console.log("Sample property data:", data[0]);
+              console.log(
+                "Images field:",
+                data[0].images || data[0].imagenes || data[0].imagen
+              );
+            }
+
+            // Normalize properties data
+            const normalizedProperties = Array.isArray(data)
+              ? data.map((property) => ({
+                  ...property,
+                  images: normalizeImageArray(
+                    property.images || property.imagenes || property.imagen
+                  ),
+                  imagenes: normalizeImageArray(
+                    property.images || property.imagenes || property.imagen
+                  ),
+                }))
+              : [];
+
+            setProperties(normalizedProperties);
           })
           .catch(() => {
             if (!mounted) return;
@@ -220,11 +266,24 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProperties.map((property) => {
               const propertyId = property.id || property._id;
-              const firstImage =
+
+              // Get the first image and ensure it's a single URL
+              let firstImage =
                 property.images?.[0] ||
                 property.imagenes?.[0] ||
                 property.imagen ||
                 "/placeholder.svg";
+
+              // Safety check: if it's an array or contains commas, take only the first part
+              if (Array.isArray(firstImage)) {
+                firstImage = firstImage[0] || "/placeholder.svg";
+              } else if (
+                typeof firstImage === "string" &&
+                firstImage.includes(",")
+              ) {
+                firstImage = firstImage.split(",")[0].trim();
+              }
+
               // Transform Cloudinary URLs to ensure HEIF/HEIC are served as JPEG
               const transformedImage = transformCloudinaryUrl(firstImage);
 

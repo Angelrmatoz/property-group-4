@@ -57,6 +57,29 @@ export default function EditPropertyPage({ params }: { params: any }) {
     return "";
   };
 
+  // Helper function to normalize image arrays (same as dashboard page)
+  function normalizeImageArray(images: any): string[] {
+    if (!images) return [];
+
+    // If it's already an array, return it (filtered for valid strings)
+    if (Array.isArray(images)) {
+      return images.filter((img) => img && typeof img === "string");
+    }
+
+    // If it's a string, check if it contains comma-separated URLs
+    if (typeof images === "string") {
+      if (images.includes(",")) {
+        return images
+          .split(",")
+          .map((img) => img.trim())
+          .filter(Boolean);
+      }
+      return [images];
+    }
+
+    return [];
+  }
+
   // Revoke object URLs when previews change or on unmount to avoid leaks
   useEffect(() => {
     return () => {
@@ -97,7 +120,10 @@ export default function EditPropertyPage({ params }: { params: any }) {
       setParkingSpaces(data.parkingSpaces?.toString() || "");
       setBuiltArea(data.builtArea?.toString() || "");
       // populate up to 10 slots with existing image URLs
-      const imagesArr = data.images || [];
+      // Use normalizeImageArray to handle both array and comma-separated string formats
+      const imagesArr = normalizeImageArray(
+        data.images || data.imagenes || data.imagen
+      );
       const slots = Array(10)
         .fill(null)
         .map((_, i) => (imagesArr[i] ? String(imagesArr[i]) : null));
@@ -163,12 +189,22 @@ export default function EditPropertyPage({ params }: { params: any }) {
       // Collect files from the per-slot imagesFiles array
       const filesToUpload = imagesFiles.filter(Boolean) as File[];
 
-      // build images array to keep the order across slots: if a slot has an
-      // existing URL keep it; if replaced by a File, it will be uploaded and
-      // the server should handle placing the new file in that slot order.
-      const keptImages = existingImages.filter(Boolean) as string[];
+      // Build array of existing images that should be kept (not replaced by new files)
+      const imagesToKeep: string[] = [];
+      for (let i = 0; i < 10; i++) {
+        const existingUrl = existingImages[i];
+        const hasNewFile = imagesFiles[i] !== null;
 
-      const payloadWithImages = { ...spanishPayload, images: keptImages };
+        // Only keep existing images for slots that are NOT being replaced
+        if (existingUrl && !hasNewFile) {
+          imagesToKeep.push(existingUrl);
+        }
+      }
+
+      const payloadWithImages = {
+        ...spanishPayload,
+        images: imagesToKeep, // Send existing images that should be kept
+      };
 
       if (filesToUpload.length > 0) {
         const mod = await import("@/services/properties");
@@ -507,7 +543,7 @@ export default function EditPropertyPage({ params }: { params: any }) {
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={getSafeImageUrl(url)}
-                              alt={`img-${idx}`}
+                              alt={`Imagen slot ${idx + 1}`}
                               className="w-full h-full object-contain bg-black/5"
                             />
                           ) : (

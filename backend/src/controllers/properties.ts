@@ -545,8 +545,28 @@ propertiesRouter.put(
       else if (typeof body["images[]"] === "string")
         existingImages = [body["images[]"]];
 
-      // Merge existing images with newly uploaded images, keeping order and limit to 10
-      const finalImages = existingImages.concat(imagesPaths).slice(0, 10);
+      // Smart merge: if there are new uploaded images, use them as primary
+      // and only keep existing images that weren't replaced
+      let finalImages: string[];
+
+      if (imagesPaths.length > 0) {
+        // When there are new uploads, prioritize them and fill remaining slots with existing
+        finalImages = [...imagesPaths];
+
+        // Add existing images only up to the limit, avoiding duplicates
+        for (const existingImg of existingImages) {
+          if (finalImages.length >= 10) break;
+          if (!finalImages.includes(existingImg)) {
+            finalImages.push(existingImg);
+          }
+        }
+      } else {
+        // No new uploads, use existing images as-is
+        finalImages = existingImages;
+      }
+
+      // Ensure we don't exceed the 10 image limit
+      finalImages = finalImages.slice(0, 10);
 
       // Identify images that were removed (exist in DB but not in finalImages)
       // and delete them from Cloudinary
@@ -674,7 +694,14 @@ propertiesRouter.delete(
         property.images.length > 0
       ) {
         try {
+          console.info(
+            `[properties] Deleting ${property.images.length} image(s) from Cloudinary for property ${id}:`,
+            property.images
+          );
           await deleteMultipleFromCloudinary(property.images);
+          console.info(
+            `[properties] Successfully deleted ${property.images.length} image(s) from Cloudinary for property ${id}`
+          );
         } catch (cloudinaryError) {
           // Log the error but don't fail the deletion
           console.error(
@@ -682,6 +709,10 @@ propertiesRouter.delete(
             cloudinaryError
           );
         }
+      } else {
+        console.info(
+          `[properties] No images to delete from Cloudinary for property ${id}`
+        );
       }
 
       // Now delete the property from the database
