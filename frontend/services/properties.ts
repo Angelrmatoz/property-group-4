@@ -69,13 +69,28 @@ export async function createPropertyFormData(
     const startTime = Date.now();
 
     try {
+      // Get JWT token from cookies (stored in Vercel domain)
+      // We need to send it as Authorization header because cookies don't work cross-domain
+      const getJwtToken = (): string | null => {
+        const cookies = document.cookie.split("; ");
+        const tokenCookie = cookies.find((c) => c.startsWith("token="));
+        return tokenCookie ? tokenCookie.split("=")[1] : null;
+      };
+
+      const jwtToken = getJwtToken();
+      if (!jwtToken) {
+        throw new Error(
+          "No se encontró el token de autenticación. Por favor, inicia sesión nuevamente."
+        );
+      }
+      console.log("🔑 [SERVICE] JWT token encontrado para autenticación");
+
       // When doing direct upload, get CSRF token directly from backend
       // (not from Next.js proxy) so the token matches the backend's _csrf cookie
       console.log("🔐 [SERVICE] Obteniendo CSRF token del backend directo...");
       console.log(
         `📍 [SERVICE] URL del token: ${directBackendUrl}/api/csrf-token`
       );
-      console.log("🍪 [SERVICE] Cookies antes de fetch:", document.cookie);
 
       const csrfRes = await fetch(`${directBackendUrl}/api/csrf-token`, {
         credentials: "include", // Important: receive and store _csrf cookie
@@ -84,13 +99,12 @@ export async function createPropertyFormData(
       if (csrfRes.ok) {
         const csrfData = await csrfRes.json();
         csrfToken = csrfData.csrfToken || "";
-        console.log("✅ [SERVICE] CSRF token obtenido del backend:", csrfToken);
-        console.log("🍪 [SERVICE] Cookies después de fetch:", document.cookie);
+        console.log("✅ [SERVICE] CSRF token obtenido del backend");
       } else {
         console.warn("⚠️ [SERVICE] No se pudo obtener CSRF token");
       }
 
-      // Send directly to backend with credentials
+      // Send directly to backend with credentials and Authorization header
       console.log("🌐 [SERVICE] Enviando POST directo a backend...");
       const response = await fetch(`${directBackendUrl}/api/properties`, {
         method: "POST",
@@ -98,6 +112,8 @@ export async function createPropertyFormData(
         credentials: "include", // Important: send cookies with the request
         headers: {
           ...(csrfToken && { "x-csrf-token": csrfToken }),
+          // Send JWT token in Authorization header for cross-domain auth
+          Authorization: `Bearer ${jwtToken}`,
         },
       });
 
