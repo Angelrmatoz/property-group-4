@@ -71,14 +71,22 @@ export async function createPropertyFormData(
     try {
       // Get JWT token from cookies (stored in Vercel domain)
       // We need to send it as Authorization header because cookies don't work cross-domain
+      console.log("🍪 [SERVICE] Todas las cookies:", document.cookie);
+
       const getJwtToken = (): string | null => {
         const cookies = document.cookie.split("; ");
+        console.log("🍪 [SERVICE] Cookies parseadas:", cookies);
         const tokenCookie = cookies.find((c) => c.startsWith("token="));
+        console.log("🍪 [SERVICE] Cookie 'token' encontrada:", tokenCookie);
         return tokenCookie ? tokenCookie.split("=")[1] : null;
       };
 
       const jwtToken = getJwtToken();
       if (!jwtToken) {
+        console.error(
+          "❌ [SERVICE] No se encontró cookie 'token' en:",
+          document.cookie
+        );
         throw new Error(
           "No se encontró el token de autenticación. Por favor, inicia sesión nuevamente."
         );
