@@ -68,6 +68,16 @@ if (ENABLE_CSRF) {
         sameSite: "none",
         secure: true,
       },
+      // Skip CSRF validation if request has Bearer token (JWT auth)
+      ignoreMethods: [],
+      value: (req) => {
+        // If request has Authorization Bearer header, skip CSRF
+        if (req.headers.authorization?.startsWith("Bearer ")) {
+          return "skip-csrf";
+        }
+        // Otherwise use normal CSRF token from header or body
+        return req.headers["x-csrf-token"] || req.body._csrf;
+      },
     })
   );
 
