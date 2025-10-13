@@ -535,15 +535,33 @@ propertiesRouter.put(
       }
 
       // Collect existing images sent in the form. frontend app may append them
-      // as 'images[]' or as 'images'. Support both.
+      // as 'images[]' or as 'images'. Support both. Also handle comma-separated
+      // strings (some clients may send multiple URLs in a single string).
+      const normalizeImageInput = (input: any): string[] => {
+        if (!input && input !== "") return [];
+        if (Array.isArray(input)) {
+          return input
+            .map((i) => (typeof i === "string" ? i.trim() : i))
+            .filter(Boolean);
+        }
+        if (typeof input === "string") {
+          // If the string contains commas, split and trim. Otherwise return single item
+          if (input.includes(",")) {
+            return input
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+          }
+          return [input.trim()].filter(Boolean);
+        }
+        return [];
+      };
+
       let existingImages: string[] = [];
-      if (Array.isArray(body.images))
-        existingImages = body.images.filter(Boolean);
-      else if (Array.isArray(body["images[]"]))
-        existingImages = body["images[]"].filter(Boolean);
-      else if (typeof body.images === "string") existingImages = [body.images];
-      else if (typeof body["images[]"] === "string")
-        existingImages = [body["images[]"]];
+      existingImages = [
+        ...normalizeImageInput(body.images),
+        ...normalizeImageInput(body["images[]"]),
+      ];
 
       // Smart merge: if there are new uploaded images, use them as primary
       // and only keep existing images that weren't replaced
@@ -567,6 +585,20 @@ propertiesRouter.put(
 
       // Ensure we don't exceed the 10 image limit
       finalImages = finalImages.slice(0, 10);
+
+      // Sanitize finalImages: split any accidental comma-joined entries, trim and dedupe
+      const sanitized: string[] = [];
+      for (const it of finalImages) {
+        if (!it) continue;
+        if (typeof it !== "string") continue;
+        // If entry contains commas (accidental concatenation), split it
+        const parts = it.includes(",") ? it.split(",") : [it];
+        for (const p of parts) {
+          const t = p.trim();
+          if (t && !sanitized.includes(t)) sanitized.push(t);
+        }
+      }
+      finalImages = sanitized.slice(0, 10);
 
       // Identify images that were removed (exist in DB but not in finalImages)
       // and delete them from Cloudinary
