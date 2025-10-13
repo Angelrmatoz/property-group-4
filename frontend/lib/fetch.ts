@@ -201,7 +201,11 @@ export const api = {
     apiFetch<T>(url, { ...options, method: "DELETE" }),
 };
 
-import { getAuthToken, clearAuthToken } from "./token-storage";
+import {
+  getAuthToken,
+  clearAuthToken,
+  handleTokenExpiration,
+} from "./token-storage";
 
 /**
  * Heartbeat function to periodically check auth status
@@ -213,10 +217,8 @@ export function startAuthHeartbeat(intervalMs = 30_000) {
     try {
       const jwtToken = getAuthToken(); // Automatically checks expiration
       if (!jwtToken) {
-        // No valid token (expired or missing), broadcast logout
-        try {
-          localStorage.setItem("pg:auth:logout", String(Date.now()));
-        } catch {}
+        // No valid token (expired or missing), handle based on remember preference
+        handleTokenExpiration();
         return;
       }
 
@@ -226,11 +228,9 @@ export function startAuthHeartbeat(intervalMs = 30_000) {
         },
       });
       if (!res.ok) {
-        // Token invalid on server, clear locally and broadcast logout
+        // Token invalid on server, clear locally and handle expiration
         clearAuthToken();
-        try {
-          localStorage.setItem("pg:auth:logout", String(Date.now()));
-        } catch {}
+        handleTokenExpiration();
       }
     } catch {
       // ignore network errors

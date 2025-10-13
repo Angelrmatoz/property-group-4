@@ -37,7 +37,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  const { email, password } = body || {};
+  const { email, password, rememberMe } = body || {};
 
   const backend = process.env.BACKEND_URL;
   if (!backend) {
@@ -48,13 +48,13 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Send login request directly to backend without CSRF
+    // Send login request directly to backend with rememberMe parameter
     const res = await fetch(`${backend}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, rememberMe }),
     });
 
     const data = await res.json().catch(() => ({}));

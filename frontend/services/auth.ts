@@ -1,8 +1,4 @@
-import {
-  storeAuthToken,
-  getAuthToken,
-  clearAuthToken,
-} from "@/lib/token-storage";
+import { getAuthToken, clearAuthToken } from "@/lib/token-storage";
 
 export type LoginResult = {
   ok: boolean;
@@ -19,14 +15,15 @@ export type LoginResult = {
 
 export async function login(
   email: string,
-  password: string
+  password: string,
+  rememberMe: boolean = false
 ): Promise<LoginResult> {
   try {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, rememberMe }),
     });
 
     const data = await res.json();

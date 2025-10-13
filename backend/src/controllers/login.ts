@@ -27,7 +27,7 @@ loginRouter.post(
   "/login",
   authLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
-    const body = req.body as LoginDTO;
+    const body = req.body as LoginDTO & { rememberMe?: boolean };
 
     if (!body || !body.email || !body.password) {
       return next(new HttpError(400, "Missing email or password"));
@@ -49,7 +49,9 @@ loginRouter.post(
       }
 
       const payload = { id: user._id.toString(), email: user.email };
-      const token = jwt.sign(payload, secret, { expiresIn: "12h" });
+      // Set token duration based on rememberMe preference
+      const expiresIn = body.rememberMe ? "12h" : "1h";
+      const token = jwt.sign(payload, secret, { expiresIn });
 
       const userDto: UserDTO = {
         id: user._id.toString(),

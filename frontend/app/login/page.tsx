@@ -11,6 +11,7 @@ import { storeAuthToken } from "@/lib/token-storage";
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   // keep overlay mounted briefly during close animation
@@ -22,22 +23,25 @@ const Login: React.FC = () => {
     // Call the app route which proxies to the backend (or uses demo auth server-side)
     (async () => {
       try {
-        const result = await auth.login(email, password);
+        const result = await auth.login(email, password, rememberMe);
+
         if (result.ok) {
-          // Store token in localStorage with 12-hour expiration
+          // Store token with remember preference
           if (result.token) {
-            storeAuthToken(result.token, 12);
+            storeAuthToken(result.token, rememberMe);
           }
           router.push("/dashboard");
           return;
         }
+
         notify({
           type: "error",
           title: "Error de inicio de sesión",
           message: result.message || "Credenciales incorrectas",
           duration: 5000,
         });
-      } catch {
+      } catch (error) {
+        console.error("Login error:", error);
         notify({
           type: "error",
           title: "Error de conexión",
@@ -128,9 +132,11 @@ const Login: React.FC = () => {
               <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                 <input
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded border-gray-300 dark:border-gray-600"
                 />
-                Recuérdame
+                Recuérdame (mantener sesión por 12 horas)
               </label>
             </div>
 
