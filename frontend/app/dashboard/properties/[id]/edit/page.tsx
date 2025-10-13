@@ -189,6 +189,66 @@ export default function EditPropertyPage({ params }: { params: any }) {
       // Collect files from the per-slot imagesFiles array
       const filesToUpload = imagesFiles.filter(Boolean) as File[];
 
+      // Resize/compress images on the client to avoid large payloads and
+      // out-of-memory crashes on mobile devices. If resizing fails we fall
+      // back to the original file.
+      async function resizeImage(
+        file: File,
+        maxDim = 1600,
+        quality = 0.8
+      ): Promise<File> {
+        try {
+          // Use createImageBitmap for efficient image decoding when available
+          const bitmap = await createImageBitmap(file);
+          const { width, height } = bitmap;
+          let targetWidth = width;
+          let targetHeight = height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              targetWidth = maxDim;
+              targetHeight = Math.round((height / width) * maxDim);
+            } else {
+              targetHeight = maxDim;
+              targetWidth = Math.round((width / height) * maxDim);
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) throw new Error("Canvas not supported");
+          ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+
+          // Prefer JPEG for smaller size and wide compatibility
+          const blob: Blob | null = await new Promise((resolve) =>
+            canvas.toBlob((b) => resolve(b), "image/jpeg", quality)
+          );
+
+          // Cleanup the ImageBitmap
+          try {
+            bitmap.close?.();
+          } catch {}
+
+          if (!blob) throw new Error("Failed to create blob");
+          return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
+            type: "image/jpeg",
+          });
+        } catch {
+          // On any failure, return original file
+          return file;
+        }
+      }
+
+      // Process files sequentially to avoid simultaneous memory spikes
+      const processedFiles: File[] = [];
+      for (const f of filesToUpload) {
+        // eslint-disable-next-line no-await-in-loop
+        const p = await resizeImage(f);
+        processedFiles.push(p);
+      }
+
       // Build array of existing images that should be kept (not replaced by new files)
       const imagesToKeep: string[] = [];
       for (let i = 0; i < 10; i++) {
@@ -206,12 +266,12 @@ export default function EditPropertyPage({ params }: { params: any }) {
         images: imagesToKeep, // Send existing images that should be kept
       };
 
-      if (filesToUpload.length > 0) {
+      if (processedFiles.length > 0) {
         const mod = await import("@/services/properties");
         await mod.updatePropertyFormData(
           id,
           payloadWithImages as any,
-          filesToUpload
+          processedFiles
         );
       } else {
         await updateProperty(id, payloadWithImages as any);
