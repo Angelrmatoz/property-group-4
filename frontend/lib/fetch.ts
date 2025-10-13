@@ -84,6 +84,12 @@ export async function apiFetch<T = any>(
   // Initialize headers
   const headers = new Headers(fetchOptions.headers);
 
+  // Add JWT Authorization header for all requests
+  const jwtToken = getAuthToken(); // Automatically checks expiration
+  if (jwtToken) {
+    headers.set("Authorization", `Bearer ${jwtToken}`);
+  }
+
   // For mutating requests, fetch and attach CSRF token
   const method = (fetchOptions.method || "GET").toUpperCase();
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
