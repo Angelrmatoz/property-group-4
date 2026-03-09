@@ -9,43 +9,45 @@
 
 # Descripción
 
-Sistema web **full-stack** desarrollado para Property Group, una empresa de bienes raíces.  
-La aplicación combina una **landing pública optimizada para marketing** con un **panel administrativo seguro** para la gestión de propiedades.
+Sistema web **full-stack** desarrollado para Property Group, una empresa de bienes raíces.
 
-El sistema incluye:
+La aplicación combina una **landing pública optimizada para marketing** con un **panel administrativo seguro** para la gestión de propiedades inmobiliarias.
 
-- Frontend moderno construido con Next.js
-- Backend REST API desarrollado con Express
+El proyecto incluye:
+
+- Frontend moderno desarrollado con Next.js
+- Backend REST API construido con Express
 - Autenticación basada en JWT
 - Protección contra ataques CSRF
 - Persistencia de datos en MongoDB
+- Panel administrativo para gestión de propiedades
 
-El objetivo del proyecto es permitir a los administradores **gestionar propiedades inmobiliarias desde un dashboard privado**, mientras los usuarios pueden visualizar las propiedades desde la interfaz pública.
+El objetivo es permitir que los administradores gestionen propiedades desde un **dashboard privado**, mientras los usuarios pueden visualizar propiedades desde la **interfaz pública**.
 
 ---
 
 # Stack Tecnológico
 
-### Frontend
+## Frontend
 
 - Next.js (App Router)
 - React
 - TailwindCSS
 - TypeScript
 
-### Backend
+## Backend
 
 - Node.js
 - Express.js
 - JWT Authentication
 - CSRF Protection
 
-### Base de datos
+## Base de datos
 
 - MongoDB
 - Mongoose
 
-### Infraestructura / Deployment
+## Infraestructura / Deployment
 
 - Vercel (Frontend)
 - Render (Backend)
@@ -54,26 +56,26 @@ El objetivo del proyecto es permitir a los administradores **gestionar propiedad
 
 # Características principales
 
-- **Next.js (App Router)** para renderizado híbrido (SSR/SSG).
-- **Tailwind CSS** para diseño responsivo y rápido desarrollo de UI.
-- **Carrusel dinámico de imágenes** optimizado para rendimiento.
-- **Sección de testimonios** con componentes reutilizables.
-- **Formulario de contacto** integrado con Formspree.
-- **Dashboard administrativo protegido** con autenticación.
-- **CRUD completo de propiedades** desde el panel de administración.
-- **Modo oscuro / claro** con persistencia de preferencias.
-- **Optimización mobile-first** evitando overflow y problemas de UX.
+- **Next.js (App Router)** para renderizado híbrido (SSR / SSG)
+- **Tailwind CSS** para diseño responsivo y desarrollo rápido de UI
+- **Carrusel dinámico de imágenes** optimizado para rendimiento
+- **Sección de testimonios** con componentes reutilizables
+- **Formulario de contacto** integrado con Formspree
+- **Panel administrativo protegido** mediante autenticación
+- **CRUD completo de propiedades** desde el dashboard
+- **Modo oscuro / claro** con persistencia de preferencias
+- **Optimización mobile-first** para mejorar la experiencia en dispositivos móviles
 
 ---
 
 # Flujo de la aplicación
 
 1. Los usuarios acceden a la landing pública para visualizar propiedades disponibles.
-2. Los administradores pueden autenticarse en el panel administrativo.
-3. El backend valida las credenciales y genera un **JWT**.
+2. Los administradores pueden autenticarse desde el panel administrativo.
+3. El backend valida credenciales y genera un **JWT** para autenticación.
 4. El dashboard consume **APIs protegidas** para gestionar propiedades.
-5. Las operaciones sensibles utilizan **protección CSRF**.
-6. La información de propiedades se almacena en **MongoDB**.
+5. Todas las operaciones sensibles utilizan **protección CSRF**.
+6. La información de las propiedades se almacena en **MongoDB**.
 
 ---
 
@@ -84,3 +86,156 @@ Clona el repositorio:
 ```bash
 git clone https://github.com/Angelrmatoz/property-group-4
 cd property-group-4
+```
+
+Instala las dependencias:
+
+```bash
+pnpm install
+# o
+npm install
+```
+
+Inicia el servidor de desarrollo:
+
+```bash
+pnpm dev
+# o
+npm run dev
+```
+
+Abre en tu navegador:
+
+```
+http://localhost:3000
+```
+
+---
+
+# Proyecto en producción
+
+Dominio principal:
+
+https://www.propertygrouprd.app/
+
+Deployment frontend:
+
+https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page
+
+---
+
+# Estructura del proyecto
+
+```
+app/           → páginas, layouts y rutas
+components/    → componentes reutilizables
+hooks/         → custom hooks
+lib/           → utilidades compartidas
+styles/        → estilos globales
+public/        → recursos estáticos
+
+backend/
+  src/
+    controllers/
+    middleware/
+    models/
+    mongo.ts
+    index.ts
+```
+
+---
+
+# Backend
+
+El directorio `backend/` contiene un servidor Express encargado de:
+
+- Autenticación de usuarios
+- Protección de rutas
+- Gestión de propiedades
+- Comunicación con MongoDB
+
+Archivos importantes:
+
+- `backend/src/index.ts` → configuración principal de Express
+- `backend/src/mongo.ts` → conexión a MongoDB mediante Mongoose
+- `backend/src/controllers/` → lógica de negocio
+- `backend/src/middleware/` → autenticación, autorización y manejo de errores
+- `backend/src/models/` → modelos de datos (`User`, `Property`)
+
+---
+
+# Variables de entorno
+
+## Frontend (Next.js)
+
+```
+BACKEND_URL
+NEXT_PUBLIC_BACKEND_URL
+NEXT_PUBLIC_BASE_URL
+```
+
+## Backend (Express)
+
+```
+FRONTEND_ORIGIN
+MONGODB_URI
+JWT_SECRET
+TRUST_PROXY
+ENABLE_CSRF
+```
+
+⚠️ Nunca expongas variables sensibles con el prefijo `NEXT_PUBLIC`.
+
+---
+
+# Despliegue
+
+Frontend:
+
+- desplegado en **Vercel**
+
+Backend:
+
+- desplegado en **Render**
+
+Si el frontend y backend están en dominios distintos (cross-site):
+
+- habilitar `credentials: true` en CORS
+- configurar cookies con:
+
+```
+sameSite: 'none'
+secure: true
+```
+
+---
+
+# Notas de debugging frecuentes
+
+### Error 403 — invalid csrf token
+
+Normalmente ocurre cuando la cookie CSRF no llega correctamente.
+
+Verificar:
+
+- cookie CSRF enviada por el backend
+- `Access-Control-Allow-Credentials`
+- `Access-Control-Allow-Origin`
+- uso de `fetch(..., { credentials: 'include' })`
+
+### Error 503 en producción
+
+Revisar:
+
+- logs de Render o Vercel
+- variables de entorno
+- conexión a MongoDB
+- disponibilidad de servicios externos
+
+---
+
+# Contribuciones
+
+Pull requests son bienvenidos.
+
+Si un cambio requiere nuevas variables de entorno o pasos de despliegue adicionales, por favor documentarlo en el PR.
