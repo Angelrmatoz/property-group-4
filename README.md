@@ -22,25 +22,30 @@ Landing page profesional y responsiva para Property Group, empresa de bienes ra�
 
 ## Instalación y uso
 
+El proyecto está desplegado y disponible en:
+- Dominio principal: **[https://www.propertygrouprd.app/](https://www.propertygrouprd.app/)**
+- Vercel: [https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page](https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page)
+
+Para correrlo localmente:
+
 1. Clona el repositorio:
    ```bash
-   El proyecto está desplegado y disponible en:
+   git clone <url-del-repositorio>
    cd property-group-4
    ```
 
-- Dominio principal: **[https://www.propertygrouprd.app/](https://www.propertygrouprd.app/)**
-- Vercel: [https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page](https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page)
-  ```bash
-  pnpm install
-  # o npm install
-  ```
+2. Instala dependencias:
+   ```bash
+   pnpm install
+   # o npm install
+   ```
 
-1. Inicia el servidor de desarrollo:
+3. Inicia el servidor de desarrollo:
    ```bash
    pnpm dev
    # o npm run dev
    ```
-2. Abre en tu navegador: [http://localhost:3000](http://localhost:3000)
+4. Abre en tu navegador: [http://localhost:3000](http://localhost:3000)
 
 ## Estructura del proyecto
 
@@ -71,7 +76,7 @@ Principales variables usadas por el proyecto:
 
 Frontend (Next.js):
 
-- `BACKEND_URL` (server-side): URL pública del backend (ej: https://property-group-4.onrender.com). Usado para construir URLs desde SSR o server-side code.
+- `BACKEND_URL` / `NEXT_PUBLIC_BACKEND_URL`: URL pública del backend (ej: https://property-group- backend...azurecontainerapps.io). Usado para construir URLs desde SSR o cliente para interactuar con la API.
 - `NEXT_PUBLIC_BACKEND_URL` / `NEXT_PUBLIC_BASE_URL` (opcional): URL que el cliente puede usar desde el navegador — sólo si es necesario exponerla al bundle cliente.
 
 Backend (Express):
@@ -86,8 +91,11 @@ Nota de seguridad: nunca marques variables secretas con el prefijo `NEXT_PUBLIC_
 
 ## Despliegue
 
-- Frontend: desplegado en Vercel. Configurar variables en el panel de Vercel y redeploy.
-- Backend: desplegado en Render (o cualquier host Node). Antes de desplegar, establece `FRONTEND_ORIGIN`, `MONGODB_URI`, `JWT_SECRET` y `TRUST_PROXY` según tu entorno.
+- **Frontend**: Desplegado en Vercel. Configurar variables en el panel de Vercel y hacer redeploy.
+- **Backend**: Desplegado en **Azure Container Apps**. El proceso de CI/CD está automatizado mediante GitHub Actions (`.github/workflows/deploy-backend.yml`).
+  1. Al hacer Push, GitHub Actions empaqueta la imagen Docker y la sube a GHCR (`ghcr.io`).
+  2. Azure Container Apps jala la nueva imagen automáticamente y despliega un contenedor Serverless (Consumption mode).
+  3. Las variables de entorno (`FRONTEND_ORIGIN`, `MONGODB_URI`, `JWT_SECRET`) se configuran manualmente en el portal de Azure.
 
 Si frontend y backend están en dominios distintos (cross-site):
 

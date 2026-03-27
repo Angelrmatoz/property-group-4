@@ -63,3 +63,7 @@ This document outlines the different agents involved in the development and main
 ## 🤖 Critical Notes for AI Agents working on this project:
 
 - **MongoDB Connection:** Due to DNS resolution issues (`ECONNREFUSED` / `querySrv`) in the local Node.js environment on Windows, the `MONGODB_URI` environment variable specifically uses the classical `mongodb://` format with explicit replica set nodes (e.g. `mongodb://user:pass@node1,node2,node3/?replicaSet=...`) instead of the `mongodb+srv://` format. **DO NOT** change the connection string back to `mongodb+srv://`, as it will break the backend connection to the database.
+- **Docker & Azure Container Apps:** The backend is containerized holding to the standard `Dockerfile` provided. Automatic CI/CD deployments are handled by GitHub Actions (`.github/workflows/deploy-backend.yml`).
+  - Do not alter the `.yml` workflow without ensuring compatibility with the GHCR (GitHub Container Registry) tags.
+  - The production server uses Azure Container Apps configured for `Scale to Zero`, running Node.js 20 minimum.
+  - Keep `console.log` statements minimal to avoid swelling Azure telemetry logs.

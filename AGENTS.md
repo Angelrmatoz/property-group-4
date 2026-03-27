@@ -4,12 +4,13 @@ This document outlines the different agents involved in the development and main
 
 ## Overview
 
-The project is divided into two main components:
+The project is divided into three main components:
 
-- **Frontend**: Handles the user interface and user experience.
-- **Backend**: Manages data, business logic, and API services.
+- **Frontend**: Handles the user interface and user experience (Next.js on Vercel).
+- **Backend**: Manages data, business logic, and API services (Node.js on Azure Container Apps).
+- **DevOps / CI-CD**: Manages infrastructure, Docker images, and automated deployments (GitHub Actions + GHCR).
 
-Further details for each component's architecture can be found in their respective `AGENTS.md` files.
+Further details for each component's architecture can be found in their respective `AGENTS.md` or `HELP.md` files.
 
 ---
 
