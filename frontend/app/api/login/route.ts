@@ -5,7 +5,7 @@ export async function GET(req: Request) {
   if (!backend) {
     return NextResponse.json(
       { error: "No backend configured" },
-      { status: 503 }
+      { status: 503 },
     );
   }
 
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   if (!authHeader) {
     return NextResponse.json(
       { error: "Authorization header required" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   if (!backend) {
     return NextResponse.json(
       { error: "No backend configured for authentication" },
-      { status: 503 }
+      { status: 503 },
     );
   }
 

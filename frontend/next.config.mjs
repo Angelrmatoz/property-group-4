@@ -1,11 +1,5 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -17,15 +11,9 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config) => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    config.resolve = config.resolve || {};
-    config.resolve.alias = config.resolve.alias || {};
-    // Map @ to the frontend root so imports like '@/components/Header' work
-    config.resolve.alias['@'] = path.resolve(__dirname);
-    return config;
-  },
+  // Adding empty turbopack config can help bypass the webpack-related error 
+  // if you have lingering webpack plugins or just want to use the default turbopack flow.
+  turbopack: {},
 }
 
 export default nextConfig;
