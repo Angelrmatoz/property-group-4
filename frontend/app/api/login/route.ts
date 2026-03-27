@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const backend = process.env.BACKEND_URL;
   if (!backend) {
@@ -24,6 +25,7 @@ export async function GET(req: Request) {
     headers: {
       Authorization: authHeader,
     },
+    cache: "no-store",
   });
 
   const data = await res.json().catch(() => ({}));
@@ -55,6 +57,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password, rememberMe }),
+      cache: "no-store",
     });
 
     const data = await res.json().catch(() => ({}));

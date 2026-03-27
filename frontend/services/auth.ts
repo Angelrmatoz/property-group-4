@@ -66,8 +66,11 @@ export async function me(): Promise<LoginResult> {
     });
 
     if (!res.ok) {
-      // If backend says token is invalid, clear it locally too
-      clearAuthToken();
+      // Only clear the token if the backend explicitly rejected it (401 Unauthorized or 403 Forbidden).
+      // If it's a 500, 502, or 503 error (backend restarting, etc.), DON'T log the user out!
+      if (res.status === 401 || res.status === 403) {
+        clearAuthToken();
+      }
       return { ok: false };
     }
 
