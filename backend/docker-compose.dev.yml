@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      target: dev
+    container_name: property_group_backend_dev
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Sincroniza la carpeta local src dentro del contenedor en tiempo real
+      - ./src:/app/src
+      - ./tsconfig.json:/app/tsconfig.json
+    restart: on-failure
+    # nodemon usará esto para ver los cambios sin tener que reiniciar el contenedor entero

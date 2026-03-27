@@ -34,29 +34,8 @@ loginRouter.post(
     }
 
     try {
-      let user = await User.findOne({ email: body.email });
-
-      // Auto-bootstrap: if there are no users at all, create this one as admin
-      if (!user) {
-        const usersCount = await User.countDocuments().exec();
-        if (usersCount === 0) {
-          console.log(
-            "[BOOTSTRAP] Database is empty, creating initial admin user.",
-          );
-          const newUser = new User({
-            email: body.email,
-            firstName: "Admin",
-            lastName: "System",
-            admin: true,
-          });
-          // set virtual password for pre-save hashing
-          (newUser as any).password = body.password;
-          await newUser.save();
-          user = newUser;
-        } else {
-          return next(new HttpError(401, "Invalid credentials"));
-        }
-      }
+      const user = await User.findOne({ email: body.email });
+      if (!user) return next(new HttpError(401, "Invalid credentials"));
 
       const isMatch = await (user as any).comparePassword(body.password);
       if (!isMatch) return next(new HttpError(401, "Invalid credentials"));
