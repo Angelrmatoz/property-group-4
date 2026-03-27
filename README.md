@@ -1,26 +1,19 @@
-# Property Group - Real Estate Landing Page
+# Property Group - Full-Stack Web System for Real Estate Property Management
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page)
 [![Dominio Propio](https://img.shields.io/badge/Online-propertygrouprd.app-blue?style=for-the-badge&logo=google-chrome)](https://www.propertygrouprd.app/)
 [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TailwindCSS](https://img.shields.io/badge/Styled%20with-TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
 
-## Descripción
+---
 
-Landing page profesional y responsiva para Property Group, empresa de bienes raíces. Este repositorio incluye el frontend (Next.js) y un backend (Express) usado para autenticación, APIs privadas y gestión de propiedades. El proyecto combina una landing pública con un panel de administración (dashboard) protegido por autenticación y CSRF.
+# Descripción
 
-## Características principales
+Sistema web **full-stack** desarrollado para Property Group, una empresa de bienes raíces.
 
-- **Next.js (App Router)**: Estructura moderna para renderizado híbrido (SSR/SSG) y rutas modernas de la carpeta `app`.
-- **Tailwind CSS**: Estilos utilitarios y responsivos con una paleta personalizada y utilidades para imágenes y layout.
-- **Carrusel de imágenes**: Hero con transición suave y carga optimizada de imágenes.
-- **Testimonios**: Sección visual y profesional con componentes reutilizables.
-- **Formulario de contacto**: Envío de datos a email usando [Formspree](https://formspree.io/).
-- **Autenticación y dashboard**: Backend Express con endpoints de auth, protección CSRF y panel administrativo para CRUD de propiedades.
-- **Optimización para móvil**: Correcciones para evitar overflow horizontal y UX mejorada en dispositivos pequeños.
-- **Modo oscuro/claro**: Soporte nativo con persistencia de preferencia.
+La aplicación combina una **landing pública optimizada para marketing** con un **panel administrativo seguro** para la gestión de propiedades inmobiliarias.
 
-## Instalación y uso
+El proyecto incluye:
 
 El proyecto está desplegado y disponible en:
 - Dominio principal: **[https://www.propertygrouprd.app/](https://www.propertygrouprd.app/)**
@@ -47,49 +40,57 @@ Para correrlo localmente:
    ```
 4. Abre en tu navegador: [http://localhost:3000](http://localhost:3000)
 
-## Estructura del proyecto
+# Stack Tecnológico
 
-- `app/` — Páginas principales, layout, rutas y componentes de alto nivel.
-- `components/` — Componentes reutilizables (UI, Header, Footer, Testimonials, etc).
-- `hooks/` — Custom hooks (ej: useCarousel, useIsMobile, useToast).
-- `public/` — Imágenes y recursos estáticos.
-- `styles/` — Archivos CSS globales.
-- `lib/` — Utilidades compartidas.
+## Frontend
 
-## Formulario de contacto
+- Next.js (App Router)
+- React
+- TailwindCSS
+- TypeScript
 
-El formulario de contacto utiliza [Formspree](https://formspree.io/) para enviar mensajes directamente a un correo electrónico configurado, sin necesidad de backend propio. Todos los campos incluyen el atributo `name` requerido por Formspree.
+## Backend
 
-## Resumen del backend
+- Node.js
+- Express.js
+- JWT Authentication
+- CSRF Protection
 
-El directorio `backend/` contiene un servidor Express que expone APIs utilizadas por el dashboard y por operaciones autenticadas. Puntos clave:
+## Base de datos
 
-- `backend/src/index.ts`: configuración de Express, CORS, cookies y csurf (protección CSRF).
-- `backend/src/mongo.ts`: conexión a MongoDB usando Mongoose.
-- `backend/src/controllers/`: controladores para `auth`, `properties`, `users`.
-- `backend/src/middleware/`: middlewares como `auth`, `requireAdmin` y manejo de errores.
-- `backend/src/models/`: modelos Mongoose (`User`, `Property`).
+- MongoDB
+- Mongoose
 
-## Variables de entorno importantes
+## Infraestructura / Deployment
 
-Principales variables usadas por el proyecto:
+- Vercel (Frontend)
+- Render (Backend)
 
-Frontend (Next.js):
+---
 
 - `BACKEND_URL` / `NEXT_PUBLIC_BACKEND_URL`: URL pública del backend (ej: https://property-group- backend...azurecontainerapps.io). Usado para construir URLs desde SSR o cliente para interactuar con la API.
 - `NEXT_PUBLIC_BACKEND_URL` / `NEXT_PUBLIC_BASE_URL` (opcional): URL que el cliente puede usar desde el navegador — sólo si es necesario exponerla al bundle cliente.
 
-Backend (Express):
+- **Next.js (App Router)** para renderizado híbrido (SSR / SSG)
+- **Tailwind CSS** para diseño responsivo y desarrollo rápido de UI
+- **Carrusel dinámico de imágenes** optimizado para rendimiento
+- **Sección de testimonios** con componentes reutilizables
+- **Formulario de contacto** integrado con Formspree
+- **Panel administrativo protegido** mediante autenticación
+- **CRUD completo de propiedades** desde el dashboard
+- **Modo oscuro / claro** con persistencia de preferencias
+- **Optimización mobile-first** para mejorar la experiencia en dispositivos móviles
 
-- `FRONTEND_ORIGIN`: origen exacto del frontend (ej: https://www.propertygrouprd.app). Uso: CORS allowed origin.
-- `MONGODB_URI`: cadena de conexión a MongoDB.
-- `JWT_SECRET`: secreto para firmar JWTs.
-- `TRUST_PROXY`: marca para que Express confíe en cabeceras `X-Forwarded-*` (útil en Render/Vercel).
-- `ENABLE_CSRF`: si quieres deshabilitar temporalmente CSRF (no recomendado en producción).
+---
 
-Nota de seguridad: nunca marques variables secretas con el prefijo `NEXT_PUBLIC_` ni actives "Automatically expose System Environment Variables" en Vercel.
+# Flujo de la aplicación
 
-## Despliegue
+1. Los usuarios acceden a la landing pública para visualizar propiedades disponibles.
+2. Los administradores pueden autenticarse desde el panel administrativo.
+3. El backend valida credenciales y genera un **JWT** para autenticación.
+4. El dashboard consume **APIs protegidas** para gestionar propiedades.
+5. Todas las operaciones sensibles utilizan **protección CSRF**.
+6. La información de las propiedades se almacena en **MongoDB**.
 
 - **Frontend**: Desplegado en Vercel. Configurar variables en el panel de Vercel y hacer redeploy.
 - **Backend**: Desplegado en **Azure Container Apps**. El proceso de CI/CD está automatizado mediante GitHub Actions (`.github/workflows/deploy-backend.yml`).
@@ -97,31 +98,163 @@ Nota de seguridad: nunca marques variables secretas con el prefijo `NEXT_PUBLIC_
   2. Azure Container Apps jala la nueva imagen automáticamente y despliega un contenedor Serverless (Consumption mode).
   3. Las variables de entorno (`FRONTEND_ORIGIN`, `MONGODB_URI`, `JWT_SECRET`) se configuran manualmente en el portal de Azure.
 
-Si frontend y backend están en dominios distintos (cross-site):
+# Instalación y uso
 
-- CORS en backend debe permitir únicamente el origen del frontend y `credentials: true`.
-- Cookies que deben viajar cross-site (ej: cookie CSRF o cookie de sesión) deben ser configuradas como `{ sameSite: 'none', secure: true }` en producción.
+Clona el repositorio:
 
-## Notas de debugging frecuentes
+```bash
+git clone https://github.com/Angelrmatoz/property-group-4
+cd property-group-4
+```
 
-- Error 403 `{"error":"invalid csrf token"}`: normalmente la cookie CSRF no llega en la petición o no se incluyó el token. Verifica:
+Instala las dependencias:
 
-  1.  Que el backend emita la cookie CSRF con `SameSite=None` y `Secure` si el frontend está en otro dominio.
-  2.  Que las respuestas de CORS incluyan `Access-Control-Allow-Credentials: true` y `Access-Control-Allow-Origin` igual al origen del frontend.
-  3.  Que el cliente use `fetch(..., { credentials: 'include' })` y que incluya el token CSRF (si la app lo coloca en un header).
+```bash
+pnpm install
+# o
+npm install
+```
 
-- Error 503 o problemas en producción: comprobar logs en Render/Vercel, revisar variables de entorno y que los servicios dependientes (MongoDB, Cloudinary) estén accesibles.
+Inicia el servidor de desarrollo:
 
-## Recomendaciones rápidas
+```bash
+pnpm dev
+# o
+npm run dev
+```
 
-- Cambiar la cookie CSRF en `backend/src/index.ts` a `sameSite: 'none'` y `secure: true` cuando `NODE_ENV === 'production'` si tu frontend está en otro dominio.
-- Evitar hardcodear `http://localhost:${process.env.PORT}` para construir URLs en SSR; usar `BACKEND_URL` en producción.
+Abre en tu navegador:
 
-## Contribuciones
+```
+http://localhost:3000
+```
 
-- Pull requests son bienvenidos. Si un cambio requiere variables de entorno nuevas o pasos de despliegue, documenta los requisitos en el PR.
+---
 
-## Links útiles
+# Proyecto en producción
 
-- Frontend (Vercel): https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page
-- Dominio principal: https://www.propertygrouprd.app/
+Dominio principal:
+
+https://www.propertygrouprd.app/
+
+Deployment frontend:
+
+https://vercel.com/angelrmatoz-1224s-projects/v0-react-landing-page
+
+---
+
+# Estructura del proyecto
+
+```
+app/           → páginas, layouts y rutas
+components/    → componentes reutilizables
+hooks/         → custom hooks
+lib/           → utilidades compartidas
+styles/        → estilos globales
+public/        → recursos estáticos
+
+backend/
+  src/
+    controllers/
+    middleware/
+    models/
+    mongo.ts
+    index.ts
+```
+
+---
+
+# Backend
+
+El directorio `backend/` contiene un servidor Express encargado de:
+
+- Autenticación de usuarios
+- Protección de rutas
+- Gestión de propiedades
+- Comunicación con MongoDB
+
+Archivos importantes:
+
+- `backend/src/index.ts` → configuración principal de Express
+- `backend/src/mongo.ts` → conexión a MongoDB mediante Mongoose
+- `backend/src/controllers/` → lógica de negocio
+- `backend/src/middleware/` → autenticación, autorización y manejo de errores
+- `backend/src/models/` → modelos de datos (`User`, `Property`)
+
+---
+
+# Variables de entorno
+
+## Frontend (Next.js)
+
+```
+BACKEND_URL
+NEXT_PUBLIC_BACKEND_URL
+NEXT_PUBLIC_BASE_URL
+```
+
+## Backend (Express)
+
+```
+FRONTEND_ORIGIN
+MONGODB_URI
+JWT_SECRET
+TRUST_PROXY
+ENABLE_CSRF
+```
+
+⚠️ Nunca expongas variables sensibles con el prefijo `NEXT_PUBLIC`.
+
+---
+
+# Despliegue
+
+Frontend:
+
+- desplegado en **Vercel**
+
+Backend:
+
+- desplegado en **Render**
+
+Si el frontend y backend están en dominios distintos (cross-site):
+
+- habilitar `credentials: true` en CORS
+- configurar cookies con:
+
+```
+sameSite: 'none'
+secure: true
+```
+
+---
+
+# Notas de debugging frecuentes
+
+### Error 403 — invalid csrf token
+
+Normalmente ocurre cuando la cookie CSRF no llega correctamente.
+
+Verificar:
+
+- cookie CSRF enviada por el backend
+- `Access-Control-Allow-Credentials`
+- `Access-Control-Allow-Origin`
+- uso de `fetch(..., { credentials: 'include' })`
+
+### Error 503 en producción
+
+Revisar:
+
+- logs de Render o Vercel
+- variables de entorno
+- conexión a MongoDB
+- disponibilidad de servicios externos
+
+---
+
+# Contribuciones
+
+Pull requests son bienvenidos.
+
+Si un cambio requiere nuevas variables de entorno o pasos de despliegue adicionales, por favor documentarlo en el PR.
