@@ -1,0 +1,55 @@
+name: Deploy to GHCR and Azure
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    # Opcional: Solo ejecutar si cambian archivos del backend
+    # paths:
+    #   - 'backend/**'
+
+env:
+  # Nombre de la imagen en GHCR (normalmente usuario/repo)
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-backend
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    # Damos permisos para leer el código y subir paquetes (imágenes) al registro
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Etiquetamos según la rama (main -> latest, dev -> dev)
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=raw,value=dev,enable=${{ github.ref == format('refs/heads/{0}', 'dev') }}
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend # O ./frontend si vas a subir el frontend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # El paso de Azure lo agregaremos después, cuando la app ya exista.
