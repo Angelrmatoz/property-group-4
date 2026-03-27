@@ -65,11 +65,11 @@ loginRouter.post(
     } catch (err) {
       console.error(
         "Error in /login handler:",
-        err && (err as any).message ? (err as any).message : err
+        err && (err as any).message ? (err as any).message : err,
       );
       return next(new HttpError(500, "Internal server error"));
     }
-  }
+  },
 );
 
 export default loginRouter;

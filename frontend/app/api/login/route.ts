@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const backend = process.env.BACKEND_URL;
   if (!backend) {
     return NextResponse.json(
       { error: "No backend configured" },
-      { status: 503 }
+      { status: 503 },
     );
   }
 
@@ -14,7 +15,7 @@ export async function GET(req: Request) {
   if (!authHeader) {
     return NextResponse.json(
       { error: "Authorization header required" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -24,6 +25,7 @@ export async function GET(req: Request) {
     headers: {
       Authorization: authHeader,
     },
+    cache: "no-store",
   });
 
   const data = await res.json().catch(() => ({}));
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
   if (!backend) {
     return NextResponse.json(
       { error: "No backend configured for authentication" },
-      { status: 503 }
+      { status: 503 },
     );
   }
 
@@ -55,6 +57,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password, rememberMe }),
+      cache: "no-store",
     });
 
     const data = await res.json().catch(() => ({}));

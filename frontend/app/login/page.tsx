@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import auth from "@/services/auth";
 import { useNotification } from "@/components/Notification";
-import { storeAuthToken } from "@/lib/token-storage";
+import { storeAuthToken, hasValidAuthToken, isRememberMeEnabled, clearAuthToken } from "@/lib/token-storage";
+import { useEffect } from "react";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +18,20 @@ const Login: React.FC = () => {
   // keep overlay mounted briefly during close animation
   const [menuVisible, setMenuVisible] = useState(false);
   const { notify } = useNotification();
+
+  // Handle auto-redirect or auto-destruction when visiting the login page
+  useEffect(() => {
+    if (hasValidAuthToken()) {
+      if (isRememberMeEnabled()) {
+        // Persistent session: skip login and jump to dashboard
+        router.push("/dashboard");
+      } else {
+        // Session-only: they came back to the login page, meaning they expect to log in again.
+        // Destroy the lingering session token so they can't sneak back into /dashboard.
+        clearAuthToken();
+      }
+    }
+  }, [router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

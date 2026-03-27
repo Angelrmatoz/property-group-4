@@ -29,8 +29,13 @@ export function storeAuthToken(
   const expiresAt = Date.now() + hours * 60 * 60 * 1000;
 
   const storage = rememberMe ? localStorage : sessionStorage;
+  const otherStorage = rememberMe ? sessionStorage : localStorage;
 
   try {
+    // Clear the storage we're NOT using to prevent stale tokens from confusing the app
+    otherStorage.removeItem(TOKEN_KEY);
+    otherStorage.removeItem(EXPIRY_KEY);
+
     storage.setItem(TOKEN_KEY, token);
     storage.setItem(EXPIRY_KEY, expiresAt.toString());
     // Store remember preference in localStorage to know which storage to check

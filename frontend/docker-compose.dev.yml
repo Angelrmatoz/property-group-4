@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: .
+      target: dev
+    container_name: property_group_frontend_dev
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - BACKEND_URL=http://host.docker.internal:8000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Sincronizamos las carpetas fuente principales
+      - ./app:/app/app
+      - ./components:/app/components
+      - ./lib:/app/lib
+      - ./public:/app/public
+      - ./hooks:/app/hooks
+      - ./services:/app/services
+      - ./styles:/app/styles
+      # Mapeamos los archivos de configuracion
+      - ./next.config.mjs:/app/next.config.mjs
+      - ./tailwind.config.ts:/app/tailwind.config.ts
+      - ./postcss.config.mjs:/app/postcss.config.mjs
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./components.json:/app/components.json
+      - ./.env.local:/app/.env.local
+    restart: on-failure

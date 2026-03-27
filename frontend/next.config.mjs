@@ -1,11 +1,5 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -17,15 +11,17 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config) => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    config.resolve = config.resolve || {};
-    config.resolve.alias = config.resolve.alias || {};
-    // Map @ to the frontend root so imports like '@/components/Header' work
-    config.resolve.alias['@'] = path.resolve(__dirname);
+  // Configurar polling para que el Hot Reload (HMR) funcione correctamente dentro de Docker Desktop / WSL2
+  webpack: (config, { dev, isServer }) => {
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
     return config;
   },
+  output: 'standalone',
 }
 
 export default nextConfig;
