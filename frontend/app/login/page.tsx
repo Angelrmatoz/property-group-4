@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import auth from "@/services/auth";
 import { useNotification } from "@/components/Notification";
-import { storeAuthToken, hasValidAuthToken } from "@/lib/token-storage";
+import { storeAuthToken, hasValidAuthToken, isRememberMeEnabled, clearAuthToken } from "@/lib/token-storage";
 import { useEffect } from "react";
 
 const Login: React.FC = () => {
@@ -19,10 +19,17 @@ const Login: React.FC = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const { notify } = useNotification();
 
-  // If the user already has a valid token (e.g. from Remember Me), redirect immediately
+  // Handle auto-redirect or auto-destruction when visiting the login page
   useEffect(() => {
     if (hasValidAuthToken()) {
-      router.push("/dashboard");
+      if (isRememberMeEnabled()) {
+        // Persistent session: skip login and jump to dashboard
+        router.push("/dashboard");
+      } else {
+        // Session-only: they came back to the login page, meaning they expect to log in again.
+        // Destroy the lingering session token so they can't sneak back into /dashboard.
+        clearAuthToken();
+      }
     }
   }, [router]);
 

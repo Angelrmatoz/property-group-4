@@ -11,8 +11,16 @@ const nextConfig = {
       },
     ],
   },
-  // Adding empty turbopack config can help bypass the webpack-related error 
-  turbopack: {},
+  // Configurar polling para que el Hot Reload (HMR) funcione correctamente dentro de Docker Desktop / WSL2
+  webpack: (config, { dev, isServer }) => {
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+    return config;
+  },
   output: 'standalone',
 }
 
