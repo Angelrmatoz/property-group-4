@@ -12,8 +12,8 @@ const nextConfig = {
     ],
   },
   // Adding empty turbopack config can help bypass the webpack-related error 
-  // if you have lingering webpack plugins or just want to use the default turbopack flow.
   turbopack: {},
+  output: 'standalone',
 }
 
 export default nextConfig;

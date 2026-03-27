@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+pnpm-debug.log
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.dockerignore
+Dockerfile
+docker-compose*.yml
