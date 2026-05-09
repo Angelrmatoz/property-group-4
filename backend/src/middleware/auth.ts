@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload as _JwtPayload } from "jsonwebtoken";
-import * as Config from "@/utils/config";
+import * as Config from "../config/config";
 import User from "@/models/user";
 import { HttpError } from "@/dto";
 

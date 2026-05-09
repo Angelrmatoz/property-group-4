@@ -57,4 +57,4 @@ This document outlines the different agents involved in the development and main
 ## 🤖 Critical Notes for AI Agents working on the frontend:
 
 - **Strict Session Destruction:** The application implements a highly secure session destruction mechanism for users traversing back to the `/login` route without a `localStorage` memory token ("Remember Me"). The `page.tsx` within `/login` executes `clearAuthToken()` immediately on mount for non-persistent sessions to prevent unauthorized back-navigation to the dashboard. **DO NOT** remove this strict cleanup logic when refactoring the authentication flow.
-- **Environment URLs:** Never use `window.location.host` or local paths for API requests in Server-side requests. `NEXT_PUBLIC_BACKEND_URL` is configured for client-side API calls to correctly hit the Azure Container Apps.
+- **Environment URLs:** Never use `window.location.host` or local paths for API requests in Server-side requests. `NEXT_PUBLIC_BACKEND_URL` is configured for client-side API calls to correctly hit the backend on Oracle Cloud.

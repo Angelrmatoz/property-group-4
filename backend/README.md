@@ -17,15 +17,15 @@ Este backend está hecho en **Node.js con Express**, y utiliza **MongoDB** como 
 ## 🔒 Control de CORS
 El Backend de esta App no sufre de restricciones abiertas. La variable `FRONTEND_ORIGIN` del `.env` le prohíbe explícitamente comunicarse con servidores no oficiales, pero permite listar arrays (separados por coma `,`) de frontend Vercel (tanto de Preview como de Prod).
 
-## 🚀 Despliegue en Azure Container Apps
-Este Backend ya no utiliza Render.com a causa de latencia y créditos. Está migrado al **Escudo Gratuito (Consumption Plan)** de Microsoft Azure.
+## 🚀 Despliegue en Oracle Cloud (VM Gratuita)
+Este Backend ya no utiliza Render.com ni Azure Container Apps. Está migrado a una **VM gratuita de Oracle Cloud** para eliminar costos de infraestructura.
 La automatización y Continuous Integration funcionan de esta forma:
 1. El programador hace `git push main`.
 2. El archivo `.github/workflows/deploy-backend.yml` se gatilla automáticamente en un corredor remoto de GitHub alojado en el SO de Ubuntu.
 3. Se compila `Dockerfile` para inyectar su código, exportándose a GitHub Container Registry (`ghcr.io`).
-4. Azure "escala a cero", notando cambios nuevos de su imagen asignada y se refresca automáticamente.
+4. El administrador accede a la VM de Oracle Cloud por SSH, ejecuta `docker pull ghcr.io/.../backend:latest` y reinicia el contenedor.
 
-> Las variables de base de datos `.env` **solo se registran manualmente en Azure**. GitHub no toca contraseñas en todo su trayecto CI/CD.
+> Las variables de base de datos `.env` **solo se registran manualmente en la VM de Oracle Cloud**. GitHub no toca contraseñas en todo su trayecto CI/CD.
 
 ---
 

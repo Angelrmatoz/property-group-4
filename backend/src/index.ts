@@ -2,12 +2,12 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import path from "path";
-import { PORT } from "@/utils/config";
+import { PORT } from "./config/config";
 
 import "@/mongo";
-import authRouter from "@/controllers/auth";
-import propertiesRouter from "@/controllers/properties";
-import usersRouter from "@/controllers/users";
+import authRouter from "@/routes/auth";
+import propertiesRouter from "@/routes/properties";
+import usersRouter from "@/routes/users";
 import errorHandler from "@/middleware/error";
 
 const app = express();

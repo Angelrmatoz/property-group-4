@@ -93,10 +93,10 @@ Para correrlo localmente:
 6. La información de las propiedades se almacena en **MongoDB**.
 
 - **Frontend**: Desplegado en Vercel. Configurar variables en el panel de Vercel y hacer redeploy.
-- **Backend**: Desplegado en **Azure Container Apps**. El proceso de CI/CD está automatizado mediante GitHub Actions (`.github/workflows/deploy-backend.yml`).
+- **Backend**: Desplegado en **Oracle Cloud (VM gratuita)**. El proceso de CI/CD está automatizado mediante GitHub Actions (`.github/workflows/deploy-backend.yml`).
   1. Al hacer Push, GitHub Actions empaqueta la imagen Docker y la sube a GHCR (`ghcr.io`).
-  2. Azure Container Apps jala la nueva imagen automáticamente y despliega un contenedor Serverless (Consumption mode).
-  3. Las variables de entorno (`FRONTEND_ORIGIN`, `MONGODB_URI`, `JWT_SECRET`) se configuran manualmente en el portal de Azure.
+  2. El administrador accede a la VM de Oracle Cloud, jala la nueva imagen y reinicia el contenedor.
+  3. Las variables de entorno (`FRONTEND_ORIGIN`, `MONGODB_URI`, `JWT_SECRET`) se configuran manualmente en el archivo `.env` de la VM.
 
 # Instalación y uso
 
