@@ -16,6 +16,17 @@ const errorHandler = (
     return;
   }
 
+  // Handle multer file type errors
+  if (
+    (err as any).code === "LIMIT_FILE_TYPE" ||
+    (err as any).message?.includes("Tipo de archivo no válido")
+  ) {
+    res.status(400).json({
+      error: "Tipo de archivo no válido. Solo se permiten imágenes.",
+    });
+    return;
+  }
+
   const status = err.status ?? 500;
   const response: any = { error: err.message || "Internal Server Error" };
 
