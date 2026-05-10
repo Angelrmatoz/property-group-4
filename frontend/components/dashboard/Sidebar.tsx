@@ -2,32 +2,38 @@
 
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Sidebar() {
   const [openUsers, setOpenUsers] = useState(false);
   const STORAGE_KEY = "dashboard:sidebarCollapsed";
 
-  // Initialize to false so server/client markup match during SSR.
-  // Use useLayoutEffect to read persisted preference before the first paint
-  // to avoid a visible jump. We also track `hydrated` so we can enable
-  // transitions only after the first paint.
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [hydrated, setHydrated] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useLayoutEffect(() => {
     try {
       const v = localStorage.getItem(STORAGE_KEY);
-      if (v !== null) setCollapsed(v === "1");
+      if (v !== null) {
+        setCollapsed(v === "1");
+      } else {
+        setCollapsed(true);
+      }
     } catch {
-      // ignore
+      setCollapsed(true);
     } finally {
-      // mark that we've applied the persisted value (runs before paint)
       setHydrated(true);
     }
-    // empty deps: run once on mount
   }, []);
-  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setCollapsed(true);
+    }
+  }, [pathname]);
+
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   // previously we fetched /api/login to determine admin rights; the
