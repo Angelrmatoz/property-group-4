@@ -10,7 +10,7 @@ on:
     #   - 'backend/**'
 
 env:
-  # Elimina el warning de deprecación de Node 20 en GitHub Actions
+  # Uso de Node 24 recomendado por GitHub
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   # Nombre de la imagen en GHCR (normalmente usuario/repo)
   REGISTRY: ghcr.io
