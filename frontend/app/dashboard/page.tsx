@@ -142,12 +142,16 @@ export default function DashboardPage() {
             Desde aquí puedes administrar tus propiedades.
           </p>
         </div>
-        <Link href="/dashboard/properties/create">
-          <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+        <Button
+          asChild
+          data-testid="new-property-btn"
+          className="bg-amber-600 hover:bg-amber-700 text-white"
+        >
+          <Link href="/dashboard/properties/create">
             <Plus className="w-4 h-4 mr-2" />
             Nueva Propiedad
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {/* Search Bar */}
@@ -247,12 +251,15 @@ export default function DashboardPage() {
                   ? "Intenta ajustar tu búsqueda"
                   : "Comienza creando tu primera propiedad"}
               </p>
-              <Link href="/dashboard/properties/create">
-                <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+              <Button
+                asChild
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                <Link href="/dashboard/properties/create">
                   <Plus className="w-4 h-4 mr-2" />
                   Crear Propiedad
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         ) : (

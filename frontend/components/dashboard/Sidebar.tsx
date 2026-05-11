@@ -19,7 +19,8 @@ export default function Sidebar() {
       if (v !== null) {
         setCollapsed(v === "1");
       } else {
-        setCollapsed(true);
+        // Default to expanded on desktop, collapsed on mobile
+        setCollapsed(window.innerWidth < 768);
       }
     } catch {
       setCollapsed(true);
@@ -98,8 +99,20 @@ export default function Sidebar() {
     }
   }, [collapsed]);
 
+  function closeOnMobile() {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setCollapsed(true);
+      try {
+        localStorage.setItem(STORAGE_KEY, "1");
+      } catch {
+        /* ignore storage errors */
+      }
+    }
+  }
+
   return (
     <aside
+      data-testid="sidebar"
       className={`${collapsed ? "w-16" : "w-64"} px-2 py-6 border-r ${
         hydrated ? "transition-all duration-200 ease-in-out" : "transition-none"
       } overflow-hidden fixed md:relative z-50 md:z-auto h-screen bg-background`}
@@ -107,6 +120,7 @@ export default function Sidebar() {
       <div className="flex items-center justify-between mb-4 px-2">
         {!collapsed && <h3 className="text-lg font-semibold">Panel</h3>}
         <button
+          data-testid="sidebar-toggle"
           aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
           onClick={() => {
             const next = !collapsed;
@@ -153,6 +167,8 @@ export default function Sidebar() {
       <nav className="flex flex-col gap-2 text-sm">
         <Link
           href="/dashboard"
+          data-testid="nav-inicio"
+          onClick={closeOnMobile}
           className={`flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
             collapsed ? "justify-center" : ""
           } transition-colors`}
@@ -176,6 +192,8 @@ export default function Sidebar() {
 
         <Link
           href="/dashboard/properties"
+          data-testid="nav-properties"
+          onClick={closeOnMobile}
           className={`flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
             collapsed ? "justify-center" : ""
           } transition-colors`}
@@ -203,6 +221,7 @@ export default function Sidebar() {
           <div>
             <button
               onClick={() => setOpenUsers(!openUsers)}
+              data-testid="nav-users-toggle"
               className={`w-full text-left px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 flex items-center justify-between ${
                 collapsed ? "justify-center" : ""
               }`}
@@ -237,11 +256,13 @@ export default function Sidebar() {
               className={`mt-2 ml-2 flex flex-col gap-1 transition-all duration-200 ${
                 openUsers && !collapsed
                   ? "max-h-40 opacity-100"
-                  : "max-h-0 opacity-0 overflow-hidden"
+                  : "hidden max-h-0 opacity-0 overflow-hidden"
               }`}
             >
               <Link
                 href="/dashboard/users"
+                data-testid="nav-users-list"
+                onClick={closeOnMobile}
                 className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
                   collapsed ? "hidden" : ""
                 }`}
@@ -250,6 +271,8 @@ export default function Sidebar() {
               </Link>
               <Link
                 href="/dashboard/users/create"
+                data-testid="nav-users-create"
+                onClick={closeOnMobile}
                 className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
                   collapsed ? "hidden" : ""
                 }`}
@@ -262,6 +285,8 @@ export default function Sidebar() {
 
         <Link
           href="/"
+          data-testid="nav-web"
+          onClick={closeOnMobile}
           className={`text-sm text-left px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 flex items-center gap-3 ${
             collapsed ? "justify-center" : ""
           }`}
@@ -288,6 +313,7 @@ export default function Sidebar() {
 
         <button
           onClick={logout}
+          data-testid="nav-logout"
           className={`text-sm text-amber-600 text-left px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 flex items-center gap-3 ${
             collapsed ? "justify-center" : ""
           }`}
