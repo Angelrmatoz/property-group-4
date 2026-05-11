@@ -12,7 +12,7 @@ export class DashboardPage {
     this.searchInput = page.getByPlaceholder(/Buscar propiedades/i);
     this.propertyCards = page.locator(".grid .group"); // Select property cards by class for now if no testid
     this.statsCards = page.locator(".grid .border-l-4");
-    this.newPropertyBtn = page.getByRole("button", { name: /Nueva Propiedad/i });
+    this.newPropertyBtn = page.getByTestId("new-property-btn");
   }
 
   async goto() {

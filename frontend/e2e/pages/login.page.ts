@@ -25,6 +25,7 @@ export class LoginPage {
 
   async mockAuthApi() {
     await this.page.route("**/api/login", async (route) => {
+      // Mock both POST (login) and GET (me)
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -32,7 +33,7 @@ export class LoginPage {
       });
     });
 
-    // Also mock 'me' call used by Sidebar
+    // Keep users mock for other tests
     await this.page.route("**/api/users/me", async (route) => {
         await route.fulfill({
             status: 200,
@@ -44,13 +45,15 @@ export class LoginPage {
 
   async loginAsAdmin() {
     await this.mockAuthApi();
-    
-    // Set token BEFORE visiting the site to ensure hydration sees it
-    await this.page.goto("/"); 
-    await this.page.evaluate((token) => {
+
+    await this.page.addInitScript((token) => {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("authTokenExpiry");
+      localStorage.removeItem("rememberMe");
+      sessionStorage.removeItem("authToken");
+      sessionStorage.removeItem("authTokenExpiry");
       const expiry = String(Date.now() + 24 * 60 * 60 * 1000);
       
-      // Set in BOTH to be bulletproof
       localStorage.setItem("authToken", token);
       localStorage.setItem("authTokenExpiry", expiry);
       localStorage.setItem("rememberMe", "true");
@@ -59,8 +62,12 @@ export class LoginPage {
       sessionStorage.setItem("authTokenExpiry", expiry);
     }, MOCK_ADMIN_USER.token);
 
-    // Navigate to dashboard and wait for it
-    await this.page.goto("/dashboard");
+    // Navigate to dashboard
+    await this.page.goto("/dashboard", { waitUntil: "domcontentloaded" });
     await expect(this.page).toHaveURL(/.*dashboard/, { timeout: 15000 });
+    // Ensure we are fully hydrated and seeing the welcome message
+    await expect(
+      this.page.getByRole("heading", { name: /Bienvenido al Dashboard/i })
+    ).toBeVisible({ timeout: 30000 });
   }
 }

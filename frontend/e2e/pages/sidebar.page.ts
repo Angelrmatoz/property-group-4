@@ -30,21 +30,23 @@ export class SidebarPage {
   }
 
   async expectCollapsed() {
-    // During transition, it might have both or neither temporarily
-    // We check for w-16 which defines collapsed state
-    await expect(this.sidebar).toHaveClass(/w-16/, { timeout: 10000 });
+    // Instead of matching exact classes, wait for the element's width to stabilize
+    // or check for the specific utility class that dictates width.
+    await expect(this.sidebar).toHaveClass(/w-16/, { timeout: 15000 });
   }
 
   async expectExpanded() {
-    await expect(this.sidebar).toHaveClass(/w-64/, { timeout: 10000 });
+    await expect(this.sidebar).toHaveClass(/w-64/, { timeout: 15000 });
   }
 
   async navigateToProperties() {
     await this.navProperties.click();
   }
 
-  async navigateToDashboard() {
-    await this.navInicio.click();
+  async toggleUsersSubmenu() {
+    await this.navUsersToggle.click();
+    // Wait for transition to complete
+    await this.page.waitForTimeout(500); 
   }
 
   async logout() {

@@ -99,6 +99,17 @@ export default function Sidebar() {
     }
   }, [collapsed]);
 
+  function closeOnMobile() {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setCollapsed(true);
+      try {
+        localStorage.setItem(STORAGE_KEY, "1");
+      } catch {
+        /* ignore storage errors */
+      }
+    }
+  }
+
   return (
     <aside
       data-testid="sidebar"
@@ -157,6 +168,7 @@ export default function Sidebar() {
         <Link
           href="/dashboard"
           data-testid="nav-inicio"
+          onClick={closeOnMobile}
           className={`flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
             collapsed ? "justify-center" : ""
           } transition-colors`}
@@ -181,6 +193,7 @@ export default function Sidebar() {
         <Link
           href="/dashboard/properties"
           data-testid="nav-properties"
+          onClick={closeOnMobile}
           className={`flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
             collapsed ? "justify-center" : ""
           } transition-colors`}
@@ -243,12 +256,13 @@ export default function Sidebar() {
               className={`mt-2 ml-2 flex flex-col gap-1 transition-all duration-200 ${
                 openUsers && !collapsed
                   ? "max-h-40 opacity-100"
-                  : "max-h-0 opacity-0 overflow-hidden"
+                  : "hidden max-h-0 opacity-0 overflow-hidden"
               }`}
             >
               <Link
                 href="/dashboard/users"
                 data-testid="nav-users-list"
+                onClick={closeOnMobile}
                 className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
                   collapsed ? "hidden" : ""
                 }`}
@@ -258,6 +272,7 @@ export default function Sidebar() {
               <Link
                 href="/dashboard/users/create"
                 data-testid="nav-users-create"
+                onClick={closeOnMobile}
                 className={`px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 ${
                   collapsed ? "hidden" : ""
                 }`}
@@ -271,6 +286,7 @@ export default function Sidebar() {
         <Link
           href="/"
           data-testid="nav-web"
+          onClick={closeOnMobile}
           className={`text-sm text-left px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 flex items-center gap-3 ${
             collapsed ? "justify-center" : ""
           }`}

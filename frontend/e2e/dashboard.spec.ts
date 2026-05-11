@@ -9,7 +9,7 @@ test.describe("Dashboard Functionality", () => {
   test.beforeEach(async ({ page }) => {
     dashboardPage = new DashboardPage(page);
     loginPage = new LoginPage(page);
-    
+
     // Mock properties API
     await page.route("**/api/properties*", async (route) => {
       await route.fulfill({

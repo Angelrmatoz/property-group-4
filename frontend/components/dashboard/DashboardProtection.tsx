@@ -18,7 +18,7 @@ export default function DashboardProtection({
     const validateAuth = () => {
       const token = getAuthToken();
       if (!token) {
-        router.push("/login");
+        router.replace("/login");
         return;
       }
 
